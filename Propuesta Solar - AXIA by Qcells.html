@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<!-- saved from url=(0157)https://www.genspark.ai/api/code_sandbox_light/preview/8d2b4897-d5ba-4b41-9e6d-a87d539f2cad/index.html?canvas_history_id=1341be4e-fb1c-46c6-9ff7-373bc7061234 -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta Solar - AXIA by Qcells</title>
+    <link rel="stylesheet" href="./Propuesta Solar - AXIA by Qcells_files/styles.css">
+    <link href="./Propuesta Solar - AXIA by Qcells_files/css2" rel="stylesheet">
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* css/styles.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+    color: #333;
+}
+
+/* Main Proposal Container */
+.proposal-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    position: relative;
+    min-height: 700px;
+}
+
+/* Header */
+.header {
+    margin-bottom: 40px;
+    text-align: left;
+}
+
+.powered-by {
+    font-size: 14px;
+    color: #666;
+    font-weight: 400;
+}
+
+.enfin {
+    color: #0A2559;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.qcells {
+    color: #0A2559;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.qcells::first-letter {
+    text-transform: uppercase;
+}
+
+/* Main Content Grid */
+.main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    align-items: start;
+    margin-bottom: 40px;
+}
+
+/* Comparison Table Section */
+.comparison-section {
+    width: 100%;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    table-layout: fixed;
+}
+
+.comparison-table thead th {
+    padding: 12px 15px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.comparison-table thead th:first-child {
+    text-align: left;
+    width: 40%;
+    padding-left: 0;
+}
+
+.comparison-table thead th:nth-child(2),
+.comparison-table thead th:nth-child(3) {
+    width: 30%;
+}
+
+.option-header {
+    color: #0A2559;
+    border-bottom: 3px solid #0A2559;
+}
+
+.comparison-table tbody td {
+    padding: 10px 15px;
+    font-size: 15px;
+}
+
+.comparison-table .label {
+    font-weight: 500;
+    color: #333;
+    text-align: left;
+    width: 40%;
+    padding-left: 0;
+}
+
+.comparison-table .value {
+    text-align: center;
+    width: 30%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.divider-row hr {
+    border: none;
+    border-top: 1px solid #e5e5e5;
+    margin: 0;
+}
+
+.comparison-table .value {
+    text-align: center;
+    color: #333;
+    font-weight: 400;
+}
+
+.divider-row td {
+    padding: 0 !important;
+}
+
+.divider-row hr {
+    border: none;
+    border-top: 1px solid #e5e5e5;
+    margin: 5px 0;
+}
+
+/* Right Section */
+.right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: fit-content;
+    padding-left: 20px;
+}
+
+.address-container {
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.address {
+    font-size: 28px;
+    font-weight: 600;
+    color: #0A2559;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+/* House Image */
+.house-image-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    height: 180px;
+    overflow: hidden;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.house-image-container:hover {
+    border-color: #0A2559;
+    box-shadow: 0 2px 8px rgba(10, 37, 89, 0.1);
+}
+
+.house-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.placeholder-text {
+    color: #6b7280;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+
+.image-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.house-image-container:hover .image-upload-overlay {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.upload-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.upload-btn:hover {
+    background: #1d4ed8;
+}
+
+/* Contact Section */
+.contact-section {
+    text-align: center;
+    margin-top: 15px;
+    padding: 15px;
+    background: transparent;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.contact-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    max-width: 250px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.phone-number {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* AXIA Logo Container - Bottom Right Corner */
+.axia-logo-container {
+    position: absolute;
+    bottom: 95px;
+    right: 65px;
+    text-align: center;
+    z-index: 10;
+}
+
+.dealer-text {
+    font-size: 10px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 400;
+    text-align: center;
+}
+
+.axia-logo-image {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Hamburger Menu Button */
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.menu-toggle:hover {
+    background: #1d4ed8;
+    transform: scale(1.05);
+}
+
+.menu-toggle.active {
+    transform: rotate(90deg);
+}
+
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+}
+
+.hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.menu-toggle.active .hamburger span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active .hamburger span:nth-child(2) {
+    opacity: 0;
+    transform: scale(0);
+}
+
+.menu-toggle.active .hamburger span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Control Panel */
+.control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    z-index: 1000;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: translateX(100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.control-panel.show {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.control-panel h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+}
+
+.control-panel h4 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #0A2559;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 5px;
+}
+
+.edit-fields {
+    margin-bottom: 20px;
+}
+
+.field-group {
+    margin-bottom: 12px;
+}
+
+.field-group label {
+    display: block;
+    font-size: 12px;
+    color: #374151;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.field-group input, .field-group select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+    background: white;
+}
+
+.field-group input:focus, .field-group select:focus {
+    outline: none;
+    border-color: #0A2559;
+    box-shadow: 0 0 0 2px rgba(10, 37, 89, 0.1);
+}
+
+.control-buttons {
+    margin-bottom: 15px;
+}
+
+.control-panel button {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+    background: #0A2559;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.control-panel button:hover {
+    background: #082047;
+}
+
+.instructions {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.instructions p {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+.instructions {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.instructions p {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+/* Editable Content Styling */
+[contenteditable="true"] {
+    outline: none;
+    transition: background-color 0.3s ease;
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: text;
+}
+
+[contenteditable="true"]:hover {
+    background-color: #f0f9ff;
+}
+
+[contenteditable="true"]:focus {
+    background-color: #e0f2fe;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .proposal-container {
+        padding: 20px;
+    }
+}
+
+/* Simple and Clean Print Layout - ONE PAGE */
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 1.5cm;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        /* Remove headers and footers */
+        @top-left { content: ""; }
+        @top-center { content: ""; }
+        @top-right { content: ""; }
+        @bottom-left { content: ""; }
+        @bottom-center { content: ""; }
+        @bottom-right { content: ""; }
+    }
+    
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    body {
+        background: white !important;
+        font-family: Arial, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Hide controls */
+    .control-panel,
+    .menu-toggle,
+    .image-upload-overlay,
+    .notification {
+        display: none !important;
+    }
+    
+    /* Clean contenteditable */
+    [contenteditable="true"] {
+        border: none !important;
+        outline: none !important;
+        background: transparent !important;
+    }
+    
+    /* Container */
+    .proposal-container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: white !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Header */
+    .header {
+        margin-bottom: 0.8cm !important;
+    }
+    
+    .powered-by {
+        font-size: 11pt !important;
+        color: #555555 !important;
+    }
+    
+    .enfin, .qcells {
+        color: #0A2559 !important;
+        text-decoration: none !important;
+    }
+    
+    /* Main content - simple grid */
+    .main-content {
+        display: grid !important;
+        grid-template-columns: 60% 40% !important;
+        gap: 1.5cm !important;
+        height: auto !important;
+    }
+    
+    /* Left section - table */
+    .left-section {
+        width: 100% !important;
+    }
+    
+    /* Table */
+    .comparison-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 10pt !important;
+    }
+    
+    .comparison-table thead th {
+        font-size: 14pt !important;
+        font-weight: bold !important;
+        color: #0A2559 !important;
+        padding: 10px !important;
+        text-align: center !important;
+        border-bottom: 2px solid #0A2559 !important;
+    }
+    
+    .comparison-table thead th:first-child {
+        visibility: hidden !important;
+        width: 25% !important;
+    }
+    
+    .comparison-table tbody td {
+        padding: 8px !important;
+        font-size: 11pt !important;
+        vertical-align: middle !important;
+    }
+    
+    .comparison-table tbody td:first-child {
+        font-weight: bold !important;
+        color: #333333 !important;
+        width: 25% !important;
+    }
+    
+    .comparison-table tbody td:nth-child(2),
+    .comparison-table tbody td:nth-child(3) {
+        text-align: center !important;
+        color: #222222 !important;
+    }
+    
+    /* Right section */
+    .right-section {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    
+    .address {
+        font-size: 16pt !important;
+        font-weight: bold !important;
+        color: #0A2559 !important;
+        text-align: center !important;
+        margin-bottom: 0.8cm !important;
+    }
+    
+    .house-image-container {
+        width: 7cm !important;
+        height: 5cm !important;
+        margin-bottom: 0.8cm !important;
+        border-radius: 0.5cm !important;
+        overflow: hidden !important;
+    }
+    
+    .house-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+    
+    .contact-section {
+        text-align: center !important;
+        margin-bottom: 1cm !important;
+    }
+    
+    .contact-section p {
+        font-size: 11pt !important;
+        color: #333333 !important;
+        margin-bottom: 0.3cm !important;
+        line-height: 1.3 !important;
+    }
+    
+    .contact-section h3 {
+        font-size: 14pt !important;
+        font-weight: bold !important;
+        color: #000000 !important;
+        margin: 0 !important;
+    }
+    
+    .axia-logo-container {
+        text-align: center !important;
+        margin-top: auto !important;
+    }
+    
+    .dealer-text {
+        font-size: 8pt !important;
+        color: #666666 !important;
+        margin-bottom: 0.2cm !important;
+    }
+    
+    .axia-logo-image {
+        width: 4.5cm !important;
+        height: auto !important;
+        max-height: 1.5cm !important;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .right-section {
+        padding-left: 0;
+    }
+
+    .address-container {
+        text-align: center;
+    }
+
+    .house-image-container {
+        margin: 0 auto;
+        max-width: 280px;
+    }
+
+    .contact-section {
+        text-align: center;
+    }
+
+    .contact-text {
+        margin: 0 auto 10px auto;
+    }
+
+    .comparison-table {
+        font-size: 14px;
+    }
+
+    .comparison-table thead th {
+        font-size: 16px;
+    }
+
+    .address {
+        font-size: 22px;
+    }
+
+    .menu-toggle {
+        top: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+    }
+
+    .control-panel {
+        top: 80px;
+        right: 15px;
+        width: calc(100vw - 30px);
+        max-width: 350px;
+    }
+
+    .axia-logo-container {
+        position: static;
+        text-align: center;
+        margin-top: 30px;
+    }
+    
+    .axia-logo-image {
+        margin: 0 auto;
+    }
+
+    .axia-logo-image {
+        width: 100px;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="proposal-container">
+        <!-- Header -->
+        <div class="header">
+            <span class="powered-by" contenteditable="true">Powered by <span class="enfin">EnFin</span> and <span class="qcells">Qcells</span></span>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="main-content">
+            <!-- Left Section: Comparison Table -->
+            <div class="comparison-section">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th class="option-header interest" contenteditable="true">3.5% Interest</th>
+                            <th class="option-header no-interest" contenteditable="true" data-no-interest-column>No Interest!</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="label" contenteditable="true">Price</td>
+                            <td class="value" contenteditable="true">Enter price</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>Enter price</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">Annual Escalator</td>
+                            <td class="value" contenteditable="true">3.5%</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>0.0%</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">Panels (W)</td>
+                            <td class="value" contenteditable="true">430</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>430</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">System Size (kW)</td>
+                            <td class="value" contenteditable="true">Enter size</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>Enter size</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">Production (kWh)</td>
+                            <td class="value" contenteditable="true">Enter production</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>Enter production</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">Energy Access</td>
+                            <td class="value" contenteditable="true">Full Access (no Flex)</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>Full Access (no Flex)</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">Inverters</td>
+                            <td class="value" contenteditable="true">Micro</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>Micro</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">Battery</td>
+                            <td class="value" contenteditable="true">Enter battery info</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>Enter battery info</td>
+                        </tr>
+                        <tr class="divider-row">
+                            <td colspan="3"><hr></td>
+                        </tr>
+                        <tr>
+                            <td class="label" contenteditable="true">Extras</td>
+                            <td class="value" contenteditable="true">6 months no payment</td>
+                            <td class="value" contenteditable="true" data-no-interest-column>6 months no payment</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right Section: Address and Image -->
+            <div class="right-section">
+                <div class="address-container">
+                    <h2 class="address" contenteditable="true">Enter address</h2>
+                </div>
+                
+                <div class="house-image-container">
+                    <img src="./Propuesta Solar - AXIA by Qcells_files/348s.jpg" alt="House with solar panels" class="house-image" style="display: block;">
+                    <div class="placeholder-text" style="display: none;">Click to upload house image with solar panels</div>
+                    <div class="image-upload-overlay">
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        <button class="upload-btn" onclick="document.getElementById('imageUpload').click()">
+                            Click to Upload or Drag & Drop
+                        </button>
+                    </div>
+                </div>
+
+                <div class="contact-section">
+                    <p class="contact-text" contenteditable="true">Reach out to us and we will connect you to one of our experts</p>
+                    <p class="phone-number" contenteditable="true">Enter phone number</p>
+                </div>
+                
+                <!-- AXIA Logo positioned within content -->
+                <div class="axia-logo-container">
+                    <div class="dealer-text">Independent Authorized Dealer</div>
+                    <img src="./Propuesta Solar - AXIA by Qcells_files/Captura de pantalla 2025-08-15 170239.png" alt="AXIA by qcells" class="axia-logo-image">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hamburger Menu Button -->
+    <button class="menu-toggle" onclick="toggleControlPanel()">
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </button>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <h3>Control Panel</h3>
+        
+        <!-- Quick Edit Fields -->
+        <div class="edit-fields">
+            <h4>Quick Edit Values</h4>
+            
+            <div class="field-group">
+                <label>Escalator Rate (%):</label>
+                <select id="escalatorRate" onchange="updateEscalator(this.value)">
+                    <option value="3.5">3.5%</option>
+                    <option value="2.99">2.99%</option>
+                </select>
+            </div>
+            
+            <div class="field-group">
+                <label>Address:</label>
+                <input type="text" id="address" placeholder="Enter property address" onchange="updateAddress(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Price with Escalator ($/month):</label>
+                <input type="number" id="price1" step="0.01" placeholder="Enter price" onchange="updateTableValue('price', 0, this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Price No Interest ($/month):</label>
+                <input type="number" id="price2" step="0.01" placeholder="Enter price" onchange="updateTableValue('price', 1, this.value)">
+            </div>
+            
+            <!-- No Interest Option Toggle -->
+            <div class="field-group" style="border: 2px solid #e3f2fd; background: #f8fafc; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="font-weight: 600; color: #0a2559;">0% Option:</label>
+                    <input type="checkbox" id="noInterestToggle" checked style="width: 18px; height: 18px; cursor: pointer;" onchange="toggleNoInterestOption()">
+                    <span id="noInterestStatus" style="font-weight: 600; color: #059669;">Available</span>
+                </div>
+            </div>
+            
+            <div class="field-group">
+                <label>System Size (kW):</label>
+                <input type="number" id="systemSize" step="0.01" placeholder="Enter system size" onchange="updateSystemSize(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Production (kWh):</label>
+                <input type="number" id="production" step="1" placeholder="Enter production" onchange="updateProduction(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Number of Batteries:</label>
+                <input type="number" id="batteries" step="1" min="0" placeholder="Enter quantity" onchange="updateBatteries(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Phone Number:</label>
+                <select id="phoneNumber" onchange="updatePhoneNumber(this.value)">
+                    <option value="">Select phone number</option>
+                    <option value="(661) 237-9543">(661) 237-9543</option>
+                    <option value="(669) 240-8458">(669) 240-8458</option>
+                    <option value="(916) 945-8152">(916) 945-8152</option>
+                    <option value="other">Other (enter manually)</option>
+                </select>
+                <input type="text" id="customPhone" placeholder="Format: (XXX) XXX-XXXX" style="display: none; margin-top: 5px;" onchange="updateCustomPhone(this.value)" oninput="formatPhoneInput(this)" maxlength="14">
+                <button id="savePhoneBtn" onclick="saveCustomPhone()" style="display: none; margin-top: 5px; background: #0a2559; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Save as permanent option</button>
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button onclick="printProposal()">Generate PDF</button>
+            <button onclick="saveData()">Save Changes</button>
+            <button onclick="resetData()">Reset</button>
+        </div>
+        
+        <div class="instructions">
+            <p>Click any text to edit it directly</p>
+            <p>Hover over image to change it</p>
+            <p>Use fields above for quick value updates</p>
+        </div>
+    </div>
+
+    <script src="./Propuesta Solar - AXIA by Qcells_files/main.js.descarga"></script>
+<script>
+/* js/main.js */
+// Store original content for reset functionality
+let originalContent = {};
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    // Store original content
+    storeOriginalContent();
+    
+    // DON'T load saved data - always start as template
+    // loadSavedData();
+    
+    // Setup image upload handler
+    setupImageUpload();
+    
+    // Add edit indicators
+    setupEditableIndicators();
+    
+    // Initialize control panel values
+    initializeControlPanel();
+    
+    // Load saved phone numbers
+    loadSavedPhoneNumbers();
+    
+    // Reset to template on load
+    resetToTemplate();
+});
+
+// Store original content for reset
+function storeOriginalContent() {
+    const editables = document.querySelectorAll('[contenteditable="true"]');
+    editables.forEach((elem, index) => {
+        originalContent[`elem_${index}`] = elem.innerHTML;
+    });
+    
+    // Store original image
+    const houseImage = document.querySelector('.house-image');
+    if (houseImage) {
+        originalContent.houseImage = houseImage.src;
+    }
+}
+
+// Toggle control panel visibility
+function toggleControlPanel() {
+    const controlPanel = document.querySelector('.control-panel');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (controlPanel.classList.contains('show')) {
+        controlPanel.classList.remove('show');
+        menuToggle.classList.remove('active');
+    } else {
+        controlPanel.classList.add('show');
+        menuToggle.classList.add('active');
+    }
+}
+
+// Close control panel when clicking outside
+document.addEventListener('click', function(event) {
+    const controlPanel = document.querySelector('.control-panel');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    // If control panel is open and click is outside both panel and toggle button
+    if (controlPanel.classList.contains('show')) {
+        if (!controlPanel.contains(event.target) && !menuToggle.contains(event.target)) {
+            controlPanel.classList.remove('show');
+            menuToggle.classList.remove('active');
+        }
+    }
+});
+
+// Setup editable indicators
+function setupEditableIndicators() {
+    const editables = document.querySelectorAll('[contenteditable="true"]');
+    
+    editables.forEach(elem => {
+        // Add visual feedback when editing
+        elem.addEventListener('focus', function() {
+            this.setAttribute('data-original', this.innerHTML);
+        });
+        
+        elem.addEventListener('blur', function() {
+            if (this.innerHTML !== this.getAttribute('data-original')) {
+                showNotification('Change saved temporarily');
+            }
+        });
+        
+        // Prevent enter key from creating new lines in single-line fields
+        elem.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !this.classList.contains('multiline')) {
+                e.preventDefault();
+                this.blur();
+            }
+        });
+    });
+}
+
+// Setup image upload functionality
+function setupImageUpload() {
+    const imageUpload = document.getElementById('imageUpload');
+    const container = document.querySelector('.house-image-container');
+    const placeholder = document.querySelector('.placeholder-text');
+    
+    if (imageUpload && container) {
+        // File input change event
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleImageFile(file);
+            }
+        });
+        
+        // Make container clickable to trigger file input
+        container.addEventListener('click', function() {
+            imageUpload.click();
+        });
+        
+        // Drag and drop functionality
+        container.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            container.style.borderColor = '#2563eb';
+            container.style.backgroundColor = '#f0f9ff';
+        });
+        
+        container.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            container.style.borderColor = '#e5e7eb';
+            container.style.backgroundColor = '#ffffff';
+        });
+        
+        container.addEventListener('drop', function(e) {
+            e.preventDefault();
+            container.style.borderColor = '#e5e7eb';
+            container.style.backgroundColor = '#ffffff';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleImageFile(files[0]);
+            }
+        });
+        
+        // Paste functionality
+        document.addEventListener('paste', function(e) {
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    if (file) {
+                        handleImageFile(file);
+                    }
+                    break;
+                }
+            }
+        });
+    }
+    
+    function handleImageFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Hide placeholder text if exists
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            
+            // Create or update image element
+            let houseImage = container.querySelector('.house-image');
+            if (!houseImage) {
+                houseImage = document.createElement('img');
+                houseImage.className = 'house-image';
+                houseImage.alt = 'House with solar panels';
+                container.appendChild(houseImage);
+            }
+            
+            houseImage.src = e.target.result;
+            houseImage.style.display = 'block';
+            showNotification('Image updated successfully', 'success');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Save data to localStorage (temporary only)
+function saveData() {
+    const data = {
+        timestamp: new Date().toISOString(),
+        content: {}
+    };
+    
+    // Save all editable content
+    const editables = document.querySelectorAll('[contenteditable="true"]');
+    editables.forEach((elem, index) => {
+        data.content[`elem_${index}`] = elem.innerHTML;
+    });
+    
+    // Save image
+    const houseImage = document.querySelector('.house-image');
+    if (houseImage) {
+        data.content.houseImage = houseImage.src;
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('solarProposal', JSON.stringify(data));
+    
+    showNotification('Data saved temporarily (will reset on page reload)', 'success');
+}
+
+// Load saved data from localStorage
+function loadSavedData() {
+    const savedData = localStorage.getItem('solarProposal');
+    
+    if (savedData) {
+        try {
+            const data = JSON.parse(savedData);
+            
+            // Restore editable content
+            const editables = document.querySelectorAll('[contenteditable="true"]');
+            editables.forEach((elem, index) => {
+                if (data.content[`elem_${index}`]) {
+                    elem.innerHTML = data.content[`elem_${index}`];
+                }
+            });
+            
+            // Restore image
+            if (data.content.houseImage) {
+                const houseImage = document.querySelector('.house-image');
+                if (houseImage) {
+                    houseImage.src = data.content.houseImage;
+                }
+            }
+            
+            console.log('Datos cargados desde:', data.timestamp);
+        } catch (error) {
+            console.error('Error loading saved data:', error);
+        }
+    }
+}
+
+// Reset to original content
+function resetData() {
+    if (confirm('Are you sure you want to reset all changes to template?')) {
+        resetToTemplate();
+        showNotification('Reset to template successfully', 'info');
+    }
+}
+
+// Reset to template values (called on page load)
+function resetToTemplate() {
+    // Clear localStorage to prevent loading old data
+    localStorage.removeItem('solarProposal');
+    
+    // Reset all table values to template text
+    const tableRows = document.querySelectorAll('.comparison-table tbody tr');
+    const templateValues = [
+        ['Enter price', 'Enter price'],
+        ['3.5%', '0.0%'], // Annual Escalator - valores por defecto
+        ['430', '430'], // Panels (W) - valor por defecto
+        ['Enter size', 'Enter size'],
+        ['Enter production', 'Enter production'],
+        ['Full Access (no Flex)', 'Full Access (no Flex)'], // Energy Access - valor por defecto
+        ['Micro', 'Micro'], // Inverters - valor por defecto
+        ['Enter battery info', 'Enter battery info'],
+        ['6 months no payment', '6 months no payment'] // Extras - valor por defecto
+    ];
+    
+    let valueIndex = 0;
+    tableRows.forEach(row => {
+        const valueCells = row.querySelectorAll('.value');
+        if (valueCells.length === 2 && valueIndex < templateValues.length) {
+            valueCells[0].textContent = templateValues[valueIndex][0];
+            valueCells[1].textContent = templateValues[valueIndex][1];
+            valueIndex++;
+        }
+    });
+    
+    // Reset address
+    const addressElement = document.querySelector('.address');
+    if (addressElement) {
+        addressElement.textContent = 'Enter address';
+    }
+    
+    // Reset phone number
+    const phoneElement = document.querySelector('.phone-number');
+    if (phoneElement) {
+        phoneElement.textContent = 'Enter phone number';
+    }
+    
+    // Reset control panel fields
+    document.getElementById('address').value = '';
+    document.getElementById('price1').value = '';
+    document.getElementById('price2').value = '';
+    document.getElementById('systemSize').value = '';
+    document.getElementById('production').value = '';
+    document.getElementById('batteries').value = '';
+    document.getElementById('phoneNumber').value = '';
+    document.getElementById('customPhone').value = '';
+    document.getElementById('customPhone').style.display = 'none';
+    document.getElementById('escalatorRate').value = '3.5';
+}
+
+// Generate PDF using native browser functionality
+function printProposal() {
+    console.log('🖨️ Starting native PDF generation...');
+    
+    try {
+        // Hide control panel and menu elements
+        const controlPanel = document.querySelector('.control-panel');
+        const menuToggle = document.querySelector('.menu-toggle');
+        
+        if (controlPanel) {
+            controlPanel.style.display = 'none';
+        }
+        if (menuToggle) {
+            menuToggle.style.display = 'none';
+        }
+        
+        // Hide image upload overlays and notifications
+        const overlays = document.querySelectorAll('.image-upload-overlay');
+        const notifications = document.querySelectorAll('.notification, [class*="notification"]');
+        
+        overlays.forEach(overlay => {
+            overlay.style.display = 'none';
+        });
+        
+        notifications.forEach(notification => {
+            notification.style.display = 'none';
+        });
+        
+        // Remove contenteditable styling for cleaner print
+        const editableElements = document.querySelectorAll('[contenteditable="true"]');
+        editableElements.forEach(element => {
+            element.style.background = 'transparent';
+            element.style.boxShadow = 'none';
+            element.style.border = 'none';
+            element.style.outline = 'none';
+        });
+        
+        // Wait a moment for UI changes to take effect
+        setTimeout(() => {
+            console.log('🖨️ Opening browser print dialog...');
+            
+            // Trigger native browser print immediately without notification
+            window.print();
+            
+            // Restore UI after print dialog
+            setTimeout(() => {
+                console.log('✅ Restoring UI elements...');
+                
+                // Restore control panel and menu
+                if (controlPanel) {
+                    controlPanel.style.display = '';
+                }
+                if (menuToggle) {
+                    menuToggle.style.display = '';
+                }
+                
+                // Restore overlays
+                overlays.forEach(overlay => {
+                    overlay.style.display = '';
+                });
+                
+                // Restore notifications
+                notifications.forEach(notification => {
+                    notification.style.display = '';
+                });
+                
+                // Restore editable styling
+                editableElements.forEach(element => {
+                    element.style.background = '';
+                    element.style.boxShadow = '';
+                    element.style.border = '';
+                    element.style.outline = '';
+                });
+                
+            }, 1000);
+            
+        }, 300);
+        
+    } catch (error) {
+        console.error('❌ PDF generation error:', error);
+    }
+}
+
+// Control Panel Functions
+function updateTableValue(type, optionIndex, value) {
+    const tableRows = document.querySelectorAll('.comparison-table tbody tr');
+    let targetRow;
+    
+    if (type === 'price') {
+        targetRow = tableRows[0]; // First row is price
+        const cells = targetRow.querySelectorAll('.value');
+        if (cells[optionIndex]) {
+            cells[optionIndex].textContent = `$${parseFloat(value).toFixed(2)}/month`;
+            showNotification('Price updated successfully', 'success');
+        }
+    }
+}
+
+function updateSystemSize(value) {
+    const systemSizeRows = document.querySelectorAll('.comparison-table tbody tr');
+    let targetRow;
+    
+    // Find the System Size row (should be around index 6-8)
+    for (let row of systemSizeRows) {
+        const label = row.querySelector('.label');
+        if (label && label.textContent.includes('System Size')) {
+            targetRow = row;
+            break;
+        }
+    }
+    
+    if (targetRow) {
+        const cells = targetRow.querySelectorAll('.value');
+        cells.forEach(cell => {
+            cell.textContent = parseFloat(value).toFixed(2);
+        });
+        showNotification('System size updated successfully', 'success');
+    }
+}
+
+function updateProduction(value) {
+    const productionRows = document.querySelectorAll('.comparison-table tbody tr');
+    let targetRow;
+    
+    // Find the Production row
+    for (let row of productionRows) {
+        const label = row.querySelector('.label');
+        if (label && label.textContent.includes('Production')) {
+            targetRow = row;
+            break;
+        }
+    }
+    
+    if (targetRow) {
+        const cells = targetRow.querySelectorAll('.value');
+        const formattedValue = parseInt(value).toLocaleString();
+        cells.forEach(cell => {
+            cell.textContent = formattedValue;
+        });
+        showNotification('Production updated successfully', 'success');
+    }
+}
+
+function updateBatteries(value) {
+    const batteryRows = document.querySelectorAll('.comparison-table tbody tr');
+    let targetRow;
+    
+    // Find the Battery row
+    for (let row of batteryRows) {
+        const label = row.querySelector('.label');
+        if (label && label.textContent.includes('Battery')) {
+            targetRow = row;
+            break;
+        }
+    }
+    
+    if (targetRow) {
+        const cells = targetRow.querySelectorAll('.value');
+        const batteryText = value == 0 ? 'No battery' : 
+                           value == 1 ? '1 Tesla Powerwall' : 
+                           `${value} Tesla Powerwalls`;
+        cells.forEach(cell => {
+            cell.textContent = batteryText;
+        });
+        showNotification('Battery configuration updated successfully', 'success');
+    }
+}
+
+function updateEscalator(rate) {
+    // Update table headers
+    const tableHeaders = document.querySelectorAll('.comparison-table thead th');
+    if (tableHeaders[1]) {
+        tableHeaders[1].textContent = `${rate}% Interest`;
+    }
+    if (tableHeaders[2]) {
+        tableHeaders[2].textContent = 'No Interest!';
+    }
+    
+    // Update escalator row in table
+    const escalatorRows = document.querySelectorAll('.comparison-table tbody tr');
+    for (let row of escalatorRows) {
+        const label = row.querySelector('.label');
+        if (label && label.textContent.includes('Escalator')) {
+            const cells = row.querySelectorAll('.value');
+            if (cells[0]) {
+                cells[0].textContent = `${rate}%`;
+            }
+            if (cells[1]) {
+                cells[1].textContent = '0.0%';
+            }
+            break;
+        }
+    }
+    
+    showNotification(`Escalator rate updated to ${rate}%`, 'success');
+}
+
+// Toggle No Interest option availability
+function toggleNoInterestOption() {
+    const checkbox = document.getElementById('noInterestToggle');
+    const statusText = document.getElementById('noInterestStatus');
+    const isAvailable = checkbox.checked;
+    
+    // Update status text
+    if (isAvailable) {
+        statusText.textContent = 'Available';
+        statusText.style.color = '#059669';
+    } else {
+        statusText.textContent = 'Not Available';
+        statusText.style.color = '#dc2626';
+    }
+    
+    // Hide/Show No Interest column in table
+    const noInterestColumns = document.querySelectorAll('[data-no-interest-column]');
+    noInterestColumns.forEach(column => {
+        column.style.display = isAvailable ? '' : 'none';
+    });
+    
+    // Update table layout to prevent empty space
+    const table = document.querySelector('.comparison-table');
+    if (table) {
+        if (isAvailable) {
+            table.style.gridTemplateColumns = '';
+        } else {
+            // Adjust table to two columns when No Interest is hidden
+            table.style.gridTemplateColumns = '1fr 1fr';
+        }
+    }
+    
+    // Show notification
+    const status = isAvailable ? 'enabled' : 'disabled';
+    showNotification(`No Interest option ${status}`, isAvailable ? 'success' : 'warning');
+    
+    console.log('No Interest option toggled:', isAvailable ? 'Available' : 'Not Available');
+}
+
+// Update address
+function updateAddress(address) {
+    const addressElement = document.querySelector('.address');
+    if (addressElement) {
+        addressElement.textContent = address || 'Enter address';
+        showNotification('Address updated successfully', 'success');
+    }
+}
+
+// Update phone number
+function updatePhoneNumber(value) {
+    const phoneElement = document.querySelector('.phone-number');
+    const customPhoneInput = document.getElementById('customPhone');
+    const savePhoneBtn = document.getElementById('savePhoneBtn');
+    
+    if (value === 'other') {
+        customPhoneInput.style.display = 'block';
+        savePhoneBtn.style.display = 'block';
+        customPhoneInput.focus();
+    } else {
+        customPhoneInput.style.display = 'none';
+        savePhoneBtn.style.display = 'none';
+        if (phoneElement && value) {
+            phoneElement.textContent = value;
+            showNotification('Phone number updated successfully', 'success');
+        }
+    }
+}
+
+// Update custom phone number
+function updateCustomPhone(value) {
+    const phoneElement = document.querySelector('.phone-number');
+    if (phoneElement && value) {
+        phoneElement.textContent = value;
+        showNotification('Custom phone number updated successfully', 'success');
+    }
+}
+
+// Save custom phone number as permanent option
+function saveCustomPhone() {
+    const customPhoneInput = document.getElementById('customPhone');
+    const phoneValue = customPhoneInput.value.trim();
+    
+    if (!phoneValue) {
+        showNotification('Please enter a phone number first', 'error');
+        return;
+    }
+    
+    // Validate phone number format (basic validation)
+    const phoneRegex = /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/;
+    if (!phoneRegex.test(phoneValue)) {
+        showNotification('Please use format: (XXX) XXX-XXXX', 'error');
+        return;
+    }
+    
+    // Check if phone number already exists
+    const phoneSelect = document.getElementById('phoneNumber');
+    const existingOptions = Array.from(phoneSelect.options);
+    const phoneExists = existingOptions.some(option => option.value === phoneValue);
+    
+    if (phoneExists) {
+        showNotification('This phone number already exists in the list', 'warning');
+        return;
+    }
+    
+    // Save to localStorage
+    const savedPhones = getSavedPhoneNumbers();
+    savedPhones.push(phoneValue);
+    localStorage.setItem('savedPhoneNumbers', JSON.stringify(savedPhones));
+    
+    // Add to dropdown (before "Other" option)
+    const otherOption = phoneSelect.querySelector('option[value="other"]');
+    const newOption = document.createElement('option');
+    newOption.value = phoneValue;
+    newOption.textContent = phoneValue;
+    phoneSelect.insertBefore(newOption, otherOption);
+    
+    // Select the new option
+    phoneSelect.value = phoneValue;
+    updatePhoneNumber(phoneValue);
+    
+    showNotification('Phone number saved successfully!', 'success');
+}
+
+// Get saved phone numbers from localStorage
+function getSavedPhoneNumbers() {
+    const saved = localStorage.getItem('savedPhoneNumbers');
+    return saved ? JSON.parse(saved) : [];
+}
+
+// Load saved phone numbers into dropdown
+function loadSavedPhoneNumbers() {
+    const savedPhones = getSavedPhoneNumbers();
+    const phoneSelect = document.getElementById('phoneNumber');
+    const otherOption = phoneSelect.querySelector('option[value="other"]');
+    
+    // Remove any previously loaded saved numbers (in case of reload)
+    const existingOptions = Array.from(phoneSelect.options);
+    existingOptions.forEach(option => {
+        if (option.value !== '' && option.value !== '(661) 237-9543' && 
+            option.value !== '(669) 240-8458' && option.value !== '(916) 945-8152' && 
+            option.value !== 'other') {
+            option.remove();
+        }
+    });
+    
+    // Add saved numbers before "Other" option
+    savedPhones.forEach(phone => {
+        const option = document.createElement('option');
+        option.value = phone;
+        option.textContent = phone;
+        phoneSelect.insertBefore(option, otherOption);
+    });
+}
+
+// Format phone input as user types
+function formatPhoneInput(input) {
+    let value = input.value.replace(/\D/g, ''); // Remove all non-digits
+    
+    if (value.length >= 6) {
+        value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+    } else if (value.length >= 3) {
+        value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+    } else if (value.length > 0) {
+        value = `(${value}`;
+    }
+    
+    input.value = value;
+}
+
+// Initialize control panel values from table
+function initializeControlPanel() {
+    // Get current values from table and populate input fields
+    const tableRows = document.querySelectorAll('.comparison-table tbody tr');
+    
+    // Extract price values
+    const priceRow = tableRows[0];
+    if (priceRow) {
+        const priceCells = priceRow.querySelectorAll('.value');
+        if (priceCells[0]) {
+            const price1 = priceCells[0].textContent.replace(/[^\d.]/g, '');
+            document.getElementById('price1').value = price1;
+        }
+        if (priceCells[1]) {
+            const price2 = priceCells[1].textContent.replace(/[^\d.]/g, '');
+            document.getElementById('price2').value = price2;
+        }
+    }
+    
+    // Extract escalator rate from table or headers
+    const escalatorSelect = document.getElementById('escalatorRate');
+    for (let row of tableRows) {
+        const label = row.querySelector('.label');
+        if (label && label.textContent.includes('Escalator')) {
+            const firstCell = row.querySelector('.value');
+            if (firstCell) {
+                const escalatorText = firstCell.textContent;
+                if (escalatorText.includes('3.5')) {
+                    escalatorSelect.value = '3.5';
+                } else if (escalatorText.includes('2.99')) {
+                    escalatorSelect.value = '2.99';
+                }
+            }
+            break;
+        }
+    }
+    
+    // Extract other values
+    for (let row of tableRows) {
+        const label = row.querySelector('.label');
+        if (!label) continue;
+        
+        const labelText = label.textContent;
+        const firstCell = row.querySelector('.value');
+        
+        if (labelText.includes('System Size') && firstCell) {
+            const systemSize = firstCell.textContent.replace(/[^\d.]/g, '');
+            document.getElementById('systemSize').value = systemSize;
+        } else if (labelText.includes('Production') && firstCell) {
+            const production = firstCell.textContent.replace(/[^\d]/g, '');
+            document.getElementById('production').value = production;
+        } else if (labelText.includes('Battery') && firstCell) {
+            const batteryText = firstCell.textContent;
+            let batteryCount = 0;
+            if (batteryText.includes('1 Tesla')) batteryCount = 1;
+            else if (batteryText.includes('2 Tesla')) batteryCount = 2;
+            else if (batteryText.includes('3 Tesla')) batteryCount = 3;
+            else if (batteryText.includes('4 Tesla')) batteryCount = 4;
+            document.getElementById('batteries').value = batteryCount;
+        }
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Remove existing notification if any
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Style the notification
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        border-radius: 6px;
+        font-size: 14px;
+        z-index: 10000;
+        animation: slideUp 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    `;
+    
+    // Add animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Add to document
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideUp 0.3s ease reverse';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// Auto-save functionality (every 30 seconds)
+setInterval(() => {
+    const hasChanges = checkForChanges();
+    if (hasChanges) {
+        saveData();
+        console.log('Auto-guardado ejecutado');
+    }
+}, 30000);
+
+// Check if there are unsaved changes
+function checkForChanges() {
+    const editables = document.querySelectorAll('[contenteditable="true"]');
+    let hasChanges = false;
+    
+    editables.forEach((elem, index) => {
+        if (elem.innerHTML !== originalContent[`elem_${index}`]) {
+            hasChanges = true;
+        }
+    });
+    
+    return hasChanges;
+}
+
+// Warn before leaving if there are unsaved changes
+window.addEventListener('beforeunload', function(e) {
+    if (checkForChanges()) {
+        e.preventDefault();
+        e.returnValue = '¿Estás seguro de que quieres salir? Los cambios no guardados se perderán.';
+        return e.returnValue;
+    }
+});
+</script>
+<script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;rayId&quot;:&quot;970b54aaede97bec&quot;,&quot;version&quot;:&quot;2025.8.0&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfEdge&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}},&quot;token&quot;:&quot;4edd5f8ec12a48cfa682ab8261b80a79&quot;,&quot;b&quot;:1}" crossorigin="anonymous"></script>
+
+</body></html>

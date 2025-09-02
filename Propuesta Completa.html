@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXIA Solar - Complete Proposal Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #0a2559;
+            --alert-red: #ef4444;
+            --positive-green: #16a34a;
+            --white: #ffffff;
+            --light-gray: #f8fafc;
+            --light-gray-2: #f1f5f9;
+            --light-gray-3: #e2e8f0;
+            --medium-gray: #64748b;
+            --dark-gray: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            position: static;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--white);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background-color: var(--white);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            background: var(--light-gray);
+            padding: 0;
+        }
+
+        .slide {
+            background: var(--white);
+            border-radius: 0;
+            padding: 60px;
+            margin-bottom: 0;
+            box-shadow: none;
+            border: none;
+            border-top: 1px solid var(--light-gray-3);
+            min-height: 720px;
+            width: 1280px;
+            display: block;
+            overflow: visible;
+        }
+
+        .slide:last-child {
+            height: auto;
+            min-height: 800px;
+        }
+
+        .slide h2 {
+            font-size: 2.75rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Propuesta Solar styles */
+        .proposal-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            position: relative;
+            min-height: 700px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .powered-by {
+            font-size: 14px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .enfin {
+            color: #0A2559;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .qcells {
+            color: #0A2559;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            align-items: start;
+            margin-bottom: 40px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+        }
+
+        .comparison-table thead th {
+            padding: 12px 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .comparison-table thead th:first-child {
+            text-align: left;
+            width: 40%;
+            padding-left: 0;
+        }
+
+        .option-header {
+            color: #0A2559;
+            border-bottom: 3px solid #0A2559;
+        }
+
+        .comparison-table tbody td {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .comparison-table .label {
+            font-weight: 500;
+            color: #333;
+            text-align: left;
+            width: 40%;
+            padding-left: 0;
+        }
+
+        .comparison-table .value {
+            text-align: center;
+            width: 30%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            color: #333;
+            font-weight: 400;
+        }
+
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: fit-content;
+            padding-left: 20px;
+        }
+
+        .address-container {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .address-container .address {
+            font-size: 28px !important;
+            font-weight: 600 !important;
+            color: #0A2559 !important;
+            margin-bottom: 0;
+            line-height: 1.2;
+        }
+
+        .house-image-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            height: 180px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .house-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .placeholder-text {
+            color: #6b7280;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .image-upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .house-image-container:hover .image-upload-overlay {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .upload-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .contact-section {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: transparent;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .contact-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            max-width: 250px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .phone-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .axia-logo-container {
+            text-align: center;
+            margin-top: 15px;
+            z-index: 10;
+        }
+
+        .dealer-text {
+            font-size: 10px;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .axia-logo-image {
+            width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 280px;
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateX(100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .control-panel.show {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .control-panel h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        .control-panel h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #0A2559;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+
+        .edit-fields {
+            margin-bottom: 20px;
+        }
+
+        .field-group {
+            margin-bottom: 12px;
+        }
+
+        .field-group label {
+            display: block;
+            font-size: 12px;
+            color: #374151;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .field-group input, .field-group select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        .field-group input:focus, .field-group select:focus {
+            outline: none;
+            border-color: #0A2559;
+            box-shadow: 0 0 0 2px rgba(10, 37, 89, 0.1);
+        }
+
+        .control-buttons {
+            margin-bottom: 15px;
+        }
+
+        .control-panel button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #0A2559;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .control-panel button:hover {
+            background: #082047;
+        }
+
+        .instructions {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .instructions p {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 3px;
+            line-height: 1.3;
+        }
+
+        [contenteditable="true"] {
+            outline: none;
+            transition: background-color 0.3s ease;
+            padding: 2px 4px;
+            border-radius: 3px;
+            cursor: text;
+        }
+
+        [contenteditable="true"]:hover {
+            background-color: #f0f9ff;
+        }
+
+        [contenteditable="true"]:focus {
+            background-color: #e0f2fe;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        .divider-row hr {
+            border: none;
+            border-top: 1px solid #e5e5e5;
+            margin: 0;
+        }
+
+        .divider-row td {
+            padding: 0 !important;
+        }
+
+        .hidden {
+            display: block !important;
+        }
+
+        /* Escalator option control styles */
+        .escalator-hidden .escalator-option,
+        .escalator-hidden .escalator-column,
+        .escalator-hidden .escalator-summary {
+            display: none !important;
+        }
+
+        .no-interest-hidden .no-interest-option,
+        .no-interest-hidden .no-interest-column,
+        .no-interest-hidden .no-interest-summary {
+            display: none !important;
+        }
+
+        .chart-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .chart-container canvas {
+            width: 800px !important;
+            height: 400px !important;
+        }
+
+        .chart-type-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--light-gray-3);
+            background: var(--white);
+            color: var(--medium-gray);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-type-btn:hover {
+            border-color: var(--primary-navy);
+            color: var(--primary-navy);
+        }
+
+        .chart-type-btn.active {
+            background: var(--primary-navy);
+            color: var(--white);
+            border-color: var(--primary-navy);
+        }
+
+        /* Print styles to remove headers and footers */
+        @media print {
+            @page {
+                margin: 0.5in;
+                size: A4 landscape;
+            }
+            
+            /* Hide headers and footers completely */
+            @page :first {
+                @top-left { content: ""; }
+                @top-center { content: ""; }
+                @top-right { content: ""; }
+                @bottom-left { content: ""; }
+                @bottom-center { content: ""; }
+                @bottom-right { content: ""; }
+            }
+            
+            @page :left {
+                @top-left { content: ""; }
+                @top-center { content: ""; }
+                @top-right { content: ""; }
+                @bottom-left { content: ""; }
+                @bottom-center { content: ""; }
+                @bottom-right { content: ""; }
+            }
+            
+            @page :right {
+                @top-left { content: ""; }
+                @top-center { content: ""; }
+                @top-right { content: ""; }
+                @bottom-left { content: ""; }
+                @bottom-center { content: ""; }
+                @bottom-right { content: ""; }
+            }
+            
+            /* Additional print optimizations */
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .slide {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Hide chart type buttons in PDF */
+            .chart-type-btn {
+                display: none !important;
+            }
+            
+            /* Keep chart and summaries together */
+            .chart-container {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            
+            /* Keep summary section with chart */
+            .chart-container + div {
+                page-break-before: avoid;
+                break-before: avoid;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Keep entire third slide together */
+            #slide-3 {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                page-break-before: always;
+                break-before: page;
+            }
+            
+            /* Keep slide title with content */
+            #slide-3 h2 {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger Menu Button -->
+    <button class="menu-toggle" onclick="toggleControlPanel()">
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </button>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <h3>Control Panel</h3>
+        
+        <!-- Quick Edit Fields -->
+        <div class="edit-fields">
+            <h4>Quick Edit Values</h4>
+            
+            <div class="field-group">
+                <label>Escalator Rate (%):</label>
+                <select id="escalatorRate" onchange="updateEscalator(this.value)">
+                    <option value="3.5">3.5%</option>
+                    <option value="2.99">2.99%</option>
+                    <option value="none">No Escalator</option>
+                </select>
+            </div>
+            
+            <div class="field-group">
+                <label>Address:</label>
+                <input type="text" id="address" placeholder="Enter property address" onchange="updateAddress(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Price with Escalator ($/month):</label>
+                <input type="number" id="price1" step="0.01" placeholder="Enter price" onchange="updateTableValue('price', 0, this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Price No Interest ($/month):</label>
+                <input type="number" id="price2" step="0.01" placeholder="Enter price" onchange="updateTableValue('price', 1, this.value)">
+            </div>
+            
+            <!-- No Interest Option Toggle -->
+            <div class="field-group" style="border: 2px solid #e3f2fd; background: #f8fafc; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="font-weight: 600; color: #0a2559;">0% Option:</label>
+                    <input type="checkbox" id="noInterestToggle" checked style="width: 18px; height: 18px; cursor: pointer;" onchange="toggleNoInterestOption()">
+                    <span id="noInterestStatus" style="font-weight: 600; color: #059669;">Available</span>
+                </div>
+            </div>
+            
+            <div class="field-group">
+                <label>System Size (kW):</label>
+                <input type="number" id="systemSize" step="0.01" placeholder="Enter system size" onchange="updateSystemSize(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Production (kWh):</label>
+                <input type="number" id="production" step="1" placeholder="Enter production" onchange="updateProduction(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Number of Batteries:</label>
+                <input type="number" id="batteries" step="1" min="0" placeholder="Enter quantity" onchange="updateBatteries(this.value)">
+            </div>
+            
+            <div class="field-group">
+                <label>Phone Number:</label>
+                <select id="phoneNumber" onchange="updatePhoneNumber(this.value)">
+                    <option value="">Select phone number</option>
+                    <option value="(661) 237-9543">(661) 237-9543</option>
+                    <option value="(669) 240-8458">(669) 240-8458</option>
+                    <option value="(916) 945-8152">(916) 945-8152</option>
+                    <option value="other">Other (enter manually)</option>
+                </select>
+                <input type="text" id="customPhone" placeholder="Format: (XXX) XXX-XXXX" style="display: none; margin-top: 5px;" onchange="updateCustomPhone(this.value)" oninput="formatPhoneInput(this)" maxlength="14">
+                <button id="savePhoneBtn" onclick="saveCustomPhone()" style="display: none; margin-top: 5px; background: #0a2559; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Save as permanent option</button>
+            </div>
+            
+            <!-- Competitor Data Section -->
+            <div class="field-group" style="border: 2px solid #f3f4f6; background: #fafafa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h4 style="margin: 0 0 15px 0; color: #0a2559; font-size: 1.1rem;">Competitor Comparison</h4>
+                
+                <div class="field-group">
+                    <label>Competitor Price ($/month):</label>
+                    <input type="number" id="competitorPrice" step="0.01" placeholder="Enter competitor price" value="215.14" onchange="updateCompetitorData()">
+                </div>
+                
+                <div class="field-group">
+                    <label>Competitor Escalator (%):</label>
+                    <input type="number" id="competitorEscalator" step="0.1" placeholder="Enter escalator rate" value="3.5" onchange="updateCompetitorData()">
+                </div>
+                
+                <div class="field-group">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="showCompetitor" style="width: 18px; height: 18px; cursor: pointer;" onchange="toggleCompetitorDisplay()">
+                        <label for="showCompetitor" style="font-weight: 600; color: #059669;">Show in comparison charts</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button onclick="printProposal()">Generate PDF</button>
+            <button onclick="saveData()">Save Changes</button>
+            <button onclick="resetData()">Reset</button>
+        </div>
+        
+        <div class="instructions">
+            <p>Click any text to edit it directly</p>
+            <p>Hover over image to change it</p>
+            <p>Use fields above for quick value updates</p>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="slide-container">
+            
+            <!-- First Slide - Company Overview (EXACT from tesla-solar-tool-clean.html) -->
+            <div class="slide" id="slide-1">
+                <h2 style="color: #0a2559; font-size: 2.2rem; font-weight: 700; text-align: left; margin-bottom: 1rem; margin-top: -1rem; padding-top: 0;">Why Choose Axia by Qcells?</h2>
+                <div style="width: 100px; height: 3px; background: #0a2559; margin-bottom: 1rem;"></div>
+                <h3 style="color: #0a2559; font-size: 1.3rem; font-weight: 500; text-align: left; margin-bottom: 4rem; margin-top: 0; font-style: italic; line-height: 1.4;">The Power of One Company: <span style="font-size: 1.1rem;">industry-leading panels, professional installation, and fast financing.</span></h3>
+                
+                <div style="display: flex; justify-content: flex-start; align-items: flex-start; max-width: 1200px; margin: 0 auto; padding: 0 1rem; gap: 0.8rem;">
+                    <!-- Left Side - Company Image -->
+                    <div style="width: 300px; flex-shrink: 0;">
+                        <img src="Propuesta completa_files/one-company-axia-highlighted-1024x966.webp" alt="One Company Ecosystem" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+                    </div>
+                    
+                    <!-- Center Content - Company Cards -->
+                    <div style="flex: 1; max-width: 550px; margin-left: 1rem;">
+                        <!-- Companies List - Stacked Vertically -->
+                        <div style="display: flex; flex-direction: column; gap: 1.4rem;">
+                            <!-- AXIA Sales & Service - Left aligned -->
+                            <div style="margin-left: 0; position: relative; padding: 0.8rem; background: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 3px solid #ff6b35; width: 400px;">
+                                <h4 style="color: #ff6b35; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center;">
+                                    <span style="color: #ff6b35; margin-right: 0.5rem; font-size: 1rem;">•</span>
+                                    AXIA Sales & Service
+                                </h4>
+                                <p style="color: #2d3748; font-size: 0.75rem; margin: 0; line-height: 1.3; margin-left: 1.3rem;">Expert consultation, transparent pricing, and dedicated installation support for a superior solar experience.</p>
+                            </div>
+                            
+                            <!-- QCELLS Manufacturing - Right offset with same width -->
+                            <div style="margin-left: 80px; position: relative; padding: 0.8rem; background: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 3px solid #0a2559; width: 400px;">
+                                <h4 style="color: #0a2559; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center;">
+                                    <span style="color: #0a2559; margin-right: 0.5rem; font-size: 1rem;">•</span>
+                                    QCELLS Manufacturing
+                                </h4>
+                                <p style="color: #2d3748; font-size: 0.75rem; margin: 0; line-height: 1.3; margin-left: 1.3rem;">Global leader producing the #1 trusted solar panels in the US, assembled in America with cutting-edge technology.</p>
+                            </div>
+                            
+                            <!-- ENFIN Financing - Left aligned with same width -->
+                            <div style="margin-left: 0; position: relative; padding: 0.8rem; background: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 3px solid #2563eb; width: 400px;">
+                                <h4 style="color: #2563eb; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center;">
+                                    <span style="color: #2563eb; margin-right: 0.5rem; font-size: 1rem;">•</span>
+                                    ENFIN Financing
+                                </h4>
+                                <p style="color: #2d3748; font-size: 0.75rem; margin: 0; line-height: 1.3; margin-left: 1.3rem;">Flexible financing solutions with competitive rates and quick approval, seamlessly integrated into our ecosystem.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side - Solar Tips -->
+                    <div style="flex-shrink: 0; width: 280px; margin-left: 1rem; display: flex; align-items: center; justify-content: center;">
+                        <!-- Small Solar Tips Box -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 3rem;">
+                            <!-- Header -->
+                            <div style="margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid #cbd5e1;">
+                                <h3 style="color: #0a2559; font-size: 0.7rem; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.2px;">
+                                    Tips - Before Signing Solar
+                                </h3>
+                            </div>
+                            
+                            <!-- Tips Items -->
+                            <div>
+                                
+                                <!-- Tip 1 -->
+                                <div style="display: flex; align-items: flex-start; margin-bottom: 0.6rem;">
+                                    <span style="color: #0a2559; font-size: 0.6rem; margin-right: 0.3rem; margin-top: 0.05rem;">✓</span>
+                                    <div>
+                                        <div style="color: #0a2559; font-weight: 600; font-size: 0.65rem; line-height: 1.2; margin-bottom: 0.15rem;">
+                                            Request total 25-year price
+                                        </div>
+                                        <div style="color: #64748b; font-size: 0.55rem; line-height: 1.2;">
+                                            It is important to see the full pricing picture over time.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tip 2 -->
+                                <div style="display: flex; align-items: flex-start; margin-bottom: 0.6rem;">
+                                    <span style="color: #0a2559; font-size: 0.6rem; margin-right: 0.3rem; margin-top: 0.05rem;">✓</span>
+                                    <div>
+                                        <div style="color: #0a2559; font-weight: 600; font-size: 0.65rem; line-height: 1.2; margin-bottom: 0.15rem;">
+                                            Verify offered production
+                                        </div>
+                                        <div style="color: #64748b; font-size: 0.55rem; line-height: 1.2;">
+                                            Some companies inflate production to justify pricing. Make sure it's realistic.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tip 3 -->
+                                <div style="display: flex; align-items: flex-start;">
+                                    <span style="color: #0a2559; font-size: 0.6rem; margin-right: 0.3rem; margin-top: 0.05rem;">✓</span>
+                                    <div>
+                                        <div style="color: #0a2559; font-weight: 600; font-size: 0.65rem; line-height: 1.2; margin-bottom: 0.15rem;">
+                                            Confirm warranty backing
+                                        </div>
+                                        <div style="color: #64748b; font-size: 0.55rem; line-height: 1.2;">
+                                            A solid manufacturer provides long-term security, not just the installer.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Connecting Message -->
+                <div style="text-align: left; margin: 1.5rem 0 0.8rem 0; padding: 0.5rem 0; max-width: 600px;">
+                    <p style="color: #0a2559; font-size: 0.75rem; font-weight: 600; margin: 0; letter-spacing: 0.2px; line-height: 1.3;">
+                        From our factory to your roof — backed by a Fortune 500 global leader.
+                    </p>
+                    <p style="color: #475569; font-size: 0.7rem; font-weight: 500; margin: 0.2rem 0 0 0; font-style: italic;">
+                        One company. Zero middlemen. Total peace of mind.
+                    </p>
+                </div>
+                
+                <!-- Industry Recognition Badges - Bottom Row -->
+                <div style="margin-top: 1.5rem; padding: 2rem 0; display: flex; justify-content: center; align-items: center; gap: 3rem; flex-wrap: wrap;">
+                    
+                    <!-- Badge 1: Best-in-class Warranty -->
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                        <img src="Propuesta completa_files/25-year-warranty-badge.svg" alt="25 Year Warranty" style="width: 60px; height: 60px; margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.6rem; color: #0a2559; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1px; line-height: 1.2; max-width: 100px; text-align: center;">
+                            Best-in-class Warranty
+                        </div>
+                    </div>
+                    
+                    <!-- Badge 2: Tier 1 Bankability -->
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                        <img src="Propuesta completa_files/fortune-500-2022-badge.svg" alt="Fortune 500" style="width: 60px; height: 60px; margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.6rem; color: #0a2559; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1px; line-height: 1.2; max-width: 100px; text-align: center;">
+                            Tier 1 Bankability
+                        </div>
+                    </div>
+                    
+                    <!-- Badge 3: No. 1 Market Share -->
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                        <img src="Propuesta completa_files/number-1-solar-company-badge.svg" alt="#1 Solar Company" style="width: 60px; height: 60px; margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.6rem; color: #0a2559; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1px; line-height: 1.2; max-width: 100px; text-align: center;">
+                            No. 1 Market Share
+                        </div>
+                    </div>
+                    
+                    <!-- Badge 4: By Solar Reviews -->
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                        <img src="Propuesta completa_files/number-1-solar-panel-manufacturer-badge.svg" alt="#1 Panel Manufacturer" style="width: 60px; height: 60px; margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.6rem; color: #0a2559; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1px; line-height: 1.2; max-width: 100px; text-align: center;">
+                            By Solar Reviews
+                        </div>
+                    </div>
+                    
+                    <!-- Badge 5: USA Panel Assembly -->
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                        <img src="Propuesta completa_files/assembled-in-usa-badge.svg" alt="Assembled in USA" style="width: 60px; height: 60px; margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.6rem; color: #0a2559; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1px; line-height: 1.2; max-width: 100px; text-align: center;">
+                            USA Panel Assembly
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Second Slide - Solar Proposal (EXACT from Propuesta Solar) -->
+            <div class="slide" id="slide-2">
+                <div class="proposal-container">
+                    <!-- Header -->
+                    <div class="header">
+                        <span class="powered-by" contenteditable="true">Powered by <span class="enfin">EnFin</span> and <span class="qcells">Qcells</span></span>
+                    </div>
+
+                    <!-- Main Content Grid -->
+                    <div class="main-content">
+                        <!-- Left Section: Comparison Table -->
+                        <div class="comparison-section">
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th class="option-header interest" contenteditable="true">3.5% Interest</th>
+                                        <th class="option-header no-interest" contenteditable="true" data-no-interest-column>No Interest!</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Price</td>
+                                        <td class="value" contenteditable="true">Enter price</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>Enter price</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Annual Escalator</td>
+                                        <td class="value" contenteditable="true">3.5%</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>0.0%</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Panels (W)</td>
+                                        <td class="value" contenteditable="true">430</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>430</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">System Size (kW)</td>
+                                        <td class="value" contenteditable="true">Enter size</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>Enter size</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Production (kWh)</td>
+                                        <td class="value" contenteditable="true">Enter production</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>Enter production</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Energy Access</td>
+                                        <td class="value" contenteditable="true">Full Access (no Flex)</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>Full Access (no Flex)</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Inverters</td>
+                                        <td class="value" contenteditable="true">Micro</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>Micro</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Battery</td>
+                                        <td class="value" contenteditable="true">Enter battery info</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>Enter battery info</td>
+                                    </tr>
+                                    <tr class="divider-row">
+                                        <td colspan="3"><hr></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label" contenteditable="true">Extras</td>
+                                        <td class="value" contenteditable="true">6 months no payment</td>
+                                        <td class="value" contenteditable="true" data-no-interest-column>6 months no payment</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Right Section: Address and Image -->
+                        <div class="right-section">
+                            <div class="address-container">
+                                <div class="address" contenteditable="true">Enter address</div>
+                            </div>
+                            
+                            <div class="house-image-container">
+                                <img src="Propuesta completa_files/348s.jpg" alt="House with solar panels" class="house-image" style="display: block;">
+                                <div class="placeholder-text" style="display: none;">Click to upload house image with solar panels</div>
+                                <div class="image-upload-overlay">
+                                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                                    <button class="upload-btn" onclick="document.getElementById('imageUpload').click()">
+                                        Click to Upload or Drag & Drop
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="contact-section">
+                                <p class="contact-text" contenteditable="true">Reach out to us and we will connect you to one of our experts</p>
+                                <p class="phone-number" contenteditable="true">Enter phone number</p>
+                            </div>
+                            
+                            <!-- AXIA Logo positioned within content -->
+                            <div class="axia-logo-container">
+                                <div class="dealer-text">Independent Authorized Dealer</div>
+                                <img src="Propuesta completa_files/Captura de pantalla 2025-08-15 170239.png" alt="AXIA by qcells" class="axia-logo-image">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Third Slide - Monthly Payment Evolution Analysis (ONLY fixed vs escalated) -->
+            <div class="slide" id="slide-3">
+                <h2 style="color: #0a2559; font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 2rem;">Monthly Payment Evolution Analysis</h2>
+                
+                <!-- Chart Type Selector -->
+                <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="chart-type-btn active" onclick="switchChartType('line')" id="lineBtn">
+                        Line Chart
+                    </button>
+                    <button class="chart-type-btn" onclick="switchChartType('bar')" id="barBtn">
+                        Bar Chart
+                    </button>
+                </div>
+                
+                <!-- Chart Container -->
+                <div class="chart-container">
+                    <canvas id="paymentChart" width="800" height="400"></canvas>
+                </div>
+                
+                <!-- Summary Information -->
+                <div style="display: flex; justify-content: center; gap: 2.5rem; margin-top: 1rem;" id="summaryContainer">
+                    
+                    <!-- Escalator Option Summary -->
+                    <div class="escalator-summary" style="border-left: 4px solid #1e40af; padding: 0.6rem; border-radius: 6px; background: rgba(30, 64, 175, 0.02); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); max-width: 260px;">
+                        <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;">
+                            <div style="width: 18px; height: 3px; background: #1e40af; border-radius: 2px;"></div>
+                            <h3 style="color: #1e40af; font-size: 1.05rem; font-weight: 600; margin: 0;" id="escalatorTitle">Escalator Option (3.5%)</h3>
+                        </div>
+                        <div style="color: #374151; font-size: 0.75rem;">
+                            <p style="margin-bottom: 0.25rem;"><strong>Starting Payment:</strong> <span id="escalatorStart">$XXX/month</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Year 25 Payment:</strong> <span id="escalatorEnd">$XXX/month</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Total 25-Year Cost:</strong> <span id="escalatorTotal">$XXX,XXX</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Savings vs Competitor:</strong> <span id="escalatorSavings">$XXX,XXX</span></p>
+                            <p style="font-size: 0.6rem; color: #6b7280; font-style: italic; margin-bottom: 0;" id="escalatorNote">Payments increase by 3.5% annually</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed Option Summary -->
+                    <div class="no-interest-summary" style="border-left: 4px solid #60a5fa; padding: 0.6rem; border-radius: 6px; background: rgba(96, 165, 250, 0.02); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); max-width: 260px;">
+                        <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;">
+                            <div style="width: 18px; height: 3px; background: #60a5fa; border-radius: 2px;"></div>
+                            <h3 style="color: #60a5fa; font-size: 1.05rem; font-weight: 600; margin: 0;">Fixed Price Option</h3>
+                        </div>
+                        <div style="color: #374151; font-size: 0.75rem;">
+                            <p style="margin-bottom: 0.25rem;"><strong>Fixed Payment:</strong> <span id="fixedPayment">$XXX/month</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Year 25 Payment:</strong> <span id="fixedEnd">$XXX/month</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Total 25-Year Cost:</strong> <span id="fixedTotal">$XXX,XXX</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Savings vs Competitor:</strong> <span id="fixedSavings">$XXX,XXX</span></p>
+                            <p style="font-size: 0.6rem; color: #6b7280; font-style: italic; margin-bottom: 0;">Payment remains constant for 25 years</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Competitor Summary (Hidden by default) -->
+                    <div class="competitor-summary" style="display: none; border-left: 4px solid #dc2626; padding: 0.6rem; border-radius: 6px; background: rgba(220, 38, 38, 0.02); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); max-width: 260px;">
+                        <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;">
+                            <div style="width: 18px; height: 3px; background: #dc2626; border-radius: 2px;"></div>
+                            <h3 style="color: #dc2626; font-size: 1.05rem; font-weight: 600; margin: 0;" id="competitorTitle">Competitor Option</h3>
+                        </div>
+                        <div style="color: #374151; font-size: 0.75rem;">
+                            <p style="margin-bottom: 0.25rem;"><strong>Starting Payment:</strong> <span id="competitorStart">$XXX/month</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Year 25 Payment:</strong> <span id="competitorEnd">$XXX/month</span></p>
+                            <p style="margin-bottom: 0.25rem;"><strong>Total 25-Year Cost:</strong> <span id="competitorTotal">$XXX,XXX</span></p>
+                            <p style="font-size: 0.6rem; color: #6b7280; font-style: italic; margin-bottom: 0;" id="competitorNote">Competitor pricing comparison</p>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Chart variables
+        let paymentChart;
+        let currentChartType = 'line';
+
+        // Proposal data
+        let proposalData = {
+            escalatorPrice: 0,
+            fixedPrice: 0,
+            escalatorRate: 3.5
+        };
+
+        // Store original content for reset functionality
+        let originalContent = {};
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store original content
+            storeOriginalContent();
+            
+            // Setup image upload handler
+            setupImageUpload();
+            
+            // Add edit indicators
+            setupEditableIndicators();
+            
+            // Initialize control panel values
+            initializeControlPanel();
+            
+            // Load saved phone numbers
+            loadSavedPhoneNumbers();
+            
+            // Reset to template on load
+            resetToTemplate();
+            
+            // Update payment chart
+            updatePaymentChart();
+        });
+
+        // Store original content for reset
+        function storeOriginalContent() {
+            const editables = document.querySelectorAll('[contenteditable="true"]');
+            editables.forEach((elem, index) => {
+                originalContent[`elem_${index}`] = elem.innerHTML;
+            });
+            
+            // Store original image
+            const houseImage = document.querySelector('.house-image');
+            if (houseImage) {
+                originalContent.houseImage = houseImage.src;
+            }
+        }
+
+        // Toggle control panel visibility
+        function toggleControlPanel() {
+            const controlPanel = document.querySelector('.control-panel');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (controlPanel.classList.contains('show')) {
+                controlPanel.classList.remove('show');
+                menuToggle.classList.remove('active');
+            } else {
+                controlPanel.classList.add('show');
+                menuToggle.classList.add('active');
+            }
+        }
+
+        // Close control panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const controlPanel = document.querySelector('.control-panel');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            // If control panel is open and click is outside both panel and toggle button
+            if (controlPanel.classList.contains('show')) {
+                if (!controlPanel.contains(event.target) && !menuToggle.contains(event.target)) {
+                    controlPanel.classList.remove('show');
+                    menuToggle.classList.remove('active');
+                }
+            }
+        });
+
+        // Setup editable indicators
+        function setupEditableIndicators() {
+            const editables = document.querySelectorAll('[contenteditable="true"]');
+            
+            editables.forEach(elem => {
+                // Add visual feedback when editing
+                elem.addEventListener('focus', function() {
+                    this.setAttribute('data-original', this.innerHTML);
+                });
+                
+                elem.addEventListener('blur', function() {
+                    if (this.innerHTML !== this.getAttribute('data-original')) {
+                        showNotification('Change saved temporarily');
+                    }
+                });
+                
+                // Prevent enter key from creating new lines in single-line fields
+                elem.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !this.classList.contains('multiline')) {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+            });
+        }
+
+        // Setup image upload functionality
+        function setupImageUpload() {
+            const imageUpload = document.getElementById('imageUpload');
+            const container = document.querySelector('.house-image-container');
+            const placeholder = document.querySelector('.placeholder-text');
+            
+            if (imageUpload && container) {
+                // File input change event
+                imageUpload.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        handleImageFile(file);
+                    }
+                });
+                
+                // Make container clickable to trigger file input
+                container.addEventListener('click', function() {
+                    imageUpload.click();
+                });
+                
+                // Drag and drop functionality
+                container.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    container.style.borderColor = '#2563eb';
+                    container.style.backgroundColor = '#f0f9ff';
+                });
+                
+                container.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    container.style.borderColor = '#e5e7eb';
+                    container.style.backgroundColor = '#ffffff';
+                });
+                
+                container.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    container.style.borderColor = '#e5e7eb';
+                    container.style.backgroundColor = '#ffffff';
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0 && files[0].type.startsWith('image/')) {
+                        handleImageFile(files[0]);
+                    }
+                });
+                
+                // Paste functionality
+                document.addEventListener('paste', function(e) {
+                    const items = e.clipboardData.items;
+                    for (let item of items) {
+                        if (item.type.startsWith('image/')) {
+                            e.preventDefault();
+                            const file = item.getAsFile();
+                            if (file) {
+                                handleImageFile(file);
+                            }
+                            break;
+                        }
+                    }
+                });
+            }
+            
+            function handleImageFile(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Hide placeholder text if exists
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
+                    
+                    // Create or update image element
+                    let houseImage = container.querySelector('.house-image');
+                    if (!houseImage) {
+                        houseImage = document.createElement('img');
+                        houseImage.className = 'house-image';
+                        houseImage.alt = 'House with solar panels';
+                        container.appendChild(houseImage);
+                    }
+                    
+                    houseImage.src = e.target.result;
+                    houseImage.style.display = 'block';
+                    showNotification('Image updated successfully', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Save data to localStorage (temporary only)
+        function saveData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                content: {}
+            };
+            
+            // Save all editable content
+            const editables = document.querySelectorAll('[contenteditable="true"]');
+            editables.forEach((elem, index) => {
+                data.content[`elem_${index}`] = elem.innerHTML;
+            });
+            
+            // Save image
+            const houseImage = document.querySelector('.house-image');
+            if (houseImage) {
+                data.content.houseImage = houseImage.src;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('solarProposal', JSON.stringify(data));
+            
+            showNotification('Data saved temporarily (will reset on page reload)', 'success');
+        }
+
+        // Reset to original content
+        function resetData() {
+            if (confirm('Are you sure you want to reset all changes to template?')) {
+                resetToTemplate();
+                showNotification('Reset to template successfully', 'info');
+            }
+        }
+
+        // Reset to template values (called on page load)
+        function resetToTemplate() {
+            // Clear localStorage to prevent loading old data
+            localStorage.removeItem('solarProposal');
+            
+            // Reset all table values to template text
+            const tableRows = document.querySelectorAll('.comparison-table tbody tr');
+            const templateValues = [
+                ['Enter price', 'Enter price'],
+                ['3.5%', '0.0%'], // Annual Escalator - valores por defecto
+                ['430', '430'], // Panels (W) - valor por defecto
+                ['Enter size', 'Enter size'],
+                ['Enter production', 'Enter production'],
+                ['Full Access (no Flex)', 'Full Access (no Flex)'], // Energy Access - valor por defecto
+                ['Micro', 'Micro'], // Inverters - valor por defecto
+                ['Enter battery info', 'Enter battery info'],
+                ['6 months no payment', '6 months no payment'] // Extras - valor por defecto
+            ];
+            
+            let valueIndex = 0;
+            tableRows.forEach(row => {
+                const valueCells = row.querySelectorAll('.value');
+                if (valueCells.length === 2 && valueIndex < templateValues.length) {
+                    valueCells[0].textContent = templateValues[valueIndex][0];
+                    valueCells[1].textContent = templateValues[valueIndex][1];
+                    valueIndex++;
+                }
+            });
+            
+            // Reset address
+            const addressElement = document.querySelector('.address');
+            if (addressElement) {
+                addressElement.textContent = 'Enter address';
+            }
+            
+            // Reset phone number
+            const phoneElement = document.querySelector('.phone-number');
+            if (phoneElement) {
+                phoneElement.textContent = 'Enter phone number';
+            }
+            
+            // Reset control panel fields
+            document.getElementById('address').value = '';
+            document.getElementById('price1').value = '';
+            document.getElementById('price2').value = '';
+            document.getElementById('systemSize').value = '';
+            document.getElementById('production').value = '';
+            document.getElementById('batteries').value = '';
+            document.getElementById('phoneNumber').value = '';
+            document.getElementById('escalatorRate').value = '3.5';
+            
+            // Update chart data
+            proposalData.escalatorPrice = 0;
+            proposalData.fixedPrice = 0;
+            proposalData.escalatorRate = 3.5;
+            updatePaymentChart();
+        }
+
+        // Generate PDF using native browser functionality
+        function printProposal() {
+            console.log('🖨️ Starting native PDF generation...');
+            
+            try {
+                // Hide control panel and menu elements
+                const controlPanel = document.querySelector('.control-panel');
+                const menuToggle = document.querySelector('.menu-toggle');
+                
+                if (controlPanel) {
+                    controlPanel.style.display = 'none';
+                }
+                if (menuToggle) {
+                    menuToggle.style.display = 'none';
+                }
+                
+                // Hide image upload overlays and notifications
+                const overlays = document.querySelectorAll('.image-upload-overlay');
+                const notifications = document.querySelectorAll('.notification, [class*="notification"]');
+                
+                overlays.forEach(overlay => {
+                    overlay.style.display = 'none';
+                });
+                
+                notifications.forEach(notification => {
+                    notification.style.display = 'none';
+                });
+                
+                // Remove contenteditable styling for cleaner print
+                const editableElements = document.querySelectorAll('[contenteditable="true"]');
+                editableElements.forEach(element => {
+                    element.style.background = 'transparent';
+                    element.style.boxShadow = 'none';
+                    element.style.border = 'none';
+                    element.style.outline = 'none';
+                });
+                
+                // Wait a moment for UI changes to take effect
+                setTimeout(() => {
+                    console.log('🖨️ Opening browser print dialog...');
+                    
+                    // Trigger native browser print immediately without notification
+                    window.print();
+                    
+                    // Restore UI after print dialog
+                    setTimeout(() => {
+                        console.log('✅ Restoring UI elements...');
+                        
+                        // Restore control panel and menu
+                        if (controlPanel) {
+                            controlPanel.style.display = '';
+                        }
+                        if (menuToggle) {
+                            menuToggle.style.display = '';
+                        }
+                        
+                        // Restore overlays
+                        overlays.forEach(overlay => {
+                            overlay.style.display = '';
+                        });
+                        
+                        // Restore notifications
+                        notifications.forEach(notification => {
+                            notification.style.display = '';
+                        });
+                        
+                        // Restore editable styling
+                        editableElements.forEach(element => {
+                            element.style.background = '';
+                            element.style.boxShadow = '';
+                            element.style.border = '';
+                            element.style.outline = '';
+                        });
+                        
+                    }, 1000);
+                    
+                }, 300);
+                
+            } catch (error) {
+                console.error('❌ PDF generation error:', error);
+            }
+        }
+
+        // Control Panel Functions
+        function updateTableValue(type, optionIndex, value) {
+            const tableRows = document.querySelectorAll('.comparison-table tbody tr');
+            let targetRow;
+            
+            if (type === 'price') {
+                targetRow = tableRows[0]; // First row is price
+                const cells = targetRow.querySelectorAll('.value');
+                if (cells[optionIndex]) {
+                    cells[optionIndex].textContent = `$${parseFloat(value).toFixed(2)}/month`;
+                    
+                    // Update proposal data for chart
+                    if (optionIndex === 0) {
+                        proposalData.escalatorPrice = parseFloat(value);
+                    } else if (optionIndex === 1) {
+                        proposalData.fixedPrice = parseFloat(value);
+                    }
+                    updatePaymentChart();
+                    
+                    showNotification('Price updated successfully', 'success');
+                }
+            }
+        }
+
+        function updateSystemSize(value) {
+            const systemSizeRows = document.querySelectorAll('.comparison-table tbody tr');
+            let targetRow;
+            
+            // Find the System Size row (should be around index 6-8)
+            for (let row of systemSizeRows) {
+                const label = row.querySelector('.label');
+                if (label && label.textContent.includes('System Size')) {
+                    targetRow = row;
+                    break;
+                }
+            }
+            
+            if (targetRow) {
+                const cells = targetRow.querySelectorAll('.value');
+                cells.forEach(cell => {
+                    cell.textContent = parseFloat(value).toFixed(2);
+                });
+                showNotification('System size updated successfully', 'success');
+            }
+        }
+
+        function updateProduction(value) {
+            const productionRows = document.querySelectorAll('.comparison-table tbody tr');
+            let targetRow;
+            
+            // Find the Production row
+            for (let row of productionRows) {
+                const label = row.querySelector('.label');
+                if (label && label.textContent.includes('Production')) {
+                    targetRow = row;
+                    break;
+                }
+            }
+            
+            if (targetRow) {
+                const cells = targetRow.querySelectorAll('.value');
+                const formattedValue = parseInt(value).toLocaleString();
+                cells.forEach(cell => {
+                    cell.textContent = formattedValue;
+                });
+                showNotification('Production updated successfully', 'success');
+            }
+        }
+
+        function updateBatteries(value) {
+            const batteryRows = document.querySelectorAll('.comparison-table tbody tr');
+            let targetRow;
+            
+            // Find the Battery row
+            for (let row of batteryRows) {
+                const label = row.querySelector('.label');
+                if (label && label.textContent.includes('Battery')) {
+                    targetRow = row;
+                    break;
+                }
+            }
+            
+            if (targetRow) {
+                const cells = targetRow.querySelectorAll('.value');
+                const batteryText = value == 0 ? 'No battery' : 
+                                   value == 1 ? '1 Tesla Powerwall' : 
+                                   `${value} Tesla Powerwalls`;
+                cells.forEach(cell => {
+                    cell.textContent = batteryText;
+                });
+                showNotification('Battery configuration updated successfully', 'success');
+            }
+        }
+
+        function updateEscalator(rate) {
+            const body = document.body;
+            
+            console.log('UpdateEscalator called with rate:', rate);
+            
+            if (rate === 'none') {
+                // No Escalator mode - only show no interest option
+                body.classList.add('escalator-hidden');
+                body.classList.remove('no-interest-hidden');
+                
+                // Update table headers - hide escalator column and show only No Interest
+                const tableHeaders = document.querySelectorAll('.comparison-table thead th');
+                if (tableHeaders[1]) {
+                    tableHeaders[1].style.display = 'none'; // Hide escalator column
+                }
+                if (tableHeaders[2]) {
+                    tableHeaders[2].style.display = ''; // Keep No Interest column visible
+                }
+                
+                // Hide escalator cells in all rows and keep only No Interest column
+                const allRows = document.querySelectorAll('.comparison-table tbody tr');
+                for (let row of allRows) {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 3) {
+                        if (cells[1]) {
+                            cells[1].style.display = 'none'; // Hide escalator cell
+                        }
+                        if (cells[2]) {
+                            cells[2].style.display = ''; // Keep No Interest cell visible
+                        }
+                    }
+                }
+                
+                // Update proposal data
+                proposalData.escalatorRate = 0;
+                showNotification('Escalator option disabled - Only No Interest available', 'info');
+                
+            } else {
+                // Normal escalator mode - show both columns
+                body.classList.remove('escalator-hidden');
+                
+                // Show all columns
+                const tableHeaders = document.querySelectorAll('.comparison-table thead th');
+                if (tableHeaders[1]) {
+                    tableHeaders[1].textContent = `${rate}% Interest`;
+                    tableHeaders[1].style.display = ''; // Show escalator column
+                }
+                if (tableHeaders[2]) {
+                    tableHeaders[2].textContent = 'No Interest!';
+                    tableHeaders[2].style.display = ''; // Show No Interest column
+                }
+                
+                // Show all cells in all rows
+                const allRows = document.querySelectorAll('.comparison-table tbody tr');
+                for (let row of allRows) {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 3) {
+                        if (cells[1]) {
+                            cells[1].style.display = ''; // Show escalator cell
+                        }
+                        if (cells[2]) {
+                            cells[2].style.display = ''; // Show No Interest cell
+                        }
+                    }
+                }
+                
+                // Update escalator values in table
+                const escalatorRows = document.querySelectorAll('.comparison-table tbody tr');
+                for (let row of escalatorRows) {
+                    const label = row.querySelector('.label');
+                    if (label && label.textContent.includes('Escalator')) {
+                        const cells = row.querySelectorAll('.value');
+                        if (cells[0]) {
+                            cells[0].textContent = `${rate}%`; // Escalator column shows the rate
+                        }
+                        if (cells[1]) {
+                            cells[1].textContent = '0.0%'; // No Interest column always shows 0%
+                            cells[1].style.display = '';
+                        }
+                        break;
+                    }
+                }
+                
+                // Update proposal data
+                proposalData.escalatorRate = parseFloat(rate);
+                showNotification(`Escalator rate updated to ${rate}%`, 'success');
+            }
+            
+            console.log('About to call updatePaymentChart');
+            updatePaymentChart();
+            console.log('updatePaymentChart called');
+        }
+
+        // Toggle No Interest option availability
+        function toggleNoInterestOption() {
+            const checkbox = document.getElementById('noInterestToggle');
+            const statusText = document.getElementById('noInterestStatus');
+            const isAvailable = checkbox.checked;
+            
+            // Update status text
+            if (isAvailable) {
+                statusText.textContent = 'Available';
+                statusText.style.color = '#059669';
+            } else {
+                statusText.textContent = 'Not Available';
+                statusText.style.color = '#dc2626';
+            }
+            
+            // Hide/Show No Interest column in table
+            const noInterestColumns = document.querySelectorAll('[data-no-interest-column]');
+            noInterestColumns.forEach(column => {
+                column.style.display = isAvailable ? '' : 'none';
+            });
+            
+            // Update table layout to prevent empty space
+            const table = document.querySelector('.comparison-table');
+            if (table) {
+                if (isAvailable) {
+                    table.style.gridTemplateColumns = '';
+                } else {
+                    // Adjust table to two columns when No Interest is hidden
+                    table.style.gridTemplateColumns = '1fr 1fr';
+                }
+            }
+            
+            // Update payment chart to reflect the change
+            updatePaymentChart();
+            
+            // Show notification
+            const status = isAvailable ? 'enabled' : 'disabled';
+            showNotification(`No Interest option ${status}`, isAvailable ? 'success' : 'warning');
+            
+            console.log('No Interest option toggled:', isAvailable ? 'Available' : 'Not Available');
+        }
+
+        // Update address
+        function updateAddress(address) {
+            const addressElement = document.querySelector('.address');
+            if (addressElement) {
+                addressElement.textContent = address || 'Enter address';
+                showNotification('Address updated successfully', 'success');
+            }
+        }
+
+        // Update competitor data
+        function updateCompetitorData() {
+            const competitorPrice = parseFloat(document.getElementById('competitorPrice').value) || 215.14;
+            const competitorEscalator = parseFloat(document.getElementById('competitorEscalator').value) || 3.5;
+            
+            // Store in global variables or data object
+            window.competitorData = {
+                price: competitorPrice,
+                escalator: competitorEscalator
+            };
+            
+            // If competitor is shown, update charts
+            const showCompetitor = document.getElementById('showCompetitor').checked;
+            if (showCompetitor) {
+                updateCompetitorCharts();
+            }
+            
+            showNotification('Competitor data updated', 'success');
+        }
+
+        // Toggle competitor display in charts
+        function toggleCompetitorDisplay() {
+            const showCompetitor = document.getElementById('showCompetitor').checked;
+            
+            if (showCompetitor) {
+                // Update competitor data first
+                updateCompetitorData();
+                // Show competitor in charts
+                updateCompetitorCharts();
+                showNotification('Competitor comparison enabled', 'success');
+            } else {
+                // Hide competitor from charts
+                hideCompetitorFromCharts();
+                showNotification('Competitor comparison disabled', 'success');
+            }
+        }
+
+        // Update charts to include competitor data
+        function updateCompetitorCharts() {
+            if (!paymentChart) return;
+            
+            // Calculate competitor payments based on escalator rate
+            const years = Array.from({length: 25}, (_, i) => i + 1);
+            const competitorPayments = years.map(year => {
+                return window.competitorData.price * Math.pow(1 + window.competitorData.escalator / 100, year - 1);
+            });
+
+            // Check if competitor dataset already exists
+            const existingDatasetIndex = paymentChart.data.datasets.findIndex(dataset => 
+                dataset.label.includes('Competitor')
+            );
+
+            if (existingDatasetIndex !== -1) {
+                // Update existing competitor dataset
+                paymentChart.data.datasets[existingDatasetIndex].data = competitorPayments;
+                paymentChart.data.datasets[existingDatasetIndex].label = `Competitor (${window.competitorData.escalator}% escalator)`;
+            } else {
+                // Add new competitor dataset
+                paymentChart.data.datasets.push({
+                    label: `Competitor (${window.competitorData.escalator}% escalator)`,
+                    data: competitorPayments,
+                    borderColor: '#dc2626',
+                    backgroundColor: currentChartType === 'bar' ? '#dc2626' : 'rgba(220, 38, 38, 0.1)',
+                    borderWidth: 2,
+                    fill: currentChartType === 'line',
+                    borderDash: [5, 5] // Dashed line to distinguish competitor
+                });
+            }
+
+            paymentChart.update();
+            
+            // Update summary displays to include competitor calculations
+            const escalatorPrice = parseFloat(document.getElementById('price1').value) || 200;
+            const fixedPrice = parseFloat(document.getElementById('price2').value) || 250;
+            const escalatorPayments = years.map(year => {
+                return escalatorPrice * Math.pow(1 + proposalData.escalatorRate / 100, year - 1);
+            });
+            const fixedPayments = Array(25).fill(fixedPrice);
+            updateSummaryDisplays(escalatorPayments, fixedPayments);
+            
+            console.log('Charts updated with competitor data');
+            console.log('Competitor Price:', window.competitorData.price);
+            console.log('Competitor Escalator:', window.competitorData.escalator);
+        }
+
+        // Hide competitor from charts
+        function hideCompetitorFromCharts() {
+            if (!paymentChart) return;
+            
+            // Find and remove competitor dataset
+            const competitorDatasetIndex = paymentChart.data.datasets.findIndex(dataset => 
+                dataset.label.includes('Competitor')
+            );
+
+            if (competitorDatasetIndex !== -1) {
+                paymentChart.data.datasets.splice(competitorDatasetIndex, 1);
+                paymentChart.update();
+                console.log('Competitor data removed from charts');
+            }
+            
+            // Update summary displays to remove competitor calculations
+            const escalatorPrice = parseFloat(document.getElementById('price1').value) || 200;
+            const fixedPrice = parseFloat(document.getElementById('price2').value) || 250;
+            const years = Array.from({length: 25}, (_, i) => i + 1);
+            const escalatorPayments = years.map(year => {
+                return escalatorPrice * Math.pow(1 + proposalData.escalatorRate / 100, year - 1);
+            });
+            const fixedPayments = Array(25).fill(fixedPrice);
+            updateSummaryDisplays(escalatorPayments, fixedPayments);
+        }
+
+        // Update phone number
+        function updatePhoneNumber(value) {
+            const phoneElement = document.querySelector('.phone-number');
+            const customPhoneInput = document.getElementById('customPhone');
+            const savePhoneBtn = document.getElementById('savePhoneBtn');
+            
+            if (value === 'other') {
+                customPhoneInput.style.display = 'block';
+                savePhoneBtn.style.display = 'block';
+                customPhoneInput.focus();
+            } else {
+                customPhoneInput.style.display = 'none';
+                savePhoneBtn.style.display = 'none';
+                if (phoneElement && value) {
+                    phoneElement.textContent = value;
+                    showNotification('Phone number updated successfully', 'success');
+                }
+            }
+        }
+
+        // Update custom phone number
+        function updateCustomPhone(value) {
+            const phoneElement = document.querySelector('.phone-number');
+            if (phoneElement && value) {
+                phoneElement.textContent = value;
+                showNotification('Custom phone number updated successfully', 'success');
+            }
+        }
+
+        // Save custom phone number as permanent option
+        function saveCustomPhone() {
+            const customPhoneInput = document.getElementById('customPhone');
+            const phoneValue = customPhoneInput.value.trim();
+            
+            if (!phoneValue) {
+                showNotification('Please enter a phone number first', 'error');
+                return;
+            }
+            
+            // Validate phone number format (basic validation)
+            const phoneRegex = /^\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}$/;
+            if (!phoneRegex.test(phoneValue)) {
+                showNotification('Please use format: (XXX) XXX-XXXX', 'error');
+                return;
+            }
+            
+            // Check if phone number already exists
+            const phoneSelect = document.getElementById('phoneNumber');
+            const existingOptions = Array.from(phoneSelect.options);
+            const phoneExists = existingOptions.some(option => option.value === phoneValue);
+            
+            if (phoneExists) {
+                showNotification('This phone number already exists in the list', 'warning');
+                return;
+            }
+            
+            // Save to localStorage
+            const savedPhones = getSavedPhoneNumbers();
+            savedPhones.push(phoneValue);
+            localStorage.setItem('savedPhoneNumbers', JSON.stringify(savedPhones));
+            
+            // Add to dropdown (before "Other" option)
+            const otherOption = phoneSelect.querySelector('option[value="other"]');
+            const newOption = document.createElement('option');
+            newOption.value = phoneValue;
+            newOption.textContent = phoneValue;
+            phoneSelect.insertBefore(newOption, otherOption);
+            
+            // Select the new option
+            phoneSelect.value = phoneValue;
+            updatePhoneNumber(phoneValue);
+            
+            showNotification('Phone number saved successfully!', 'success');
+        }
+
+        // Get saved phone numbers from localStorage
+        function getSavedPhoneNumbers() {
+            const saved = localStorage.getItem('savedPhoneNumbers');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        // Load saved phone numbers into dropdown
+        function loadSavedPhoneNumbers() {
+            const savedPhones = getSavedPhoneNumbers();
+            const phoneSelect = document.getElementById('phoneNumber');
+            const otherOption = phoneSelect.querySelector('option[value="other"]');
+            
+            // Remove any previously loaded saved numbers (in case of reload)
+            const existingOptions = Array.from(phoneSelect.options);
+            existingOptions.forEach(option => {
+                if (option.value !== '' && option.value !== '(661) 237-9543' && 
+                    option.value !== '(669) 240-8458' && option.value !== '(916) 945-8152' && 
+                    option.value !== 'other') {
+                    option.remove();
+                }
+            });
+            
+            // Add saved numbers before "Other" option
+            savedPhones.forEach(phone => {
+                const option = document.createElement('option');
+                option.value = phone;
+                option.textContent = phone;
+                phoneSelect.insertBefore(option, otherOption);
+            });
+        }
+
+        // Format phone input as user types
+        function formatPhoneInput(input) {
+            let value = input.value.replace(/\D/g, ''); // Remove all non-digits
+            
+            if (value.length >= 6) {
+                value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+            } else if (value.length >= 3) {
+                value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+            } else if (value.length > 0) {
+                value = `(${value}`;
+            }
+            
+            input.value = value;
+        }
+
+        // Initialize control panel values from table
+        function initializeControlPanel() {
+            // Get current values from table and populate input fields
+            const tableRows = document.querySelectorAll('.comparison-table tbody tr');
+            
+            // Extract price values
+            const priceRow = tableRows[0];
+            if (priceRow) {
+                const priceCells = priceRow.querySelectorAll('.value');
+                if (priceCells[0]) {
+                    const price1 = priceCells[0].textContent.replace(/[^\d.]/g, '');
+                    document.getElementById('price1').value = price1;
+                }
+                if (priceCells[1]) {
+                    const price2 = priceCells[1].textContent.replace(/[^\d.]/g, '');
+                    document.getElementById('price2').value = price2;
+                }
+            }
+            
+            // Extract escalator rate from table or headers
+            const escalatorSelect = document.getElementById('escalatorRate');
+            for (let row of tableRows) {
+                const label = row.querySelector('.label');
+                if (label && label.textContent.includes('Escalator')) {
+                    const firstCell = row.querySelector('.value');
+                    if (firstCell) {
+                        const escalatorText = firstCell.textContent;
+                        if (escalatorText.includes('3.5')) {
+                            escalatorSelect.value = '3.5';
+                        } else if (escalatorText.includes('2.99')) {
+                            escalatorSelect.value = '2.99';
+                        }
+                    }
+                    break;
+                }
+            }
+            
+            // Extract other values
+            for (let row of tableRows) {
+                const label = row.querySelector('.label');
+                if (!label) continue;
+                
+                const labelText = label.textContent;
+                const firstCell = row.querySelector('.value');
+                
+                if (labelText.includes('System Size') && firstCell) {
+                    const systemSize = firstCell.textContent.replace(/[^\d.]/g, '');
+                    document.getElementById('systemSize').value = systemSize;
+                } else if (labelText.includes('Production') && firstCell) {
+                    const production = firstCell.textContent.replace(/[^\d]/g, '');
+                    document.getElementById('production').value = production;
+                } else if (labelText.includes('Battery') && firstCell) {
+                    const batteryText = firstCell.textContent;
+                    let batteryCount = 0;
+                    if (batteryText.includes('1 Tesla')) batteryCount = 1;
+                    else if (batteryText.includes('2 Tesla')) batteryCount = 2;
+                    else if (batteryText.includes('3 Tesla')) batteryCount = 3;
+                    else if (batteryText.includes('4 Tesla')) batteryCount = 4;
+                    document.getElementById('batteries').value = batteryCount;
+                }
+            }
+        }
+
+        // Chart functions
+        function updatePaymentChart() {
+            const ctx = document.getElementById('paymentChart');
+            if (!ctx) {
+                console.log('Chart canvas not found');
+                return;
+            }
+
+            // Get current values from inputs
+            const escalatorPrice = parseFloat(document.getElementById('price1').value) || 200;
+            const fixedPrice = parseFloat(document.getElementById('price2').value) || 250;
+            
+            console.log('Chart update - escalatorPrice:', escalatorPrice, 'fixedPrice:', fixedPrice);
+
+            const years = Array.from({length: 25}, (_, i) => i + 1);
+            const escalatorPayments = years.map(year => {
+                return escalatorPrice * Math.pow(1 + proposalData.escalatorRate / 100, year - 1);
+            });
+            const fixedPayments = Array(25).fill(fixedPrice);
+
+            // Update summary displays
+            updateSummaryDisplays(escalatorPayments, fixedPayments);
+
+            // Destroy existing chart if it exists
+            if (paymentChart) {
+                paymentChart.destroy();
+            }
+
+            // Check if in "No Escalator" mode and if No Interest option is available
+            const escalatorRate = document.getElementById('escalatorRate').value;
+            const noInterestAvailable = document.getElementById('noInterestToggle').checked;
+            let datasets = [];
+            
+            console.log('Escalator rate mode:', escalatorRate);
+            console.log('No Interest available:', noInterestAvailable);
+            
+            if (escalatorRate === 'none') {
+                // In "No Escalator" mode, only show Fixed Price if No Interest is available
+                if (noInterestAvailable) {
+                    datasets = [
+                        {
+                            label: 'Fixed Price Option (No Interest)',
+                            data: fixedPayments,
+                            borderColor: '#60a5fa',
+                            backgroundColor: currentChartType === 'bar' ? '#60a5fa' : 'rgba(96, 165, 250, 0.1)',
+                            borderWidth: 2,
+                            fill: currentChartType === 'line'
+                        }
+                    ];
+                    console.log('Using No Escalator mode - single dataset (No Interest available)');
+                } else {
+                    // If No Interest is not available, show no datasets (empty chart)
+                    datasets = [];
+                    console.log('No datasets - No Interest not available in No Escalator mode');
+                }
+            } else {
+                // Normal escalator mode
+                datasets = [
+                    {
+                        label: `Escalator Option (${escalatorRate}%)`,
+                        data: escalatorPayments,
+                        borderColor: '#1e40af',
+                        backgroundColor: currentChartType === 'bar' ? '#1e40af' : 'rgba(30, 64, 175, 0.1)',
+                        borderWidth: 2,
+                        fill: currentChartType === 'line'
+                    }
+                ];
+                
+                // Only add Fixed Price Option if No Interest is available
+                if (noInterestAvailable) {
+                    datasets.push({
+                        label: 'Fixed Price Option',
+                        data: fixedPayments,
+                        borderColor: '#60a5fa',
+                        backgroundColor: currentChartType === 'bar' ? '#60a5fa' : 'rgba(96, 165, 250, 0.1)',
+                        borderWidth: 2,
+                        fill: currentChartType === 'line'
+                    });
+                    console.log('Using normal mode - dual datasets (No Interest available)');
+                } else {
+                    console.log('Using normal mode - single dataset (No Interest not available)');
+                }
+            }
+
+            // Create new chart
+            paymentChart = new Chart(ctx, {
+                type: currentChartType,
+                data: {
+                    labels: years,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Monthly Payment Comparison Over 25 Years'
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Monthly Payment ($)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: currentChartType === 'line' ? 3 : 0
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryDisplays(escalatorPayments, fixedPayments) {
+            const escalatorRate = document.getElementById('escalatorRate').value;
+            const noInterestAvailable = document.getElementById('noInterestToggle').checked;
+            
+            // Handle "No Escalator" mode - hide escalator summary
+            const escalatorSummary = document.querySelector('.escalator-summary');
+            const fixedSummary = document.querySelector('.no-interest-summary');
+            
+            if (escalatorRate === 'none') {
+                // Hide escalator summary in "No Escalator" mode
+                if (escalatorSummary) escalatorSummary.style.display = 'none';
+            } else {
+                // Show escalator summary and update with current rate
+                if (escalatorSummary) escalatorSummary.style.display = 'block';
+                
+                const escalatorTitle = document.getElementById('escalatorTitle');
+                const escalatorNote = document.getElementById('escalatorNote');
+                
+                if (escalatorTitle) escalatorTitle.textContent = `Escalator Option (${escalatorRate}%)`;
+                if (escalatorNote) escalatorNote.textContent = `Payments increase by ${escalatorRate}% annually`;
+            }
+            
+            // Handle Fixed Price summary visibility based on No Interest availability
+            if (fixedSummary) {
+                fixedSummary.style.display = noInterestAvailable ? 'block' : 'none';
+            }
+            
+            // Calculate totals
+            const escalatorTotalCost = escalatorPayments.reduce((sum, payment) => sum + payment, 0) * 12;
+            const fixedTotalCost = fixedPayments[0] * 12 * 25;
+            
+            // Update escalator summary (only if not in "No Escalator" mode)
+            if (escalatorRate !== 'none') {
+                const escalatorStart = document.getElementById('escalatorStart');
+                const escalatorEnd = document.getElementById('escalatorEnd');
+                const escalatorTotal = document.getElementById('escalatorTotal');
+                const escalatorSavings = document.getElementById('escalatorSavings');
+                
+                if (escalatorStart) escalatorStart.textContent = `$${escalatorPayments[0].toFixed(0)}/month`;
+                if (escalatorEnd) escalatorEnd.textContent = `$${escalatorPayments[24].toFixed(0)}/month`;
+                if (escalatorTotal) escalatorTotal.textContent = `$${escalatorTotalCost.toLocaleString()}`;
+            }
+            
+            // Fixed summary (only shown if No Interest is available)
+            if (noInterestAvailable) {
+                const fixedPayment = document.getElementById('fixedPayment');
+                const fixedEnd = document.getElementById('fixedEnd');
+                const fixedTotalEl = document.getElementById('fixedTotal');
+                const fixedSavings = document.getElementById('fixedSavings');
+                
+                if (fixedPayment) fixedPayment.textContent = `$${fixedPayments[0].toFixed(0)}/month`;
+                if (fixedEnd) fixedEnd.textContent = `$${fixedPayments[0].toFixed(0)}/month`;
+                if (fixedTotalEl) fixedTotalEl.textContent = `$${fixedTotalCost.toLocaleString()}`;
+            }
+            
+            // Check if competitor is enabled and calculate savings
+            const showCompetitor = document.getElementById('showCompetitor');
+            const competitorSummary = document.querySelector('.competitor-summary');
+            
+            if (showCompetitor && showCompetitor.checked && window.competitorData) {
+                // Show competitor summary
+                if (competitorSummary) competitorSummary.style.display = 'block';
+                
+                // Calculate competitor payments
+                const years = Array.from({length: 25}, (_, i) => i + 1);
+                const competitorPayments = years.map(year => {
+                    return window.competitorData.price * Math.pow(1 + window.competitorData.escalator / 100, year - 1);
+                });
+                const competitorTotalCost = competitorPayments.reduce((sum, payment) => sum + payment, 0) * 12;
+                
+                // Update competitor summary
+                const competitorTitle = document.getElementById('competitorTitle');
+                const competitorStart = document.getElementById('competitorStart');
+                const competitorEnd = document.getElementById('competitorEnd');
+                const competitorTotal = document.getElementById('competitorTotal');
+                const competitorNote = document.getElementById('competitorNote');
+                
+                if (competitorTitle) competitorTitle.textContent = `Competitor (${window.competitorData.escalator}%)`;
+                if (competitorStart) competitorStart.textContent = `$${competitorPayments[0].toFixed(0)}/month`;
+                if (competitorEnd) competitorEnd.textContent = `$${competitorPayments[24].toFixed(0)}/month`;
+                if (competitorTotal) competitorTotal.textContent = `$${competitorTotalCost.toLocaleString()}`;
+                if (competitorNote) competitorNote.textContent = `Payments increase by ${window.competitorData.escalator}% annually`;
+                
+                // Calculate and show savings
+                if (escalatorRate !== 'none') {
+                    const escalatorSavings = document.getElementById('escalatorSavings');
+                    const escalatorSavingsAmount = competitorTotalCost - escalatorTotalCost;
+                    
+                    if (escalatorSavings) {
+                        escalatorSavings.textContent = escalatorSavingsAmount > 0 ? 
+                            `$${escalatorSavingsAmount.toLocaleString()}` : 
+                            `-$${Math.abs(escalatorSavingsAmount).toLocaleString()}`;
+                        escalatorSavings.style.color = escalatorSavingsAmount > 0 ? '#059669' : '#dc2626';
+                    }
+                }
+                
+                // Only calculate fixed price savings if No Interest is available
+                if (noInterestAvailable) {
+                    const fixedSavingsAmount = competitorTotalCost - fixedTotalCost;
+                    const fixedSavings = document.getElementById('fixedSavings');
+                    if (fixedSavings) {
+                        fixedSavings.textContent = fixedSavingsAmount > 0 ? 
+                            `$${fixedSavingsAmount.toLocaleString()}` : 
+                            `-$${Math.abs(fixedSavingsAmount).toLocaleString()}`;
+                        fixedSavings.style.color = fixedSavingsAmount > 0 ? '#059669' : '#dc2626';
+                    }
+                }
+                
+            } else {
+                // Hide competitor summary and savings when not enabled
+                if (competitorSummary) competitorSummary.style.display = 'none';
+                
+                if (escalatorRate !== 'none') {
+                    const escalatorSavings = document.getElementById('escalatorSavings');
+                    if (escalatorSavings) escalatorSavings.textContent = 'N/A';
+                }
+                
+                // Only update fixed savings if No Interest is available
+                if (noInterestAvailable) {
+                    const fixedSavings = document.getElementById('fixedSavings');
+                    if (fixedSavings) fixedSavings.textContent = 'N/A';
+                }
+            }
+        }
+
+        function switchChartType(type) {
+            currentChartType = type;
+            
+            // Update button states
+            document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(type + 'Btn').classList.add('active');
+            
+            // Update chart
+            updatePaymentChart();
+            
+            // Re-add competitor data if it should be visible
+            const showCompetitorCheckbox = document.getElementById('showCompetitor');
+            if (showCompetitorCheckbox && showCompetitorCheckbox.checked) {
+                updateCompetitorCharts();
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            // Remove existing notification if any
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            // Style the notification
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 12px 24px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                border-radius: 6px;
+                font-size: 14px;
+                z-index: 10000;
+                animation: slideUp 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            `;
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideUp {
+                    from {
+                        transform: translateX(-50%) translateY(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(-50%) translateY(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Add to document
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideUp 0.3s ease reverse';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Auto-save functionality (every 30 seconds)
+        setInterval(() => {
+            const hasChanges = checkForChanges();
+            if (hasChanges) {
+                saveData();
+                console.log('Auto-guardado ejecutado');
+            }
+        }, 30000);
+
+        // Check if there are unsaved changes
+        function checkForChanges() {
+            const editables = document.querySelectorAll('[contenteditable="true"]');
+            let hasChanges = false;
+            
+            editables.forEach((elem, index) => {
+                if (elem.innerHTML !== originalContent[`elem_${index}`]) {
+                    hasChanges = true;
+                }
+            });
+            
+            return hasChanges;
+        }
+
+        // Warn before leaving if there are unsaved changes
+        window.addEventListener('beforeunload', function(e) {
+            if (checkForChanges()) {
+                e.preventDefault();
+                e.returnValue = '¿Estás seguro de que quieres salir? Los cambios no guardados se perderán.';
+                return e.returnValue;
+            }
+        });
+    </script>
+</body>
+</html>
