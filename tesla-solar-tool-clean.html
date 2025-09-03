@@ -1828,12 +1828,6 @@
     <div class="control-panel">
         <h3>Customize Presentation</h3>
         
-        <!-- Client Name -->
-        <div class="field-group">
-            <label>Client Name:</label>
-            <input type="text" id="clientNameInput" value="Valued Customer" placeholder="Full name">
-        </div>
-        
         <!-- Competitor Selection -->
         <div class="field-group">
             <label>Select Competitor:</label>
@@ -2698,7 +2692,6 @@
         // Existing functions continue below...
         // Data storage
         let presentationData = {
-            clientName: 'Valued Customer',
             competitorType: 'other', // 'flex' or 'other'
             // Flex Program data
             sunrunBaseProduction: 13469,
@@ -4350,7 +4343,6 @@
         // Update Presentation function - triggered by panel button
         function updatePresentation() {
             // Update data from panel inputs
-            presentationData.clientName = document.getElementById('clientNameInput').value;
             
             const competitorType = document.getElementById('competitorTypeSelect').value;
             presentationData.competitorType = competitorType;
