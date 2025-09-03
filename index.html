@@ -818,8 +818,37 @@
             document.body.style.overflow = '';
         }
 
+        // Store original content and restore on page load
+        const toolLinks = document.querySelectorAll('.tool-link');
+        const originalContent = new Map();
+        
+        // Store original content
+        toolLinks.forEach(link => {
+            originalContent.set(link, link.innerHTML);
+        });
+        
+        // Restore original content on page load/visibility change
+        function restoreOriginalContent() {
+            toolLinks.forEach(link => {
+                if (originalContent.has(link)) {
+                    link.innerHTML = originalContent.get(link);
+                    link.style.pointerEvents = '';
+                }
+            });
+        }
+        
+        // Restore content when page becomes visible again
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                restoreOriginalContent();
+            }
+        });
+        
+        // Restore content when page loads/reloads
+        window.addEventListener('pageshow', restoreOriginalContent);
+        
         // Close sidebar when clicking on tool links
-        document.querySelectorAll('.tool-link').forEach(link => {
+        toolLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 // Add loading effect
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Loading...';
