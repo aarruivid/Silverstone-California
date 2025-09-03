@@ -1838,8 +1838,8 @@
         <div class="field-group">
             <label>Select Competitor:</label>
             <select id="competitorTypeSelect" onchange="updateCompetitorType()">
+                <option value="other" selected>Another Competitor</option>
                 <option value="flex">Flex Program</option>
-                <option value="other">Another Competitor</option>
             </select>
         </div>
         
@@ -2699,7 +2699,7 @@
         // Data storage
         let presentationData = {
             clientName: 'Valued Customer',
-            competitorType: 'flex', // 'flex' or 'other'
+            competitorType: 'other', // 'flex' or 'other'
             // Flex Program data
             sunrunBaseProduction: 13469,
             sunrunFlexProduction: 19000,
@@ -2748,7 +2748,7 @@
             }
             
             // Update competitor pricing based on type
-            const competitorType = presentationData.competitorType || 'flex';
+            const competitorType = presentationData.competitorType || 'other';
             if (competitorType === 'flex') {
                 // Update Flex Program prices (if elements exist)
                 const basePriceElement = document.getElementById('sunrunBasePriceDisplay');
@@ -3594,7 +3594,7 @@
         // Update recommendation
         function updateRecommendation() {
             const costs = calculateCosts();
-            const competitorType = presentationData.competitorType || 'flex';
+            const competitorType = presentationData.competitorType || 'other';
             
             // Calculate 15-year costs
             const costs15Years = {
@@ -3683,7 +3683,7 @@
         function updateComparisonTable() {
             try {
                 console.log('updateComparisonTable starting...');
-                const competitorType = presentationData.competitorType || 'flex';
+                const competitorType = presentationData.competitorType || 'other';
             
             // Get current values from inputs
             const currentFlexPrice = parseFloat(document.getElementById('sunrunFlexPriceInput').value) || presentationData.sunrunFlexPrice || 248.96;
