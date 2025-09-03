@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Solar Comparison Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #1a1a1a;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* Tesla-style container */
+        .main-container {
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+        }
+        .slide-container {
+            width: 100%;
+            max-width: none;
+            min-height: auto;
+            margin: 0 0 80px 0;
+            background: #ffffff;
+            border-radius: 0;
+            padding: 80px 0;
+            border: none;
+            box-shadow: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Alternating background colors like Tesla */
+        .slide:nth-child(even) .slide-container {
+            background: #f8f9fa;
+        }
+
+        .slide-container::before {
+            display: none;
+        }
+
+        .slide-container:hover {
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Tesla-style section styling */
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        /* Tesla-style Control Panel - Top Header */
+        .control-panel {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #e5e7eb;
+            padding: 24px 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-panel-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .control-panel h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 32px;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .input-group {
+            margin-bottom: 0;
+            position: relative;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            background: #ffffff;
+            color: #1a1a1a;
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .input-group input:hover, .input-group select:hover {
+            border-color: #9ca3af;
+        }
+
+        /* Tesla-style content area */
+        .content-area {
+            background: #ffffff;
+            min-height: 100vh;
+        }
+
+        .slides-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 10px 25px -5px rgba(59, 130, 246, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.9),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 20px 35px -5px rgba(59, 130, 246, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* Modern Table Styles */
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 
+                0 10px 25px -5px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(226, 232, 240, 0.8);
+        }
+
+        .modern-table thead tr {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+        }
+
+        .modern-table th {
+            padding: 20px 24px;
+            text-align: left;
+            font-weight: 700;
+            color: white;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: none;
+        }
+
+        .modern-table th:first-child {
+            border-radius: 16px 0 0 0;
+        }
+
+        .modern-table th:last-child {
+            border-radius: 0 16px 0 0;
+        }
+
+        .modern-table td {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .modern-table tbody tr:hover {
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            transform: scale(1.01);
+        }
+
+        .modern-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .modern-table tbody tr:last-child td:first-child {
+            border-radius: 0 0 0 16px;
+        }
+
+        .modern-table tbody tr:last-child td:last-child {
+            border-radius: 0 0 16px 0;
+        }
+
+        /* Modern Chart Container */
+        .chart-container {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 20px;
+            padding: 32px;
+            margin: 32px 0;
+            box-shadow: 
+                0 10px 25px -5px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(226, 232, 240, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .chart-container canvas {
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Tesla-style Typography */
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.05em;
+            margin-bottom: 2rem;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        h2, h3 {
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Icon Improvements */
+        .fas {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Badge Styles */
+        .modern-badge {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+            display: inline-block;
+        }
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+        .comparison-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-left: 4px solid #0a2559;
+        }
+        /* Hidden slide navigation - Tesla style uses scroll */
+        .slide-nav {
+            display: none;
+        }
+        .slide {
+            display: block;
+            opacity: 1;
+            transform: none;
+            transition: none;
+        }
+        .slide.active {
+            display: block;
+            opacity: 1;
+            transform: none;
+            animation: none;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            padding: 32px;
+            margin: 24px 0;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 
+                0 10px 25px -5px rgba(0, 0, 0, 0.04),
+                0 0 0 1px rgba(255, 255, 255, 0.9),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+            border-radius: 0 20px 20px 0;
+        }
+
+        .highlight-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 20px 35px -5px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 1),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+        }
+        
+        .comparison-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            box-shadow: 
+                0 10px 25px -5px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(255, 255, 255, 0.9);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 1);
+        }
+        .savings-badge {
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 5px;
+        }
+        .warning-badge {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Tesla-style Control Panel - Top -->
+        <div class="control-panel">
+            <div class="control-panel-inner">
+                <h3>Solar Comparison Tool</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="clientName">Client Name</label>
+                        <input type="text" id="clientName" value="John & Jane Smith">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="sunrunProduction">Sunrun System Production (kWh/year)</label>
+                        <input type="number" id="sunrunProduction" value="13472">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="sunrunBasePrice">Sunrun Base Price ($/month)</label>
+                        <input type="number" id="sunrunBasePrice" value="215.14" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="sunrunFlexPrice">Sunrun Flex Price ($/month)</label>
+                        <input type="number" id="sunrunFlexPrice" value="248.96" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ourProduction">Our System Production (kWh/year)</label>
+                        <input type="number" id="ourProduction" value="12106">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ourEscalator">Our Escalator Rate</label>
+                        <select id="ourEscalator">
+                            <option value="0">0% (Fixed Payment)</option>
+                            <option value="2.99">2.99% Escalator</option>
+                            <option value="3.5" selected>3.5% Escalator</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ourPrice">Our Escalated Price ($/month)</label>
+                        <input type="number" id="ourPrice" value="195.13" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ourFixedPrice">Our Fixed Price (0% - $/month)</label>
+                        <input type="number" id="ourFixedPrice" value="280.19" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="slides-container">
+                <!-- Slide 1: Welcome -->
+                <div class="slide active">
+                    <h2>Welcome to Your Solar Journey</h2>
+                    <p>Compare Sunrun and our solar solutions to find your perfect energy solution.</p>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>System Comparison</h3>
+                            <p>Professional analysis of solar options</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Cost Analysis</h3>
+                            <p>25-year financial projections</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Environmental Impact</h3>
+                            <p>Your contribution to clean energy</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2: System Comparison -->
+                <div class="slide active">
+                    <h2>System Comparison</h2>
+                    <div class="comparison-grid">
+                        <div class="comparison-card sunrun">
+                            <h3>Sunrun Solar</h3>
+                            <div class="production-display">
+                                <span class="production-value" id="sunrunProductionDisplay">13,472</span>
+                                <span class="production-unit">kWh/year</span>
+                            </div>
+                            <div class="pricing">
+                                <div class="price-option">
+                                    <span class="price-label">Base Price</span>
+                                    <span class="price-value">$<span id="sunrunBasePriceDisplay">215.14</span>/month</span>
+                                </div>
+                                <div class="price-option">
+                                    <span class="price-label">Flex Price</span>
+                                    <span class="price-value">$<span id="sunrunFlexPriceDisplay">248.96</span>/month</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card our-system">
+                            <h3>Our Solar Solution</h3>
+                            <div class="production-display">
+                                <span class="production-value" id="ourProductionDisplay">12,106</span>
+                                <span class="production-unit">kWh/year</span>
+                            </div>
+                            <div class="pricing">
+                                <div class="price-option">
+                                    <span class="price-label">Escalated (<span id="ourEscalatorDisplay">3.5%</span>)</span>
+                                    <span class="price-value">$<span id="ourPriceDisplay">195.13</span>/month</span>
+                                </div>
+                                <div class="price-option">
+                                    <span class="price-label">Fixed (0%)</span>
+                                    <span class="price-value">$<span id="ourFixedPriceDisplay">280.19</span>/month</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3: 25-Year Cost Analysis -->
+                <div class="slide active">
+                    <h2>25-Year Cost Analysis</h2>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                    <div class="cost-summary" id="costSummary">
+                        <!-- Cost summary will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Slide 4: Monthly Payment Comparison -->
+                <div class="slide active">
+                    <h2>Monthly Payment Comparison</h2>
+                    <div class="chart-container">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                    <div class="payment-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Sunrun Base</th>
+                                    <th>Sunrun Flex</th>
+                                    <th>Our Escalated</th>
+                                    <th>Our Fixed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentTableBody">
+                                <!-- Payment data will be generated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Slide 5: Your Savings -->
+                <div class="slide active">
+                    <h2>Your Potential Savings</h2>
+                    <div class="savings-highlight" id="savingsHighlight">
+                        <!-- Savings data will be generated by JavaScript -->
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="savingsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Slide 6: Environmental Impact -->
+                <div class="slide active">
+                    <h2>Environmental Impact</h2>
+                    <div class="environmental-stats" id="environmentalStats">
+                        <!-- Environmental data will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Slide 7: Recommendation -->
+                <div class="slide active">
+                    <h2>Our Recommendation</h2>
+                    <div class="recommendation-content" id="recommendationContent">
+                        <!-- Recommendation will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                <!-- Client Information -->
+                <div class="input-group">
+                    <label for="clientName">Client Name</label>
+                    <input type="text" id="clientName" placeholder="Enter client name" value="John & Jane Smith">
+                </div>
+                
+                <!-- Sunrun System Offered -->
+                <div class="input-group">
+                    <label for="sunrunProduction">Sunrun System Production (kWh/year)</label>
+                    <input type="number" id="sunrunProduction" value="13469">
+                </div>
+                
+                <div class="input-group">
+                    <label for="sunrunBasePrice">Sunrun Base Price ($/month)</label>
+                    <input type="number" id="sunrunBasePrice" step="0.01" value="215.14">
+                </div>
+                
+                <div class="input-group">
+                    <label for="sunrunFlexPrice">Sunrun Flex Price ($/month)</label>
+                    <input type="number" id="sunrunFlexPrice" step="0.01" value="248.96">
+                </div>
+                
+                <!-- Our System Offered -->
+                <div class="input-group">
+                    <label for="ourProduction">Our System Production (kWh/year)</label>
+                    <input type="number" id="ourProduction" value="12106">
+                </div>
+                
+                <div class="input-group">
+                    <label for="ourEscalator">Our Escalator Option</label>
+                    <select id="ourEscalator">
+                        <option value="0">0% (Fixed Payment)</option>
+                        <option value="2.99">2.99% Escalator</option>
+                        <option value="3.5" selected>3.5% Escalator</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="ourPrice">Our Price ($/month)</label>
+                    <input type="number" id="ourPrice" step="0.01" value="195.13">
+                </div>
+                
+                <div class="input-group">
+                    <label for="ourFixedPrice">Our Fixed Price (0% - $/month)</label>
+                    <input type="number" id="ourFixedPrice" step="0.01" value="280.19">
+                </div>
+            </div>
+            
+            <div class="text-center mt-6">
+                <button class="btn-primary" onclick="updateAllSlides()">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Update Presentation
+                </button>
+                <button class="btn-primary ml-4" onclick="generatePDF()">
+                    <i class="fas fa-file-pdf mr-2"></i>
+
+
+    <!-- Slides Container -->
+    <div class="container mx-auto">
+        
+        <!-- Slide 1: Cover -->
+        <div class="slide active" id="slide-0">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div class="text-center">
+                    <div class="bg-blue-900 text-white p-4 rounded-lg mb-8">
+                        <h2 class="text-2xl font-semibold">Powered by EnFin and Qcells</h2>
+                    </div>
+                    
+                    <h1 class="text-5xl font-bold text-blue-900 mb-8">
+                        Sunrun Flex vs Axia by Qcells:<br>
+                        <span class="text-3xl">Take Control of Your Power</span>
+                    </h1>
+                    
+                    <div class="text-2xl text-gray-700 mb-8">
+                        Personalized Analysis for <span class="font-bold text-blue-900" id="cover-client-name">John & Jane Smith</span>
+                    </div>
+                    
+                    <div class="flex justify-center">
+                        <img src="https://page.gensparksite.com/get_upload_url/e4a7873b8c68d78a63c23745494f7e08ecfe0d7805d801e483c7873df7af9573/default/e76d6ccb-c9da-4808-9f1a-c36b2827f9a2" 
+                             alt="Solar Home" class="max-w-2xl rounded-lg shadow-lg">
+                    </div>
+                    
+                    <div class="text-right mt-8">
+                        <span class="text-gray-600">Independent Authorized Dealer</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Problems with Sunrun Flex -->
+        <div class="slide" id="slide-1">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">The Problem with Sunrun Flex</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="comparison-card">
+                            <div class="flex items-start">
+                                <div class="bg-blue-900 text-white w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-money-bill"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-blue-900 mb-2">Limited Access to Your Production</h3>
+                                    <p class="text-gray-700">Your minimum payment only covers <span class="font-bold" id="baseline-percentage">71.3%</span> of what the system produces.</p>
+                                    <p class="text-gray-700">Extra kWh are charged separately at the Flex Rate.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card">
+                            <div class="flex items-start">
+                                <div class="bg-blue-900 text-white w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-solar-panel"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-blue-900 mb-2">Oversized System</h3>
+                                    <p class="text-gray-700">Produces <span class="font-bold" id="oversized-percentage">141.8%</span> more than your current needs.</p>
+                                    <p class="text-gray-700">That extra is not free - <strong>more panels, more cost</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="comparison-card">
+                            <div class="flex items-start">
+                                <div class="bg-blue-900 text-white w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-plug"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-blue-900 mb-2">Flex Rate Charges</h3>
+                                    <p class="text-gray-700">Using 100% of your system's production will significantly increase your monthly bill.</p>
+                                    <p class="text-gray-700">Up to <span class="font-bold text-red-600" id="max-payment-display">$248.96/month</span> vs <span class="font-bold" id="min-payment-display">$215.14/month</span> minimum.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card">
+                            <div class="flex items-start">
+                                <div class="bg-blue-900 text-white w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-file-contract"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-blue-900 mb-2">25-Year Lock-in</h3>
+                                    <p class="text-gray-700">Automatically adds 5 years unless you cancel in time.</p>
+                                    <p class="text-gray-700">If utility rules change, they choose the replacement program.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-8">
+                    <div class="bg-red-100 border-l-4 border-red-500 p-4 rounded">
+                        <p class="text-xl font-semibold text-red-700">More conditions, less control.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Access Comparison -->
+        <div class="slide" id="slide-2">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">Partial vs Full Access</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="highlight-box">
+                        <h3 class="text-2xl font-semibold text-red-600 mb-4">Sunrun Flex</h3>
+                        <p class="text-lg mb-4">You only have full access to your <strong>baseline</strong> included in the minimum payment.</p>
+                        <div class="border-l-4 border-red-500 pl-4">
+                            <p class="text-lg mb-1"><strong><span id="sunrun-baseline-display">9,605</span> kWh/year</strong> - baseline included</p>
+                            <p class="text-lg"><strong>+<span id="sunrun-extra-display">3,864</span> kWh/year</strong> - charged extra with Flex rate</p>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-box">
+                        <h3 class="text-2xl font-semibold text-blue-800 mb-4">Axia by Qcells</h3>
+                        <p class="text-lg mb-4">You have <strong>100% access</strong> to all production from your system from day one.</p>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <p class="text-lg mb-1"><strong>Total production</strong> - included in your monthly payment</p>
+                            <p class="text-lg"><strong>No limits</strong> - no additional charges for using your energy</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="accessChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Oversized System -->
+        <div class="slide" id="slide-3">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">Oversized System: More Panels = More Savings?</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-red-600 mb-4">Oversized System</h3>
+                        <p class="text-lg mb-4">Sunrun Flex installs <strong>more panels</strong> than you need for your current consumption.</p>
+                        
+                        <div class="highlight-box mb-6">
+                            <p class="text-lg font-semibold mb-2">Why do they do this?</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center text-red-600">
+                                    <i class="fas fa-money-bill-wave mr-3"></i>
+                                    <span>To charge you if you use that "extra" energy</span>
+                                </div>
+                                <div class="flex items-center text-red-600">
+                                    <i class="fas fa-lock mr-3"></i>
+                                    <span>You only have the right to use your "baseline"</span>
+                                </div>
+                                <div class="flex items-center text-red-600">
+                                    <i class="fas fa-chart-line mr-3"></i>
+                                    <span>Your minimum payment increases each year (escalator)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <p class="text-lg font-semibold text-blue-800">With Axia by Qcells:</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center text-blue-800">
+                                    <i class="fas fa-check-circle mr-3"></i>
+                                    <span>System sized exactly to your needs</span>
+                                </div>
+                                <div class="flex items-center text-blue-800">
+                                    <i class="fas fa-check-circle mr-3"></i>
+                                    <span>100% access to all your production with no extra charges</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-center mb-6">
+                            <span class="warning-badge text-2xl" id="oversized-badge">OVERSIZED 141%</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="oversizedChart"></canvas>
+                        </div>
+                        <div class="text-center mt-4">
+                            <p class="text-lg">Although you produce <strong><span id="total-production">13,469</span> kWh</strong>, only <strong><span id="baseline-included">9,605</span> kWh</strong> are included in your minimum payment.</p>
+                            <p class="text-lg font-semibold text-red-600 mt-2">The excess of <strong><span id="excess-production">3,864</span> kWh</strong> will cost you extra if you use it</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-100 p-6 rounded-lg mt-6">
+                    <p class="text-xl font-semibold text-center">More production doesn't mean savings if you have to pay for access to your own energy</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Payment Growth -->
+        <div class="slide" id="slide-4">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">Payment Growth Over Time</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                    <div>
+                        <p class="text-lg mb-3">With <span class="text-red-600 font-semibold">Sunrun Flex</span>, monthly payments constantly increase with a <strong>3.5% annual escalator</strong>, for both minimum and maximum payments.</p>
+                        <p class="text-lg">The data shows a significant increase in cost over the years, with a growing gap between payments.</p>
+                    </div>
+                    <div>
+                        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-red-500">
+                            <p class="font-semibold mb-2">Impact of the 3.5% escalator over 10 years:</p>
+                            <ul class="list-disc pl-5">
+                                <li class="mb-1">Minimum payment increases by <strong>35%</strong></li>
+                                <li class="mb-1">Maximum payment increases by <strong>32%</strong></li>
+                                <li>Cumulative increase of <strong id="cumulative-increase">$9,726</strong> over 10 years vs. initial payment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="paymentChart"></canvas>
+                </div>
+                
+                <div class="mt-6">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Monthly Minimum Payment</th>
+                                <th>Monthly Maximum Payment</th>
+                                <th>Increase vs Year 1</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payment-table-body">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Value Proposition -->
+        <div class="slide" id="slide-5">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">Why Choose Axia by Qcells?</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i class="fas fa-unlock text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Complete Access</h3>
+                                <p class="text-gray-700">You have <strong>100% access</strong> to all production from your system from day one.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-cog text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Flexible Options</h3>
+                                <p class="text-gray-700">Choose between fixed payment (0%) or escalator options (2.99% or 3.5%).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <i class="fas fa-ruler text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Right-Sized System</h3>
+                                <p class="text-gray-700">Custom designed for your actual energy needs - no oversizing.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-shield-alt text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">No Hidden Costs</h3>
+                                <p class="text-gray-700">All production included in your monthly payment - no surprises.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <i class="fas fa-chart-line text-red-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Predictable Savings</h3>
+                                <p class="text-gray-700">Fixed payment option protects you from escalating costs.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-teal-100 p-3 rounded-full">
+                                <i class="fas fa-handshake text-teal-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Trusted Partner</h3>
+                                <p class="text-gray-700">Backed by Qcells, a global leader in solar technology.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Comparison Table -->
+        <div class="slide" id="slide-6">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">Comparison: Sunrun Flex vs Axia by Qcells</h1>
+                
+                <div class="overflow-x-auto">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th class="bg-gradient-to-r from-gray-600 to-gray-700">Sunrun Flex</th>
+                                <th class="bg-gradient-to-r from-blue-600 to-blue-700">Axia by Qcells</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-semibold">Energy Access</td>
+                                <td class="bg-red-50">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-times text-red-500 mr-2"></i>
+                                        <span>Limited baseline access</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600"><span id="comparison-baseline">9,605</span> kWh/year included, extra charged separately</div>
+                                </td>
+                                <td class="bg-blue-50">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>100% Complete Access</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">All production included in your monthly payment</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Escalator</td>
+                                <td class="bg-red-50">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-times text-red-500 mr-2"></i>
+                                        <span>Mandatory 3.5% annual</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">No fixed payment option</div>
+                                </td>
+                                <td class="bg-blue-50">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Flexible options</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Optional 3.5% escalator or fixed payment (0%)</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">System Sizing</td>
+                                <td class="bg-red-50">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-times text-red-500 mr-2"></i>
+                                        <span>Oversized</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Systems <span id="comparison-oversized">140%</span> larger than your actual consumption</div>
+                                </td>
+                                <td class="bg-blue-50">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Exact design</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Customized to your actual needs</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Monthly Payment Range</td>
+                                <td class="bg-red-50">
+                                    <div class="text-lg font-semibold">$<span id="comparison-sunrun-min">215.14</span> - $<span id="comparison-sunrun-max">248.96</span></div>
+                                    <div class="text-sm text-gray-600">Always increases 3.5% annually</div>
+                                </td>
+                                <td class="bg-blue-50">
+                                    <div class="text-lg font-semibold">$<span id="comparison-our-price">195.13</span> - $<span id="comparison-axia-fixed">280.19</span></div>
+                                    <div class="text-sm text-gray-600">Choose <span id="escalator-display">3.5%</span> escalator or fixed payment (0%)</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Pricing -->
+        <div class="slide" id="slide-7">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">Sample Design & Pricing for <span id="pricing-client-name">John & Jane Smith</span></h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Features</th>
+                                    <th class="bg-gradient-to-r from-blue-500 to-blue-600">3.5% Escalator</th>
+                                    <th class="bg-gradient-to-r from-green-500 to-green-600">No Interest!</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border p-4 font-semibold">Price</td>
+                                    <td class="border p-4 text-center bg-blue-50">
+                                        <div class="text-2xl font-bold text-blue-900">$<span id="pricing-escalator">195.13</span>/month</div>
+                                    </td>
+                                    <td class="border p-4 text-center bg-green-50">
+                                        <div class="text-2xl font-bold text-green-900">$<span id="pricing-fixed">280.19</span>/month</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-4 font-semibold">Annual Escalator</td>
+                                    <td class="border p-4 text-center bg-blue-50"><span id="pricing-escalator-rate">3.5</span>%</td>
+                                    <td class="border p-4 text-center bg-green-50">0.0%</td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-4 font-semibold">System Size (kW)</td>
+                                    <td class="border p-4 text-center bg-blue-50"><span id="pricing-system-size">9.89</span></td>
+                                    <td class="border p-4 text-center bg-green-50"><span id="pricing-system-size-2">9.89</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-4 font-semibold">Production (kWh)</td>
+                                    <td class="border p-4 text-center bg-blue-50"><span id="pricing-production">12,106</span></td>
+                                    <td class="border p-4 text-center bg-green-50"><span id="pricing-production-2">12,106</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-4 font-semibold">Energy Access</td>
+                                    <td class="border p-4 text-center bg-blue-50">
+                                        <div class="flex items-center justify-center">
+                                            <i class="fas fa-check text-green-600 mr-2"></i>
+                                            <span>100% Full Access</span>
+                                        </div>
+                                    </td>
+                                    <td class="border p-4 text-center bg-green-50">
+                                        <div class="flex items-center justify-center">
+                                            <i class="fas fa-check text-green-600 mr-2"></i>
+                                            <span>100% Full Access</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-4 font-semibold">Panels (W)</td>
+                                    <td class="border p-4 text-center bg-blue-50"><span id="pricing-panel-wattage">430</span></td>
+                                    <td class="border p-4 text-center bg-green-50"><span id="pricing-panel-wattage-2">430</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="border p-4 font-semibold">Promotion</td>
+                                    <td class="border p-4 text-center bg-blue-50">
+                                        <div class="savings-badge">6 months no payment</div>
+                                    </td>
+                                    <td class="border p-4 text-center bg-green-50">
+                                        <div class="savings-badge">6 months no payment</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-home text-6xl text-blue-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-blue-900 mb-4">
+                                <i class="fas fa-solar-panel mr-2"></i>
+                                Customize your solar system
+                            </h3>
+                            <p class="mb-4 text-gray-700">Contact us and we'll connect you with an expert to design a system tailored to your needs.</p>
+                            <div class="text-2xl font-bold text-blue-900">
+                                <i class="fas fa-phone-alt mr-2"></i>
+                                <span>661-237-9543</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Financial Impact -->
+        <div class="slide" id="slide-8">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold text-blue-900 mb-8">5–10 Year Financial Impact</h1>
+                
+                <div class="overflow-x-auto">
+                    <table class="modern-table" id="financial-impact-table">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th class="bg-gradient-to-r from-gray-500 to-gray-600">Sunrun Flex</th>
+                                <th class="bg-gradient-to-r from-blue-500 to-blue-600">Axia (0% fixed)</th>
+                                <th class="bg-gradient-to-r from-green-500 to-green-600">Axia (<span id="financial-escalator-header">3.5</span>% escalator)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financial-impact-body">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <div class="bg-green-100 border-l-4 border-green-500 p-4 rounded inline-block">
+                        <p class="text-lg"><i class="fas fa-info-circle mr-2"></i>These are estimated values. We perform a personalized analysis based on your actual consumption and specific conditions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Contact -->
+        <div class="slide" id="slide-9">
+            <div class="slide-container bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div class="text-center">
+                    <h1 class="text-5xl font-bold text-blue-900 mb-8">Compare, choose with real data, and save.</h1>
+                    
+                    <p class="text-2xl text-gray-700 mb-8">
+                        Get a solar solution that gives you <span class="text-blue-900 font-bold">100% access</span> 
+                        to all the energy you produce, without fine print or hidden charges.
+                    </p>
+                    
+                    <div class="mb-8">
+                        <img src="https://page.gensparksite.com/get_upload_url/e4a7873b8c68d78a63c23745494f7e08ecfe0d7805d801e483c7873df7af9573/default/aa708982-c71c-462c-a5b5-2746ccf64dfd" 
+                             alt="Solar Installation" class="max-w-2xl mx-auto rounded-lg shadow-lg">
+                    </div>
+                    
+                    <div class="text-4xl font-bold text-blue-900 mb-8">
+                        <i class="fas fa-phone-alt mr-3"></i>
+                        <span>661-237-9543</span>
+                    </div>
+                    
+                    <div class="text-center">
+                        <p class="text-gray-600">Independent Authorized Dealer | © 2025 Axia by Qcells</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        
+        // Data storage
+        let presentationData = {
+            clientName: 'John & Jane Smith',
+            sunrunProduction: 13469,
+            sunrunBasePrice: 215.14,
+            sunrunFlexPrice: 248.96,
+            ourProduction: 12106,
+            ourEscalator: 3.5,
+            ourPrice: 195.13,
+            ourFixedPrice: 280.19
+        };
+
+        // Calculate Sunrun baseline (typically 71.3% of production)
+        function calculateSunrunBaseline() {
+            return Math.round(presentationData.sunrunProduction * 0.713);
+        }
+
+        // Calculate our escalator price based on selected escalator
+        function calculateOurEscalatorPrice(year = 1) {
+            const escalatorRate = presentationData.ourEscalator / 100;
+            return presentationData.ourPrice * Math.pow(1 + escalatorRate, year - 1);
+        }
+
+        // Calculate Sunrun price with 3.5% escalator
+        function calculateSunrunPrice(basePrice, year = 1) {
+            return basePrice * Math.pow(1.035, year - 1);
+        }
+
+        // Show specific slide
+        function showSlide(slideIndex) {
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.slide-nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected slide
+            document.getElementById(`slide-${slideIndex}`).classList.add('active');
+            document.querySelectorAll('.slide-nav button')[slideIndex].classList.add('active');
+            
+            currentSlide = slideIndex;
+        }
+
+        // Update all slides with current data
+        function updateAllSlides() {
+            // Get data from inputs
+            presentationData.clientName = document.getElementById('clientName').value;
+            presentationData.sunrunProduction = parseFloat(document.getElementById('sunrunProduction').value);
+            presentationData.sunrunBasePrice = parseFloat(document.getElementById('sunrunBasePrice').value);
+            presentationData.sunrunFlexPrice = parseFloat(document.getElementById('sunrunFlexPrice').value);
+            presentationData.ourProduction = parseFloat(document.getElementById('ourProduction').value);
+            presentationData.ourEscalator = parseFloat(document.getElementById('ourEscalator').value);
+            presentationData.ourPrice = parseFloat(document.getElementById('ourPrice').value);
+            presentationData.ourFixedPrice = parseFloat(document.getElementById('ourFixedPrice').value);
+
+            // Update all text elements
+            updateTextElements();
+            
+            // Update charts
+            updateCharts();
+            
+            // Update tables
+            updateTables();
+            
+            alert('Presentation updated successfully!');
+        }
+
+        function updateTextElements() {
+            const data = presentationData;
+            const sunrunBaseline = calculateSunrunBaseline();
+            const sunrunExtra = data.sunrunProduction - sunrunBaseline;
+            
+            // Client names
+            document.querySelectorAll('#cover-client-name, #pricing-client-name').forEach(el => {
+                if (el) el.textContent = data.clientName;
+            });
+            
+            // Sunrun data
+            const minPaymentEl = document.getElementById('min-payment-display');
+            const maxPaymentEl = document.getElementById('max-payment-display');
+            if (minPaymentEl) minPaymentEl.textContent = `$${data.sunrunBasePrice.toFixed(2)}/month`;
+            if (maxPaymentEl) maxPaymentEl.textContent = `$${data.sunrunFlexPrice.toFixed(2)}/month`;
+            
+            const sunrunBaselineEl = document.getElementById('sunrun-baseline-display');
+            const sunrunExtraEl = document.getElementById('sunrun-extra-display');
+            if (sunrunBaselineEl) sunrunBaselineEl.textContent = sunrunBaseline.toLocaleString();
+            if (sunrunExtraEl) sunrunExtraEl.textContent = sunrunExtra.toLocaleString();
+            
+            // Percentages calculations
+            const baselinePercentage = ((sunrunBaseline / data.sunrunProduction) * 100).toFixed(1);
+            const oversizedPercentage = Math.round(((data.sunrunProduction / data.ourProduction) - 1) * 100); // Shows how much MORE it produces
+            
+            const baselinePercentageEl = document.getElementById('baseline-percentage');
+            const oversizedPercentageEl = document.getElementById('oversized-percentage');
+            const oversizedBadgeEl = document.getElementById('oversized-badge');
+            
+            if (baselinePercentageEl) baselinePercentageEl.textContent = `${baselinePercentage}%`;
+            if (oversizedPercentageEl) oversizedPercentageEl.textContent = `${oversizedPercentage}%`;
+            if (oversizedBadgeEl) oversizedBadgeEl.textContent = `OVERSIZED ${oversizedPercentage}%`;
+            
+            // Update cumulative increase calculation
+            const year10BasePayment = calculateSunrunPrice(data.sunrunBasePrice, 10);
+            const cumulativeIncrease = (year10BasePayment - data.sunrunBasePrice) * 12 * 10;
+            const cumulativeIncreaseEl = document.getElementById('cumulative-increase');
+            if (cumulativeIncreaseEl) cumulativeIncreaseEl.textContent = `$${Math.round(cumulativeIncrease).toLocaleString()}`;
+            
+            // Production data
+            const totalProductionEl = document.getElementById('total-production');
+            const baselineIncludedEl = document.getElementById('baseline-included');
+            const excessProductionEl = document.getElementById('excess-production');
+            
+            if (totalProductionEl) totalProductionEl.textContent = data.sunrunProduction.toLocaleString();
+            if (baselineIncludedEl) baselineIncludedEl.textContent = sunrunBaseline.toLocaleString();
+            if (excessProductionEl) excessProductionEl.textContent = sunrunExtra.toLocaleString();
+            
+            // Our pricing
+            const pricingEscalatorEl = document.getElementById('pricing-escalator');
+            const pricingFixedEl = document.getElementById('pricing-fixed');
+            const pricingEscalatorRateEl = document.getElementById('pricing-escalator-rate');
+            const pricingProductionEls = document.querySelectorAll('#pricing-production, #pricing-production-2');
+            const pricingSystemSizeEls = document.querySelectorAll('#pricing-system-size, #pricing-system-size-2');
+            
+            if (pricingEscalatorEl) pricingEscalatorEl.textContent = data.ourPrice.toFixed(2);
+            if (pricingFixedEl) pricingFixedEl.textContent = data.ourFixedPrice.toFixed(2);
+            if (pricingEscalatorRateEl) pricingEscalatorRateEl.textContent = data.ourEscalator;
+            pricingProductionEls.forEach(el => {
+                if (el) el.textContent = data.ourProduction.toLocaleString();
+            });
+            pricingSystemSizeEls.forEach(el => {
+                if (el) el.textContent = (data.ourProduction / 1225).toFixed(2); // Assuming 1225 kWh per kW per year
+            });
+            
+            // Comparison table updates
+            const comparisonBaselineEl = document.getElementById('comparison-baseline');
+            const comparisonOversizedEl = document.getElementById('comparison-oversized');
+            const comparisonSunrunMinEl = document.getElementById('comparison-sunrun-min');
+            const comparisonSunrunMaxEl = document.getElementById('comparison-sunrun-max');
+            const comparisonOurPriceEl = document.getElementById('comparison-our-price');
+            const comparisonOurFixedEl = document.getElementById('comparison-axia-fixed');
+            const escalatorDisplayEl = document.getElementById('escalator-display');
+            const escalatorOptionHeaderEl = document.getElementById('escalator-option-header');
+            
+            if (comparisonBaselineEl) comparisonBaselineEl.textContent = sunrunBaseline.toLocaleString();
+            if (comparisonOversizedEl) comparisonOversizedEl.textContent = `${oversizedPercentage}%`;
+            if (comparisonSunrunMinEl) comparisonSunrunMinEl.textContent = data.sunrunBasePrice.toFixed(2);
+            if (comparisonSunrunMaxEl) comparisonSunrunMaxEl.textContent = data.sunrunFlexPrice.toFixed(2);
+            if (comparisonOurPriceEl) comparisonOurPriceEl.textContent = data.ourPrice.toFixed(2);
+            if (comparisonOurFixedEl) comparisonOurFixedEl.textContent = data.ourFixedPrice.toFixed(2);
+            if (escalatorDisplayEl) escalatorDisplayEl.textContent = `${data.ourEscalator}%`;
+            if (escalatorOptionHeaderEl) escalatorOptionHeaderEl.textContent = `${data.ourEscalator}%`;
+            
+            // Financial table header
+            const financialEscalatorHeaderEl = document.getElementById('financial-escalator-header');
+            if (financialEscalatorHeaderEl) financialEscalatorHeaderEl.textContent = data.ourEscalator;
+        }
+
+        function updateCharts() {
+            updateAccessChart();
+            updateOversizedChart();
+            updatePaymentChart();
+        }
+
+        function updateAccessChart() {
+            const ctx = document.getElementById('accessChart');
+            if (!ctx) return;
+            
+            const data = presentationData;
+            const sunrunBaseline = calculateSunrunBaseline();
+            const sunrunExtra = data.sunrunProduction - sunrunBaseline;
+            
+            // Destroy existing chart if it exists
+            if (window.accessChartInstance) {
+                window.accessChartInstance.destroy();
+            }
+            
+            window.accessChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sunrun Flex', 'Axia by Qcells'],
+                    datasets: [
+                        {
+                            label: 'Baseline included',
+                            data: [sunrunBaseline, 0],
+                            backgroundColor: '#1e3a8a',
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.7
+                        },
+                        {
+                            label: 'Flex (charged extra)',
+                            data: [sunrunExtra, 0],
+                            backgroundColor: '#ef4444',
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.7
+                        },
+                        {
+                            label: 'Complete access',
+                            data: [0, data.ourProduction],
+                            backgroundColor: '#16a34a',
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false }
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Annual production (kWh)'
+                            },
+                            min: 0
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+        }
+
+        function updateOversizedChart() {
+            const ctx = document.getElementById('oversizedChart');
+            if (!ctx) return;
+            
+            const data = presentationData;
+            const sunrunBaseline = calculateSunrunBaseline();
+            
+            // Destroy existing chart if it exists
+            if (window.oversizedChartInstance) {
+                window.oversizedChartInstance.destroy();
+            }
+            
+            window.oversizedChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Production', 'Included Baseline'],
+                    datasets: [{
+                        label: 'kWh per year',
+                        data: [data.sunrunProduction, sunrunBaseline],
+                        backgroundColor: ['#0a2559', '#16a34a'],
+                        borderColor: ['#0a2559', '#16a34a'],
+                        borderWidth: 1,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Kilowatt-hours (kWh)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updatePaymentChart() {
+            const ctx = document.getElementById('paymentChart');
+            if (!ctx) return;
+            
+            const data = presentationData;
+            const years = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            
+            // Calculate Sunrun payments with 3.5% escalator (always)
+            const sunrunMinPayments = years.map(year => calculateSunrunPrice(data.sunrunBasePrice, year));
+            const sunrunMaxPayments = years.map(year => calculateSunrunPrice(data.sunrunFlexPrice, year));
+            
+            // Destroy existing chart if it exists
+            if (window.paymentChartInstance) {
+                window.paymentChartInstance.destroy();
+            }
+            
+            window.paymentChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years.map(year => `Year ${year}`),
+                    datasets: [
+                        {
+                            label: 'Sunrun Base Payment',
+                            data: sunrunMinPayments,
+                            borderColor: '#dc2626',
+                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#dc2626',
+                            pointRadius: 5,
+                            tension: 0.2,
+                            fill: false
+                        },
+                        {
+                            label: 'Sunrun Flex Payment',
+                            data: sunrunMaxPayments,
+                            borderColor: '#f87171',
+                            backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#f87171',
+                            pointRadius: 5,
+                            tension: 0.2,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Monthly Payment ($)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+        }
+
+        function updateTables() {
+            updatePaymentTable();
+            updateFinancialImpactTable();
+        }
+
+        function updatePaymentTable() {
+            const data = presentationData;
+            const tbody = document.getElementById('payment-table-body');
+            if (!tbody) return;
+            
+            const years = [1, 5, 10];
+            tbody.innerHTML = '';
+            
+            years.forEach(year => {
+                const sunrunBasePayment = calculateSunrunPrice(data.sunrunBasePrice, year);
+                const sunrunFlexPayment = calculateSunrunPrice(data.sunrunFlexPrice, year);
+                const increasePercent = ((sunrunBasePayment / data.sunrunBasePrice - 1) * 100).toFixed(1);
+                
+                const row = `
+                    <tr>
+                        <td class="border p-3"><strong>Year ${year}</strong></td>
+                        <td class="border p-3">$${sunrunBasePayment.toFixed(2)}</td>
+                        <td class="border p-3">$${sunrunFlexPayment.toFixed(2)}</td>
+                        <td class="border p-3">${year === 1 ? '-' : `+${increasePercent}%`}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function updateFinancialImpactTable() {
+            const data = presentationData;
+            const tbody = document.getElementById('financial-impact-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            const years = [1, 5, 10];
+            let sunrunBaseTotal = 0;
+            let sunrunFlexTotal = 0;
+            let ourFixedTotal = 0;
+            let ourEscalatorTotal = 0;
+            
+            years.forEach(year => {
+                const sunrunBase = calculateSunrunPrice(data.sunrunBasePrice, year);
+                const sunrunFlex = calculateSunrunPrice(data.sunrunFlexPrice, year);
+                const ourFixed = data.ourFixedPrice; // Always the same
+                const ourEscalator = calculateOurEscalatorPrice(year);
+                
+                if (year === 10) {
+                    // Calculate 10-year totals
+                    for (let i = 1; i <= 10; i++) {
+                        sunrunBaseTotal += calculateSunrunPrice(data.sunrunBasePrice, i) * 12;
+                        sunrunFlexTotal += calculateSunrunPrice(data.sunrunFlexPrice, i) * 12;
+                        ourFixedTotal += data.ourFixedPrice * 12;
+                        ourEscalatorTotal += calculateOurEscalatorPrice(i) * 12;
+                    }
+                    
+                    const savingsFixedVsBase = sunrunBaseTotal - ourFixedTotal;
+                    const savingsFixedVsFlex = sunrunFlexTotal - ourFixedTotal;
+                    const savingsEscalatorVsBase = sunrunBaseTotal - ourEscalatorTotal;
+                    const savingsEscalatorVsFlex = sunrunFlexTotal - ourEscalatorTotal;
+                    
+                    const row = `
+                        <tr class="bg-gray-100 font-bold">
+                            <td class="border p-3">10-year<br>total</td>
+                            <td class="border p-3 bg-gray-50">
+                                <div>$${(sunrunBaseTotal/1000).toFixed(0)}k (base)</div>
+                                <div class="text-sm text-gray-600">Up to $${(sunrunFlexTotal/1000).toFixed(0)}k with Flex Rate</div>
+                            </td>
+                            <td class="border p-3 bg-blue-50">
+                                <div>$${(ourFixedTotal/1000).toFixed(0)}k</div>
+                                <div class="text-sm text-green-600">Savings vs. Base: $${(savingsFixedVsBase/1000).toFixed(1)}k</div>
+                                <div class="text-sm text-green-600">Savings vs. Flex: $${(savingsFixedVsFlex/1000).toFixed(1)}k</div>
+                            </td>
+                            <td class="border p-3 bg-green-50">
+                                <div>$${(ourEscalatorTotal/1000).toFixed(0)}k</div>
+                                <div class="text-sm text-green-600">Savings vs. Base: $${(savingsEscalatorVsBase/1000).toFixed(1)}k</div>
+                                <div class="text-sm text-green-600">Savings vs. Flex: $${(savingsEscalatorVsFlex/1000).toFixed(1)}k</div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                } else {
+                    const escalatorText = data.ourEscalator === 0 ? 'Fixed price' : 
+                                        data.ourEscalator === 2.99 ? '2.99% escalator' : 
+                                        '3.5% escalator';
+                    
+                    const row = `
+                        <tr>
+                            <td class="border p-3"><strong>Year ${year}</strong></td>
+                            <td class="border p-3 bg-gray-50">
+                                <div>$${sunrunBase.toFixed(2)}/month (base)</div>
+                                <div class="text-sm text-gray-600">Up to $${sunrunFlex.toFixed(2)} with Flex Rate</div>
+                            </td>
+                            <td class="border p-3 bg-blue-50">
+                                <div>$${ourFixed.toFixed(2)}/month</div>
+                                <div class="text-sm text-gray-600">${year === 1 ? 'Fixed price (0%)' : 'No changes'}</div>
+                            </td>
+                            <td class="border p-3 bg-green-50">
+                                <div>$${ourEscalator.toFixed(2)}/month</div>
+                                <div class="text-sm text-gray-600">${year === 1 ? escalatorText : 'With escalator'}</div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                }
+            });
+        }
+
+        function generatePDF() {
+            alert('PDF generation would be implemented here. This would capture all slides and create a downloadable PDF presentation.');
+        }
+
+        // Initialize the presentation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial values from inputs
+            updateAllSlides();
+            
+            // Add event listeners for real-time updates
+            const inputs = ['clientName', 'sunrunProduction', 'sunrunBasePrice', 'sunrunFlexPrice', 
+                          'ourProduction', 'ourEscalator', 'ourPrice', 'ourFixedPrice'];
+            
+            inputs.forEach(inputId => {
+                const element = document.getElementById(inputId);
+                if (element) {
+                    element.addEventListener('change', function() {
+                        // Update silently without alert
+                        presentationData.clientName = document.getElementById('clientName').value;
+                        presentationData.sunrunProduction = parseFloat(document.getElementById('sunrunProduction').value);
+                        presentationData.sunrunBasePrice = parseFloat(document.getElementById('sunrunBasePrice').value);
+                        presentationData.sunrunFlexPrice = parseFloat(document.getElementById('sunrunFlexPrice').value);
+                        presentationData.ourProduction = parseFloat(document.getElementById('ourProduction').value);
+                        presentationData.ourEscalator = parseFloat(document.getElementById('ourEscalator').value);
+                        presentationData.ourPrice = parseFloat(document.getElementById('ourPrice').value);
+                        presentationData.ourFixedPrice = parseFloat(document.getElementById('ourFixedPrice').value);
+
+                        updateTextElements();
+                        updateCharts();
+                        updateTables();
+                    });
+                }
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' && currentSlide < 9) {
+                showSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        });
+    </script>
+</body>
+</html>
