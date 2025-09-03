@@ -3423,22 +3423,14 @@
                     </div>
                 `;
             } else if (!presentationData.zeroInterestAvailable) {
-                // When 0% is not available, show vs Baseline and vs Flex comparisons with escalator
-                const costs = calculateCosts();
-                const savingsVsBaselineProgram = costs.baselineProgram[24] - costs.ourEscalated[24];
-                const savingsVsFlexProgram = costs.flexProgram[24] - costs.ourEscalated[24];
-                
+                // When 0% is not available, show only escalator plan vs competitor
                 highlight.innerHTML = `
-                    <h3 style="text-align: center; margin-bottom: 1rem; color: #16a34a;">Your 25-Year Savings</h3>
-                    <p style="text-align: center; font-size: 1.1rem; margin-bottom: 1.5rem; color: #6b7280;">With Our ${presentationData.ourEscalator}% Escalator Plan</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <h3 style="text-align: center; margin-bottom: 1rem; color: #16a34a;">Your 25-Year Savings vs Competitor</h3>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; justify-content: center;">
                         <div style="text-align: center;">
-                            <p style="font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">vs Baseline Program</p>
-                            <div class="savings-number" style="color: #16a34a;">$${savingsVsBaselineProgram.toLocaleString('en-US')}</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <p style="font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">vs Flex Program</p>
-                            <div class="savings-number" style="color: #16a34a;">$${savingsVsFlexProgram.toLocaleString('en-US')}</div>
+                            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">With Our ${presentationData.ourEscalator}% Escalated Plan</p>
+                            <div class="savings-number" style="color: #16a34a;">$${savingsEscalated >= 0 ? savingsEscalated.toLocaleString('en-US') : '-' + Math.abs(savingsEscalated).toLocaleString('en-US')}</div>
+                            <p style="font-size: 0.9rem; color: #6b7280;">Monthly: $${presentationData.ourPrice}</p>
                         </div>
                     </div>
                 `;
