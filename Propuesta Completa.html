@@ -1152,6 +1152,12 @@
         // Store original content for reset functionality
         let originalContent = {};
 
+        // Helper function to format numbers in US format (comma for thousands, period for decimals)
+        function formatNumberUS(number) {
+            if (typeof number !== 'number' || isNaN(number)) return '0';
+            return number.toLocaleString('en-US');
+        }
+
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             // Store original content
@@ -1576,7 +1582,7 @@
             
             if (targetRow) {
                 const cells = targetRow.querySelectorAll('.value');
-                const formattedValue = parseInt(value).toLocaleString();
+                const formattedValue = formatNumberUS(parseInt(value));
                 cells.forEach(cell => {
                     cell.textContent = formattedValue;
                 });
@@ -1798,7 +1804,7 @@
             if (competitorTitle) competitorTitle.textContent = `Competitor (${window.competitorData.escalator}% escalator)`;
             if (competitorStart) competitorStart.textContent = `$${competitorPayments[0].toFixed(0)}/month`;
             if (competitorEnd) competitorEnd.textContent = `$${competitorPayments[24].toFixed(0)}/month`;
-            if (competitorTotal) competitorTotal.textContent = `$${competitorTotalCost.toLocaleString()}`;
+            if (competitorTotal) competitorTotal.textContent = `$${formatNumberUS(competitorTotalCost)}`;
             if (competitorNote) competitorNote.textContent = `Payments increase by ${window.competitorData.escalator}% annually`;
         }
 
@@ -2363,7 +2369,7 @@
                 
                 if (escalatorStart) escalatorStart.textContent = `$${escalatorPayments[0].toFixed(0)}/month`;
                 if (escalatorEnd) escalatorEnd.textContent = `$${escalatorPayments[24].toFixed(0)}/month`;
-                if (escalatorTotal) escalatorTotal.textContent = `$${escalatorTotalCost.toLocaleString()}`;
+                if (escalatorTotal) escalatorTotal.textContent = `$${formatNumberUS(escalatorTotalCost)}`;
             }
             
             // Fixed summary (only shown if No Interest is available)
@@ -2375,7 +2381,7 @@
                 
                 if (fixedPayment) fixedPayment.textContent = `$${fixedPayments[0].toFixed(0)}/month`;
                 if (fixedEnd) fixedEnd.textContent = `$${fixedPayments[0].toFixed(0)}/month`;
-                if (fixedTotalEl) fixedTotalEl.textContent = `$${fixedTotalCost.toLocaleString()}`;
+                if (fixedTotalEl) fixedTotalEl.textContent = `$${formatNumberUS(fixedTotalCost)}`;
             }
             
             // Check if competitor is enabled and calculate savings
@@ -2402,7 +2408,7 @@
                 if (competitorTitle) competitorTitle.textContent = `Competitor (${window.competitorData.escalator}% escalator)`;
                 if (competitorStart) competitorStart.textContent = `$${competitorPayments[0].toFixed(0)}/month`;
                 if (competitorEnd) competitorEnd.textContent = `$${competitorPayments[24].toFixed(0)}/month`;
-                if (competitorTotal) competitorTotal.textContent = `$${competitorTotalCost.toLocaleString()}`;
+                if (competitorTotal) competitorTotal.textContent = `$${formatNumberUS(competitorTotalCost)}`;
                 if (competitorNote) competitorNote.textContent = `Payments increase by ${window.competitorData.escalator}% annually`;
                 
                 // Calculate and show savings for escalator option
@@ -2412,8 +2418,8 @@
                     
                     if (escalatorSavings) {
                         escalatorSavings.textContent = escalatorSavingsAmount > 0 ? 
-                            `$${escalatorSavingsAmount.toLocaleString()}` : 
-                            `-$${Math.abs(escalatorSavingsAmount).toLocaleString()}`;
+                            `$${formatNumberUS(escalatorSavingsAmount)}` : 
+                            `-$${formatNumberUS(Math.abs(escalatorSavingsAmount))}`;
                         escalatorSavings.style.color = escalatorSavingsAmount > 0 ? '#059669' : '#dc2626';
                     }
                 }
@@ -2424,8 +2430,8 @@
                     const fixedSavings = document.getElementById('fixedSavings');
                     if (fixedSavings) {
                         fixedSavings.textContent = fixedSavingsAmount > 0 ? 
-                            `$${fixedSavingsAmount.toLocaleString()}` : 
-                            `-$${Math.abs(fixedSavingsAmount).toLocaleString()}`;
+                            `$${formatNumberUS(fixedSavingsAmount)}` : 
+                            `-$${formatNumberUS(Math.abs(fixedSavingsAmount))}`;
                         fixedSavings.style.color = fixedSavingsAmount > 0 ? '#059669' : '#dc2626';
                     }
                 }
@@ -2743,7 +2749,7 @@
                 escalatorTotalCell.style.fontWeight = '700';
                 escalatorTotalCell.style.fontSize = '1.1rem';
                 escalatorTotalCell.className = 'escalator-column';
-                escalatorTotalCell.textContent = `$${escalatorTotal.toLocaleString()}`;
+                escalatorTotalCell.textContent = `$${formatNumberUS(escalatorTotal)}`;
                 totalRow.appendChild(escalatorTotalCell);
             }
 
@@ -2756,7 +2762,7 @@
                 fixedTotalCell.style.fontWeight = '700';
                 fixedTotalCell.style.fontSize = '1.1rem';
                 fixedTotalCell.className = 'fixed-column';
-                fixedTotalCell.textContent = `$${fixedTotal.toLocaleString()}`;
+                fixedTotalCell.textContent = `$${formatNumberUS(fixedTotal)}`;
                 totalRow.appendChild(fixedTotalCell);
             }
 
@@ -2769,7 +2775,7 @@
                 competitorTotalCell.style.fontWeight = '700';
                 competitorTotalCell.style.fontSize = '1.1rem';
                 competitorTotalCell.className = 'competitor-column';
-                competitorTotalCell.textContent = `$${competitorTotal.toLocaleString()}`;
+                competitorTotalCell.textContent = `$${formatNumberUS(competitorTotal)}`;
                 totalRow.appendChild(competitorTotalCell);
             }
 
@@ -2801,8 +2807,8 @@
                     const escalatorSavings = competitorTotal - escalatorTotal;
                     escalatorSavingsCell.style.color = escalatorSavings > 0 ? '#059669' : '#dc2626';
                     escalatorSavingsCell.textContent = escalatorSavings > 0 ? 
-                        `+$${escalatorSavings.toLocaleString()}` : 
-                        `-$${Math.abs(escalatorSavings).toLocaleString()}`;
+                        `+$${formatNumberUS(escalatorSavings)}` : 
+                        `-$${formatNumberUS(Math.abs(escalatorSavings))}`;
                     savingsRow.appendChild(escalatorSavingsCell);
                 }
 
@@ -2818,8 +2824,8 @@
                     const fixedSavings = competitorTotal - fixedTotal;
                     fixedSavingsCell.style.color = fixedSavings > 0 ? '#059669' : '#dc2626';
                     fixedSavingsCell.textContent = fixedSavings > 0 ? 
-                        `+$${fixedSavings.toLocaleString()}` : 
-                        `-$${Math.abs(fixedSavings).toLocaleString()}`;
+                        `+$${formatNumberUS(fixedSavings)}` : 
+                        `-$${formatNumberUS(Math.abs(fixedSavings))}`;
                     savingsRow.appendChild(fixedSavingsCell);
                 }
 
@@ -2848,14 +2854,14 @@
             const tableSavingsNoteRow = document.getElementById('tableSavingsNoteRow');
             
             if (escalatorRate > 0 && tableEscalatorTotal) {
-                tableEscalatorTotal.textContent = `$${escalatorTotal.toLocaleString()}`;
+                tableEscalatorTotal.textContent = `$${formatNumberUS(escalatorTotal)}`;
             }
             if (noInterestAvailable && tableFixedTotal) {
-                tableFixedTotal.textContent = `$${fixedTotal.toLocaleString()}`;
+                tableFixedTotal.textContent = `$${formatNumberUS(fixedTotal)}`;
             }
             if (showCompetitor && window.competitorData) {
                 if (tableCompetitorTotal) {
-                    tableCompetitorTotal.textContent = `$${competitorTotal.toLocaleString()}`;
+                    tableCompetitorTotal.textContent = `$${formatNumberUS(competitorTotal)}`;
                 }
                 if (tableCompetitorRow) {
                     tableCompetitorRow.style.display = 'table-row';
@@ -2882,7 +2888,7 @@
                 }
                 
                 if (tableBestSavings) {
-                    tableBestSavings.textContent = `$${bestSavings.toLocaleString()}`;
+                    tableBestSavings.textContent = `$${formatNumberUS(bestSavings)}`;
                 }
                 if (tableSavingsNote) {
                     tableSavingsNote.textContent = `with ${bestOption} vs Competitor over 25 years`;
