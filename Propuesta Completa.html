@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- PDF.js será cargado dinámicamente para mejor estabilidad en móviles -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -653,6 +653,48 @@
         .comparison-table.no-interest-hidden [data-no-interest-column] {
             display: none !important;
         }
+
+        /* iPad/Touch device optimizations */
+        @media (pointer: coarse) {
+            /* Botones más grandes para dedos */
+            .control-panel button {
+                padding: 12px 16px !important;
+                font-size: 14px !important;
+                min-height: 44px !important;
+                touch-action: manipulation;
+            }
+            
+            /* Área de drag & drop más grande */
+            #pdfDropZone {
+                min-height: 120px !important;
+                padding: 24px !important;
+            }
+            
+            /* Mejorar áreas táctiles */
+            input, select, textarea {
+                min-height: 44px !important;
+                font-size: 16px !important; /* Evita zoom en Safari iOS */
+            }
+            
+            /* Hover states para touch */
+            .control-panel button:active {
+                transform: scale(0.98);
+                background-color: rgba(10, 37, 89, 0.9) !important;
+            }
+        }
+
+        /* iPad específico */
+        @media screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+            .control-panel {
+                width: 320px !important;
+                max-height: 90vh !important;
+            }
+            
+            #pdfImportContainer {
+                margin: 20px 0 !important;
+                padding: 20px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1275,6 +1317,25 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+            // Detectar iPad y optimizar experiencia
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isIPad = navigator.userAgent.includes('iPad') || 
+                          (navigator.userAgent.includes('Mac') && navigator.maxTouchPoints > 1);
+            
+            if (isIOS || isIPad) {
+                console.log('🍎 iPad/iOS detected - Optimizing experience...');
+                
+                // Aplicar optimizaciones específicas para iPad
+                setTimeout(() => {
+                    optimizeForIPad();
+                }, 500);
+                
+                // Mostrar mensaje informativo
+                setTimeout(() => {
+                    showNotification('iPad detected - PDF import optimized for mobile', 'info');
+                }, 1000);
+            }
+            
             // Store original content
             storeOriginalContent();
             
@@ -1537,6 +1598,63 @@
             }
         }
 
+        // iPad/iOS Optimization Functions
+        async function loadPDFJS() {
+            if (typeof pdfjsLib === 'undefined') {
+                console.log('📚 Loading PDF.js for mobile...');
+                
+                return new Promise((resolve, reject) => {
+                    // Usar versión más estable para móviles
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
+                    script.onload = () => {
+                        console.log('✅ PDF.js loaded successfully');
+                        // Configurar worker para mejor estabilidad en iOS
+                        if (typeof pdfjsLib !== 'undefined') {
+                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                        }
+                        resolve();
+                    };
+                    script.onerror = () => {
+                        console.error('❌ Failed to load PDF.js');
+                        showNotification('PDF processing not available on this device', 'error');
+                        reject(new Error('Failed to load PDF.js'));
+                    };
+                    document.head.appendChild(script);
+                });
+            }
+            return Promise.resolve();
+        }
+
+        function optimizeForIPad() {
+            console.log('🍎 Optimizing for iPad...');
+            
+            // 1. Mejorar feedback visual para iPad
+            const pdfImportContainer = document.getElementById('pdfImportContainer');
+            if (pdfImportContainer) {
+                pdfImportContainer.style.border = '2px solid #34d399';
+                pdfImportContainer.style.background = '#ecfdf5';
+            }
+            
+            // 2. Mejorar interfaz para touch
+            const pdfDropZone = document.getElementById('pdfDropZone');
+            if (pdfDropZone) {
+                pdfDropZone.innerHTML = `
+                    <div class="upload-icon" style="font-size: 2rem; margin-bottom: 10px;">📱📄</div>
+                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #374151; font-weight: 600;">iPad PDF Import</p>
+                    <p style="margin: 0 0 12px 0; font-size: 11px; color: #6b7280;">Tap to select PDF from Files app</p>
+                    <button onclick="document.getElementById('pdfUpload').click()" style="padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; touch-action: manipulation;">
+                        📁 Choose PDF File
+                    </button>
+                `;
+            }
+            
+            // 3. Log memoria disponible si es posible
+            if ('memory' in performance) {
+                console.log('💾 Available memory:', Math.round(performance.memory.usedJSHeapSize / 1048576), 'MB');
+            }
+        }
+
         // PDF Import Functions
         async function handlePDFUpload(event) {
             const file = event.target.files[0];
@@ -1544,10 +1662,15 @@
 
             const importStatus = document.getElementById('importStatus');
             importStatus.style.display = 'block';
-            importStatus.textContent = 'Processing PDF...';
+            importStatus.textContent = 'Loading PDF processor...';
             importStatus.style.color = '#0ea5e9';
 
             try {
+                // Cargar PDF.js dinámicamente para mejor estabilidad
+                await loadPDFJS();
+                
+                importStatus.textContent = 'Processing PDF...';
+                
                 const extractedData = await extractDataFromPDF(file);
                 if (extractedData) {
                     populateControlPanel(extractedData);
@@ -1561,7 +1684,7 @@
                 }
             } catch (error) {
                 console.error('PDF import error:', error);
-                importStatus.textContent = '❌ Failed to import data from PDF';
+                importStatus.textContent = `❌ Failed: ${error.message}`;
                 importStatus.style.color = '#dc2626';
                 setTimeout(() => {
                     importStatus.style.display = 'none';
@@ -1574,35 +1697,99 @@
 
         async function extractDataFromPDF(file) {
             return new Promise((resolve, reject) => {
+                // Verificar tamaño de archivo (iPad tiene límites de memoria)
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                if (file.size > maxSize) {
+                    reject(new Error(`File too large: ${Math.round(file.size / 1048576)}MB. Max: 50MB`));
+                    return;
+                }
+                
+                console.log('📄 Processing PDF file:', file.name, `(${Math.round(file.size / 1024)}KB)`);
+                
                 const fileReader = new FileReader();
+                
+                // Timeout para evitar cuelgues en iPad
+                const timeout = setTimeout(() => {
+                    fileReader.abort();
+                    reject(new Error('PDF processing timeout (30s). Try a smaller file.'));
+                }, 30000);
                 
                 fileReader.onload = async function() {
                     try {
+                        clearTimeout(timeout);
+                        console.log('📖 File read complete, processing...');
+                        
                         const typedarray = new Uint8Array(this.result);
-                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        
+                        // Verificar que PDF.js esté cargado
+                        if (typeof pdfjsLib === 'undefined') {
+                            console.log('⏳ PDF.js not loaded, loading now...');
+                            await loadPDFJS();
+                        }
+                        
+                        const pdf = await pdfjsLib.getDocument({
+                            data: typedarray,
+                            // Configuraciones específicas para móviles
+                            disableRange: true,
+                            disableStream: true,
+                            disableAutoFetch: true,
+                            maxImageSize: 1024 * 1024, // Límite de imagen 1MB
+                            cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/cmaps/',
+                            cMapPacked: true
+                        }).promise;
+                        
+                        console.log('📚 PDF loaded, pages:', pdf.numPages);
                         let extractedData = {};
                         
-                        // Extract text from all pages
-                        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        // Procesar solo las primeras 3 páginas para evitar problemas de memoria
+                        const maxPages = Math.min(pdf.numPages, 3);
+                        console.log(`🔄 Processing ${maxPages} pages...`);
+                        
+                        for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+                            console.log(`📄 Processing page ${pageNum}...`);
                             const page = await pdf.getPage(pageNum);
                             const textContent = await page.getTextContent();
                             const textItems = textContent.items.map(item => item.str).join(' ');
                             
-                            // Extract data using regex patterns
                             const pageData = extractDataFromText(textItems);
                             extractedData = { ...extractedData, ...pageData };
+                            
+                            // Pequeña pausa para no saturar el hilo principal (importante en iPad)
+                            await new Promise(resolve => setTimeout(resolve, 100));
                         }
                         
-                        console.log('Extracted data:', extractedData);
+                        console.log('✅ iPad extraction completed:', extractedData);
                         resolve(extractedData);
+                        
                     } catch (error) {
-                        console.error('Error processing PDF:', error);
-                        reject(error);
+                        clearTimeout(timeout);
+                        console.error('💥 iPad PDF processing error:', error);
+                        let errorMessage = 'PDF processing failed';
+                        
+                        if (error.message.includes('Invalid PDF')) {
+                            errorMessage = 'Invalid PDF file. Please try another file.';
+                        } else if (error.message.includes('memory')) {
+                            errorMessage = 'Not enough memory. Close other apps and try again.';
+                        } else if (error.message.includes('network')) {
+                            errorMessage = 'Network error. Check your connection.';
+                        }
+                        
+                        reject(new Error(errorMessage));
                     }
                 };
                 
-                fileReader.onerror = () => reject(new Error('Failed to read PDF file'));
-                fileReader.readAsArrayBuffer(file);
+                fileReader.onerror = () => {
+                    clearTimeout(timeout);
+                    reject(new Error('Cannot read file on this device. Try a different PDF.'));
+                };
+                
+                // Leer archivo
+                try {
+                    fileReader.readAsArrayBuffer(file);
+                } catch (error) {
+                    clearTimeout(timeout);
+                    reject(new Error('Cannot access file: ' + error.message));
+                }
             });
         }
 
