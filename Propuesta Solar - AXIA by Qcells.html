@@ -4,11 +4,11 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Propuesta Solar - AXIA by Qcells</title>
-    <link rel="stylesheet" href="./Propuesta Solar - AXIA by Qcells_files/styles.css">
-    <link href="./Propuesta Solar - AXIA by Qcells_files/css2" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- PDF Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- PDF.js será cargado dinámicamente para mejor estabilidad en móviles -->
 <style>
 /* css/styles.css */
 * {
@@ -497,6 +497,75 @@ body {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
+        /* PDF Import Styles */
+        #pdfDropZone {
+            transition: all 0.3s ease;
+        }
+
+        #pdfDropZone:hover {
+            background-color: rgba(14, 165, 233, 0.05) !important;
+        }
+
+        #pdfDropZone.dragover {
+            background-color: rgba(14, 165, 233, 0.1) !important;
+            border-color: #1d4ed8 !important;
+            transform: scale(1.02);
+        }
+
+        #pdfImportContainer {
+            transition: all 0.3s ease;
+        }
+
+        .comparison-table.no-interest-hidden {
+            grid-template-columns: 40% 60% !important;
+        }
+
+        .comparison-table.no-interest-hidden [data-no-interest-column] {
+            display: none !important;
+        }
+
+        /* iPad/Touch device optimizations */
+        @media (pointer: coarse) {
+            /* Botones más grandes para dedos */
+            .control-panel button {
+                padding: 12px 16px !important;
+                font-size: 14px !important;
+                min-height: 44px !important;
+                touch-action: manipulation;
+            }
+            
+            /* Área de drag & drop más grande */
+            #pdfDropZone {
+                min-height: 120px !important;
+                padding: 24px !important;
+            }
+            
+            /* Mejorar áreas táctiles */
+            input, select, textarea {
+                min-height: 44px !important;
+                font-size: 16px !important; /* Evita zoom en Safari iOS */
+            }
+            
+            /* Hover states para touch */
+            .control-panel button:active {
+                transform: scale(0.98);
+                background-color: rgba(10, 37, 89, 0.9) !important;
+            }
+        }
+
+        /* iPad específico */
+        @media screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+            .control-panel {
+                width: 320px !important;
+                max-height: 90vh !important;
+            }
+            
+            #pdfImportContainer {
+                margin: 20px 0 !important;
+                padding: 20px !important;
+            }
+        }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-content {
@@ -969,6 +1038,24 @@ body {
             </div>
         </div>
         
+        <!-- PDF Import Section -->
+        <div id="pdfImportContainer" style="margin: 15px 0; padding: 15px; background: #f0f9ff; border-radius: 8px; border: 2px dashed #0ea5e9; transition: all 0.3s ease;">
+            <h4 style="margin: 0 0 10px 0; color: #0a2559; font-size: 0.9rem; font-weight: 600;">Import from PDF</h4>
+            <div id="pdfDropZone" style="text-align: center; padding: 20px; cursor: pointer;">
+                <input type="file" id="pdfUpload" accept=".pdf" style="display: none;" onchange="handlePDFUpload(event)">
+                <div class="upload-icon" style="font-size: 2rem; margin-bottom: 10px;">📄</div>
+                <p style="margin: 0 0 8px 0; font-size: 12px; color: #374151; font-weight: 500;">Drag & Drop PDF here</p>
+                <p style="margin: 0 0 12px 0; font-size: 10px; color: #6b7280;">or click to browse</p>
+                <button onclick="document.getElementById('pdfUpload').click()" style="padding: 8px 16px; background: #0ea5e9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; transition: background 0.3s ease;">
+                    Choose PDF File
+                </button>
+            </div>
+            <div id="importStatus" style="font-size: 11px; color: #6b7280; text-align: center; display: none; margin-top: 10px;"></div>
+            <div style="font-size: 10px; color: #6b7280; font-style: italic; text-align: center; line-height: 1.3; margin-top: 8px;">
+                Upload a PDF generated from "Propuesta Solar" to auto-fill this control panel
+            </div>
+        </div>
+        
         <div class="control-buttons">
             <button onclick="printProposal()">Generate PDF</button>
             <button onclick="saveData()">Save Changes</button>
@@ -982,8 +1069,7 @@ body {
         </div>
     </div>
 
-    <script src="./Propuesta Solar - AXIA by Qcells_files/main.js.descarga"></script>
-<script>
+    <script>
 /* js/main.js */
 // Store original content for reset functionality
 let originalContent = {};
@@ -1010,6 +1096,57 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Reset to template on load
     resetToTemplate();
+    
+    // Detectar iPad y optimizar
+    const isIPad = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    
+    if (isIPad) {
+        console.log('📱 iPad/iOS detected');
+        setTimeout(() => {
+            optimizeForIPad();
+        }, 500);
+        
+        // Mostrar mensaje informativo
+        setTimeout(() => {
+            showNotification('iPad detected - PDF import optimized for mobile', 'info');
+        }, 2000);
+    }
+    
+    // Setup PDF import handler
+    const pdfUpload = document.getElementById('pdfUpload');
+    const pdfDropZone = document.getElementById('pdfDropZone');
+    const pdfImportContainer = document.getElementById('pdfImportContainer');
+    
+    if (pdfUpload) {
+        pdfUpload.addEventListener('change', handlePDFUpload);
+    }
+    
+    // Setup drag and drop functionality
+    if (pdfDropZone && pdfImportContainer) {
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            pdfDropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            pdfDropZone.addEventListener(eventName, handleDragHighlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            pdfDropZone.addEventListener(eventName, handleDragUnhighlight, false);
+        });
+        
+        // Handle dropped files
+        pdfDropZone.addEventListener('drop', handleDrop, false);
+        
+        // Make drop zone clickable
+        pdfDropZone.addEventListener('click', () => {
+            pdfUpload.click();
+        });
+    }
 });
 
 // Store original content for reset
@@ -1800,6 +1937,475 @@ window.addEventListener('beforeunload', function(e) {
         return e.returnValue;
     }
 });
+
+        // iPad/iOS Optimization Functions
+        async function loadPDFJS() {
+            if (typeof pdfjsLib === 'undefined') {
+                console.log('📚 Loading PDF.js for mobile...');
+                
+                return new Promise((resolve, reject) => {
+                    // Usar versión más estable para móviles
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
+                    script.onload = () => {
+                        console.log('✅ PDF.js loaded successfully');
+                        // Configurar worker para mejor estabilidad en iOS
+                        if (typeof pdfjsLib !== 'undefined') {
+                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                        }
+                        resolve();
+                    };
+                    script.onerror = () => {
+                        console.error('❌ Failed to load PDF.js');
+                        showNotification('PDF processing not available on this device', 'error');
+                        reject(new Error('Failed to load PDF.js'));
+                    };
+                    document.head.appendChild(script);
+                });
+            }
+            return Promise.resolve();
+        }
+
+        function optimizeForIPad() {
+            console.log('🍎 Optimizing for iPad...');
+            
+            // 1. Mejorar feedback visual para iPad
+            const pdfImportContainer = document.getElementById('pdfImportContainer');
+            if (pdfImportContainer) {
+                pdfImportContainer.style.border = '2px solid #34d399';
+                pdfImportContainer.style.background = '#ecfdf5';
+            }
+            
+            // 2. Mejorar interfaz para touch
+            const pdfDropZone = document.getElementById('pdfDropZone');
+            if (pdfDropZone) {
+                pdfDropZone.innerHTML = `
+                    <div class="upload-icon" style="font-size: 2rem; margin-bottom: 10px;">📱📄</div>
+                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #374151; font-weight: 600;">iPad PDF Import</p>
+                    <p style="margin: 0 0 12px 0; font-size: 11px; color: #6b7280;">Tap to select PDF from Files app</p>
+                    <button onclick="document.getElementById('pdfUpload').click()" style="padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; touch-action: manipulation;">
+                        📁 Choose PDF File
+                    </button>
+                `;
+            }
+            
+            // 3. Log memoria disponible si es posible
+            if ('memory' in performance) {
+                console.log('💾 Available memory:', Math.round(performance.memory.usedJSHeapSize / 1048576), 'MB');
+            }
+        }
+
+        // PDF Import Functions
+        async function handlePDFUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const importStatus = document.getElementById('importStatus');
+            importStatus.style.display = 'block';
+            importStatus.textContent = 'Loading PDF processor...';
+            importStatus.style.color = '#0ea5e9';
+
+            try {
+                // Cargar PDF.js dinámicamente para mejor estabilidad
+                await loadPDFJS();
+                
+                importStatus.textContent = 'Processing PDF...';
+                
+                const extractedData = await extractDataFromPDF(file);
+                if (extractedData) {
+                    populateControlPanel(extractedData);
+                    importStatus.textContent = '✅ Data imported successfully!';
+                    importStatus.style.color = '#059669';
+                    setTimeout(() => {
+                        importStatus.style.display = 'none';
+                    }, 3000);
+                } else {
+                    throw new Error('No data could be extracted from the PDF');
+                }
+            } catch (error) {
+                console.error('PDF import error:', error);
+                importStatus.textContent = `❌ Failed: ${error.message}`;
+                importStatus.style.color = '#dc2626';
+                setTimeout(() => {
+                    importStatus.style.display = 'none';
+                }, 5000);
+            }
+
+            // Clear the file input
+            event.target.value = '';
+        }
+
+        async function extractDataFromPDF(file) {
+            return new Promise((resolve, reject) => {
+                // Verificar tamaño de archivo (iPad tiene límites de memoria)
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                if (file.size > maxSize) {
+                    reject(new Error(`File too large: ${Math.round(file.size / 1048576)}MB. Max: 50MB`));
+                    return;
+                }
+                
+                console.log('📄 Processing PDF file:', file.name, `(${Math.round(file.size / 1024)}KB)`);
+                
+                const fileReader = new FileReader();
+                
+                // Timeout para evitar cuelgues en iPad
+                const timeout = setTimeout(() => {
+                    fileReader.abort();
+                    reject(new Error('PDF processing timeout (30s). Try a smaller file.'));
+                }, 30000);
+                
+                fileReader.onload = async function() {
+                    try {
+                        clearTimeout(timeout);
+                        console.log('📖 File read complete, processing...');
+                        
+                        const typedarray = new Uint8Array(this.result);
+                        
+                        // Verificar que PDF.js esté cargado
+                        if (typeof pdfjsLib === 'undefined') {
+                            console.log('⏳ PDF.js not loaded, loading now...');
+                            await loadPDFJS();
+                        }
+                        
+                        const pdf = await pdfjsLib.getDocument({
+                            data: typedarray,
+                            // Configuraciones específicas para móviles
+                            disableRange: true,
+                            disableStream: true,
+                            disableAutoFetch: true,
+                            maxImageSize: 1024 * 1024, // Límite de imagen 1MB
+                            cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/cmaps/',
+                            cMapPacked: true
+                        }).promise;
+                        
+                        console.log('📚 PDF loaded, pages:', pdf.numPages);
+                        let extractedData = {};
+                        
+                        // Procesar solo las primeras 3 páginas para evitar problemas de memoria
+                        const maxPages = Math.min(pdf.numPages, 3);
+                        console.log(`🔄 Processing ${maxPages} pages...`);
+                        
+                        for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+                            console.log(`📄 Processing page ${pageNum}...`);
+                            const page = await pdf.getPage(pageNum);
+                            const textContent = await page.getTextContent();
+                            const textItems = textContent.items.map(item => item.str).join(' ');
+                            
+                            const pageData = extractDataFromText(textItems);
+                            extractedData = { ...extractedData, ...pageData };
+                            
+                            // Pequeña pausa para no saturar el hilo principal (importante en iPad)
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                        
+                        console.log('✅ iPad extraction completed:', extractedData);
+                        resolve(extractedData);
+                        
+                    } catch (error) {
+                        clearTimeout(timeout);
+                        console.error('💥 iPad PDF processing error:', error);
+                        let errorMessage = 'PDF processing failed';
+                        
+                        if (error.message.includes('Invalid PDF')) {
+                            errorMessage = 'Invalid PDF file. Please try another file.';
+                        } else if (error.message.includes('memory')) {
+                            errorMessage = 'Not enough memory. Close other apps and try again.';
+                        } else if (error.message.includes('network')) {
+                            errorMessage = 'Network error. Check your connection.';
+                        }
+                        
+                        reject(new Error(errorMessage));
+                    }
+                };
+                
+                fileReader.onerror = () => {
+                    clearTimeout(timeout);
+                    reject(new Error('Cannot read file on this device. Try a different PDF.'));
+                };
+                
+                // Leer archivo
+                try {
+                    fileReader.readAsArrayBuffer(file);
+                } catch (error) {
+                    clearTimeout(timeout);
+                    reject(new Error('Cannot access file: ' + error.message));
+                }
+            });
+        }
+
+        function extractDataFromText(text) {
+            const data = {};
+            console.log('Raw text from PDF:', text);
+            
+            // Clean and normalize text
+            const cleanText = text.replace(/\s+/g, ' ').trim();
+            
+            // Detect if "No Interest!" column is present
+            const hasNoInterestColumn = cleanText.includes('No Interest!') || cleanText.includes('No Interest') || cleanText.includes('0.0%');
+            data.hasNoInterestOption = hasNoInterestColumn;
+            console.log('Has No Interest option:', hasNoInterestColumn);
+            
+            // Extract escalator rate from header - look for "X.XX% Interest"
+            const headerEscalatorPattern = /(\d+(?:\.\d+)?)\%\s+Interest/i;
+            const headerEscalatorMatch = cleanText.match(headerEscalatorPattern);
+            if (headerEscalatorMatch) {
+                data.escalatorRate = headerEscalatorMatch[1];
+                console.log('Found escalator rate from header:', data.escalatorRate);
+            } else {
+                // Fallback: look for "Annual Escalator X.XX%"
+                const escalatorPattern = /Annual\s+Escalator\s+(\d+(?:\.\d+)?)\s*%/i;
+                const escalatorMatch = cleanText.match(escalatorPattern);
+                if (escalatorMatch) {
+                    data.escalatorRate = escalatorMatch[1];
+                    console.log('Found escalator rate from table:', data.escalatorRate);
+                }
+            }
+            
+            // Extract prices - need to handle both single and dual column layouts
+            if (hasNoInterestColumn) {
+                // Dual column layout - extract both prices
+                // Look for price patterns: $XXX.XX/month
+                const priceMatches = cleanText.match(/\$(\d+(?:\.\d{2})?)[\/\s]*month/gi);
+                if (priceMatches && priceMatches.length >= 2) {
+                    // First price is with escalator, second is No Interest
+                    data.price1 = parseFloat(priceMatches[0].match(/\$(\d+(?:\.\d{2})?)/)[1]);
+                    data.price2 = parseFloat(priceMatches[1].match(/\$(\d+(?:\.\d{2})?)/)[1]);
+                    console.log('Found dual prices - With escalator:', data.price1, ', No Interest:', data.price2);
+                }
+            } else {
+                // Single column layout - only escalator price
+                const pricePattern = /\$(\d+(?:\.\d{2})?)[\/\s]*month/i;
+                const priceMatch = cleanText.match(pricePattern);
+                if (priceMatch) {
+                    data.price1 = parseFloat(priceMatch[1]);
+                    console.log('Found single price with escalator:', data.price1);
+                    // No Interest option is not available, so no price2
+                    data.price2 = null;
+                }
+            }
+            
+            // Extract System Size - look for "System Size (kW) X.XX"
+            const systemSizePattern = /System\s+Size\s+\(kW\)\s+(\d+(?:\.\d+)?)/i;
+            const systemSizeMatch = cleanText.match(systemSizePattern);
+            if (systemSizeMatch) {
+                data.systemSize = parseFloat(systemSizeMatch[1]);
+                console.log('Found system size:', data.systemSize);
+            }
+            
+            // Extract Production - look for "Production (kWh) XXXX"
+            const productionPattern = /Production\s+\(kWh\)\s+(\d+(?:,\d{3})*)/i;
+            const productionMatch = cleanText.match(productionPattern);
+            if (productionMatch) {
+                data.production = parseInt(productionMatch[1].replace(/,/g, ''));
+                console.log('Found production:', data.production);
+            }
+            
+            // Extract Battery - look for "X Tesla Powerwall" or "Battery X Tesla Powerwall"
+            const batteryPatterns = [
+                /Battery\s+(\d+)\s+Tesla\s+Powerwall/i,
+                /(\d+)\s+Tesla\s+Powerwall/i
+            ];
+            
+            for (const pattern of batteryPatterns) {
+                const match = cleanText.match(pattern);
+                if (match) {
+                    data.batteries = parseInt(match[1]);
+                    console.log('Found batteries:', data.batteries);
+                    break;
+                }
+            }
+            
+            // Handle no battery case
+            if (cleanText.includes('No battery') || cleanText.includes('Enter battery info')) {
+                data.batteries = 0;
+                console.log('No batteries found');
+            }
+            
+            // Extract Address - look for address pattern before "Reach out"
+            const addressPatterns = [
+                /(\d{3,5}\s+[A-Za-z\s]+(?:Ave|Avenue|St|Street|Dr|Drive|Rd|Road|Ln|Lane|Blvd|Boulevard|Way|Court|Ct|Circle|Cir))\s+(?:Reach|Independent)/i,
+                /(?:Battery\s+[^R]*?|Extras\s+[^R]*?)(\d{3,5}\s+[A-Za-z\s]+(?:Ave|Avenue|St|Street|Dr|Drive|Rd|Road|Ln|Lane|Blvd|Boulevard|Way|Court|Ct|Circle|Cir))/i
+            ];
+            
+            for (const pattern of addressPatterns) {
+                const match = cleanText.match(pattern);
+                if (match) {
+                    data.address = match[1].trim();
+                    console.log('Found address:', data.address);
+                    break;
+                }
+            }
+            
+            // Extract Phone Number - look for "(XXX) XXX-XXXX" pattern
+            const phonePattern = /\((\d{3})\)\s*(\d{3})-(\d{4})/;
+            const phoneMatch = cleanText.match(phonePattern);
+            if (phoneMatch) {
+                data.phoneNumber = `(${phoneMatch[1]}) ${phoneMatch[2]}-${phoneMatch[3]}`;
+                console.log('Found phone:', data.phoneNumber);
+            }
+            
+            console.log('Final extracted data:', data);
+            return data;
+        }
+
+        function populateControlPanel(data) {
+            console.log('Populating control panel with:', data);
+            let fieldsPopulated = 0;
+            
+            // Handle No Interest option availability first
+            if (data.hasNoInterestOption !== undefined) {
+                const noInterestCheckbox = document.getElementById('noInterestToggle');
+                if (noInterestCheckbox) {
+                    noInterestCheckbox.checked = data.hasNoInterestOption;
+                    toggleNoInterestOption(); // Apply the setting
+                    fieldsPopulated++;
+                    console.log('No Interest option set to:', data.hasNoInterestOption);
+                }
+            }
+            
+            // Populate basic fields
+            if (data.address) {
+                document.getElementById('address').value = data.address;
+                updateAddress(data.address);
+                fieldsPopulated++;
+            }
+            
+            if (data.price1) {
+                document.getElementById('price1').value = data.price1;
+                updateTableValue('price', 0, data.price1);
+                fieldsPopulated++;
+            }
+            
+            // Handle price2 based on availability
+            if (data.hasNoInterestOption && data.price2) {
+                document.getElementById('price2').value = data.price2;
+                updateTableValue('price', 1, data.price2);
+                fieldsPopulated++;
+            } else if (!data.hasNoInterestOption) {
+                // If No Interest is not available, clear price2 field
+                document.getElementById('price2').value = '';
+                console.log('No Interest option not available, price2 cleared');
+            }
+            
+            if (data.systemSize) {
+                document.getElementById('systemSize').value = data.systemSize;
+                updateSystemSize(data.systemSize);
+                fieldsPopulated++;
+            }
+            
+            if (data.production) {
+                document.getElementById('production').value = data.production;
+                updateProduction(data.production);
+                fieldsPopulated++;
+            }
+            
+            if (data.batteries !== undefined) {
+                document.getElementById('batteries').value = data.batteries;
+                updateBatteries(data.batteries);
+                fieldsPopulated++;
+            }
+            
+            if (data.phoneNumber) {
+                // Check if it's one of the predefined options
+                const phoneSelect = document.getElementById('phoneNumber');
+                const options = Array.from(phoneSelect.options);
+                const matchingOption = options.find(option => option.value === data.phoneNumber);
+                
+                if (matchingOption) {
+                    phoneSelect.value = data.phoneNumber;
+                    updatePhoneNumber(data.phoneNumber);
+                } else {
+                    // Set as custom phone number
+                    phoneSelect.value = 'other';
+                    const customPhone = document.getElementById('customPhone');
+                    customPhone.value = data.phoneNumber;
+                    customPhone.style.display = 'block';
+                    document.getElementById('savePhoneBtn').style.display = 'block';
+                    updateCustomPhone(data.phoneNumber);
+                }
+                fieldsPopulated++;
+            }
+            
+            if (data.escalatorRate) {
+                const escalatorSelect = document.getElementById('escalatorRate');
+                const rate = data.escalatorRate.toString();
+                
+                // Check if the exact rate exists in options
+                const validRates = ['2.99', '3.5'];
+                if (validRates.includes(rate)) {
+                    escalatorSelect.value = rate;
+                } else {
+                    // If it's a different rate, select the closest one
+                    const rateNum = parseFloat(rate);
+                    escalatorSelect.value = rateNum < 3.2 ? '2.99' : '3.5';
+                    console.log(`Escalator rate ${rate}% mapped to closest option: ${escalatorSelect.value}%`);
+                }
+                
+                updateEscalator(escalatorSelect.value);
+                fieldsPopulated++;
+            }
+            
+            // Show detailed success message
+            const noInterestStatus = data.hasNoInterestOption ? 'enabled' : 'disabled';
+            const message = fieldsPopulated > 0 
+                ? `PDF imported successfully! ${fieldsPopulated} fields populated. No Interest option: ${noInterestStatus}.`
+                : 'PDF processed but no matching data found. Check PDF format.';
+            
+            showNotification(message, fieldsPopulated > 0 ? 'success' : 'warning');
+        }
+
+        // Drag and Drop Helper Functions
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleDragHighlight(e) {
+            const pdfImportContainer = document.getElementById('pdfImportContainer');
+            const pdfDropZone = document.getElementById('pdfDropZone');
+            
+            if (pdfImportContainer && pdfDropZone) {
+                pdfImportContainer.style.borderColor = '#1d4ed8';
+                pdfImportContainer.style.backgroundColor = '#dbeafe';
+                pdfImportContainer.style.transform = 'scale(1.02)';
+                pdfDropZone.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+            }
+        }
+
+        function handleDragUnhighlight(e) {
+            const pdfImportContainer = document.getElementById('pdfImportContainer');
+            const pdfDropZone = document.getElementById('pdfDropZone');
+            
+            if (pdfImportContainer && pdfDropZone) {
+                pdfImportContainer.style.borderColor = '#0ea5e9';
+                pdfImportContainer.style.backgroundColor = '#f0f9ff';
+                pdfImportContainer.style.transform = 'scale(1)';
+                pdfDropZone.style.backgroundColor = 'transparent';
+            }
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                const file = files[0];
+                
+                // Check if it's a PDF file
+                if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                    // Create a mock event object for handlePDFUpload
+                    const mockEvent = {
+                        target: {
+                            files: [file],
+                            value: ''
+                        }
+                    };
+                    handlePDFUpload(mockEvent);
+                } else {
+                    showNotification('Please drop a PDF file only', 'error');
+                }
+            }
+        }
 </script>
 <script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;rayId&quot;:&quot;970b54aaede97bec&quot;,&quot;version&quot;:&quot;2025.8.0&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfEdge&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}},&quot;token&quot;:&quot;4edd5f8ec12a48cfa682ab8261b80a79&quot;,&quot;b&quot;:1}" crossorigin="anonymous"></script>
 
