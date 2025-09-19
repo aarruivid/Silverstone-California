@@ -1774,20 +1774,22 @@ function updateEscalator(rate) {
             }
             
             if (extrasRow) {
-                const cells = extrasRow.querySelectorAll('.value');
-                let displayText;
-                
                 if (isAvailable) {
-                    displayText = `${monthsCount} month${monthsCount > 1 ? 's' : ''} no payment`;
+                    // Show the row and update the content
+                    extrasRow.style.display = 'table-row';
+                    const cells = extrasRow.querySelectorAll('.value');
+                    const displayText = `${monthsCount} month${monthsCount > 1 ? 's' : ''} no payment`;
+                    
+                    cells.forEach(cell => {
+                        cell.textContent = displayText;
+                    });
+                    
+                    console.log('Free months display updated:', displayText);
                 } else {
-                    displayText = 'No extras available';
+                    // Hide the entire Extras row
+                    extrasRow.style.display = 'none';
+                    console.log('Extras row hidden - free months not available');
                 }
-                
-                cells.forEach(cell => {
-                    cell.textContent = displayText;
-                });
-                
-                console.log('Free months display updated:', displayText);
             }
         }// Update address
 function updateAddress(address) {
