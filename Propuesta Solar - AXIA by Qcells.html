@@ -1010,15 +1010,24 @@ body {
             </div>
 
             <!-- Free Months Control -->
-            <div class="field-group" style="border: 2px solid #e8f5e8; background: #f8fcf8; padding: 10px; border-radius: 8px; margin: 10px 0;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <label style="font-weight: 600; color: #0a2559;">Free Months:</label>
-                    <input type="checkbox" id="freeMonthsToggle" checked style="width: 18px; height: 18px; cursor: pointer;" onchange="toggleFreeMonths()">
-                    <span id="freeMonthsStatus" style="font-weight: 600; color: #059669;">Available</span>
+            <div style="margin: 15px 0; padding: 15px; background: #f8fcf8; border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="toggleFreeMonthsSection()">
+                    <input type="checkbox" id="freeMonthsToggle" checked style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleFreeMonths()">
+                    <label for="freeMonthsToggle" style="font-weight: 600; color: #0a2559; font-size: 0.9rem; cursor: pointer;">Free Months</label>
+                    <span id="freeMonthsStatus" style="font-weight: 500; color: #059669; font-size: 0.8rem;">(Available)</span>
+                    <div id="freeMonthsToggleArrow" style="margin-left: auto; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid #0a2559; cursor: pointer; transition: transform 0.3s ease;"></div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="font-size: 12px; color: #374151; font-weight: 500;">Number of months:</label>
-                    <input type="number" id="freeMonthsCount" value="6" min="1" max="12" style="width: 60px; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;" onchange="updateFreeMonths(this.value)">
+                
+                <!-- Collapsible Free Months Settings -->
+                <div id="freeMonthsSettings" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                    <div class="field-group">
+                        <label>Number of months:</label>
+                        <input type="number" id="freeMonthsCount" value="6" min="1" max="12" placeholder="Enter months (1-12)" onchange="updateFreeMonths(this.value)">
+                    </div>
+                    
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 8px; font-style: italic;">
+                        Configure the number of free months with no payment at the start of the solar plan
+                    </div>
                 </div>
             </div>
             
@@ -1678,6 +1687,28 @@ function updateEscalator(rate) {
             console.log('No Interest option toggled:', isAvailable ? 'Available' : 'Not Available');
         }
 
+        // Toggle Free Months section visibility
+        function toggleFreeMonthsSection() {
+            const freeMonthsSettings = document.getElementById('freeMonthsSettings');
+            const arrow = document.getElementById('freeMonthsToggleArrow');
+            
+            if (freeMonthsSettings.style.display === 'none' || freeMonthsSettings.style.display === '') {
+                freeMonthsSettings.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+                arrow.style.borderTop = '6px solid #0a2559';
+                arrow.style.borderBottom = 'none';
+                arrow.style.borderLeft = '4px solid transparent';
+                arrow.style.borderRight = '4px solid transparent';
+            } else {
+                freeMonthsSettings.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+                arrow.style.borderTop = '6px solid #0a2559';
+                arrow.style.borderBottom = 'none';
+                arrow.style.borderLeft = '4px solid transparent';
+                arrow.style.borderRight = '4px solid transparent';
+            }
+        }
+
         // Toggle Free Months option availability
         function toggleFreeMonths() {
             const checkbox = document.getElementById('freeMonthsToggle');
@@ -1687,11 +1718,11 @@ function updateEscalator(rate) {
             
             // Update status text
             if (isAvailable) {
-                statusText.textContent = 'Available';
+                statusText.textContent = '(Available)';
                 statusText.style.color = '#059669';
                 monthsInput.disabled = false;
             } else {
-                statusText.textContent = 'Not Available';
+                statusText.textContent = '(Not Available)';
                 statusText.style.color = '#dc2626';
                 monthsInput.disabled = true;
             }
