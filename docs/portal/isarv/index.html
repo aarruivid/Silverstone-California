@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISARV Fiscal Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ══════════════════════════════════════════════════════════════════
+       DESIGN SYSTEM — Light Professional Theme
+       ══════════════════════════════════════════════════════════════════ */
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --surface3: #e2e8f0;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.14);
+      --text: #0f172a;
+      --text-secondary: #334155;
+      --muted: #64748b;
+      --green: #16a34a;
+      --green-bg: rgba(22, 163, 74, 0.08);
+      --green-bg2: rgba(22, 163, 74, 0.14);
+      --yellow: #d97706;
+      --yellow-bg: rgba(217, 119, 6, 0.08);
+      --yellow-bg2: rgba(217, 119, 6, 0.14);
+      --red: #dc2626;
+      --red-bg: rgba(220, 38, 38, 0.08);
+      --red-bg2: rgba(220, 38, 38, 0.14);
+      --blue: #2563eb;
+      --blue-bg: rgba(37, 99, 235, 0.08);
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-bg: #eef2ff;
+      --accent-bg2: #e0e7ff;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.04);
+      --radius: 10px;
+      --radius-sm: 6px;
+      --radius-xs: 4px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────── */
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 230px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+    .sidebar-logo h1 {
+      font-size: 16px; font-weight: 700; color: var(--accent);
+      letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;
+    }
+    .sidebar-logo h1 svg { width: 20px; height: 20px; }
+    .sidebar-logo span { font-size: 11px; color: var(--muted); display: block; margin-top: 3px; }
+
+    .nav-section {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--muted); padding: 14px 20px 6px; font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 20px; cursor: pointer; font-size: 13px;
+      color: var(--muted); transition: all var(--transition);
+      border-left: 2px solid transparent; user-select: none;
+    }
+    .nav-item:hover { color: var(--text); background: var(--surface2); }
+    .nav-item.active {
+      color: var(--accent); border-left-color: var(--accent);
+      background: var(--accent-bg); font-weight: 500;
+    }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .nav-item .nav-badge {
+      margin-left: auto; font-size: 10px; font-weight: 600;
+      background: var(--red); color: #fff; padding: 1px 6px;
+      border-radius: 10px; min-width: 18px; text-align: center;
+    }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 12px 20px; border-top: 1px solid var(--border);
+    }
+    .sidebar-status {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .status-row {
+      display: flex; align-items: center; gap: 8px; font-size: 11px;
+    }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    }
+    .status-dot.live { background: var(--green); box-shadow: 0 0 6px rgba(22,163,74,0.4); }
+    .status-dot.off { background: var(--muted); }
+    .status-label { color: var(--muted); }
+    .status-val { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--text); margin-left: auto; }
+
+    .main { margin-left: 230px; padding: 28px 36px; flex: 1; min-width: 0; max-width: 1400px; }
+    .page { display: none; animation: fadeIn 0.25s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .page-header { margin-bottom: 24px; }
+    .page-header h2 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .page-header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Cards ────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: box-shadow var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow-md); }
+    .card-sm { padding: 16px; }
+    .card-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--muted); font-weight: 600; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .card-label svg { width: 14px; height: 14px; opacity: 0.5; }
+    .card-value { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .card-value.sm { font-size: 18px; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Stat Cards (Overview) ────────────────────────────────────── */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      display: flex; align-items: flex-start; gap: 14px;
+      transition: all var(--transition);
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .stat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .stat-icon svg { width: 20px; height: 20px; }
+    .stat-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .stat-icon.green { background: var(--green-bg); color: var(--green); }
+    .stat-icon.accent { background: var(--accent-bg); color: var(--accent); }
+    .stat-icon.yellow { background: var(--yellow-bg); color: var(--yellow); }
+    .stat-body { flex: 1; min-width: 0; }
+    .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 500; }
+    .stat-value { font-size: 20px; font-weight: 700; margin-top: 2px; line-height: 1.2; }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Grids ────────────────────────────────────────────────────── */
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .gap-24 { gap: 24px; }
+
+    /* ── Badges ───────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: var(--radius-xs);
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2px;
+    }
+    .badge-green { background: var(--green-bg); color: var(--green); }
+    .badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
+    .badge-red { background: var(--red-bg); color: var(--red); }
+    .badge-blue { background: var(--blue-bg); color: var(--blue); }
+    .badge-muted { background: var(--surface2); color: var(--muted); }
+    .badge-accent { background: var(--accent-bg); color: var(--accent); }
+    .badge-pulse { animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+    /* ── Buttons ──────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      cursor: pointer; transition: all var(--transition); font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--border-strong); }
+    .btn:active { transform: scale(0.98); }
+    .btn svg { width: 14px; height: 14px; }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-danger { color: var(--red); border-color: var(--red); }
+    .btn-danger:hover { background: var(--red-bg); }
+    .btn-ghost { border: none; background: none; color: var(--muted); padding: 6px 10px; }
+    .btn-ghost:hover { color: var(--text); background: var(--surface2); }
+    .toggle-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+    .toggle-btn { padding: 6px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: var(--surface); color: var(--muted); transition: var(--transition); font-family: inherit; }
+    .toggle-btn:hover { background: var(--surface2); color: var(--text); }
+    .toggle-btn.active { background: var(--accent); color: white; }
+    .toggle-btn + .toggle-btn { border-left: 1px solid var(--border); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Tables ───────────────────────────────────────────────────── */
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tbl th {
+      text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px;
+      border-bottom: 2px solid var(--border); background: var(--surface2);
+    }
+    .tbl th:first-child { border-radius: var(--radius-xs) 0 0 0; }
+    .tbl th:last-child { border-radius: 0 var(--radius-xs) 0 0; }
+    .tbl td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .tbl tr { transition: background var(--transition); }
+    .tbl tbody tr:hover td { background: var(--surface2); }
+    .tbl .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .tbl .right { text-align: right; }
+
+    /* ── Selects ──────────────────────────────────────────────────── */
+    .sel {
+      padding: 6px 10px; font-size: 12px; border: 1px solid var(--border);
+      border-radius: var(--radius-xs); background: var(--surface); font-family: inherit;
+      color: var(--text); cursor: pointer; transition: border-color var(--transition);
+    }
+    .sel:hover { border-color: var(--border-strong); }
+    .sel:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+    /* ── Forms ────────────────────────────────────────────────────── */
+    .input-group { margin-bottom: 16px; }
+    .input-group label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); margin-bottom: 5px;
+    }
+    .input-group input, .input-group textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: 'JetBrains Mono', monospace; background: var(--surface);
+      color: var(--text); transition: border-color var(--transition);
+    }
+    .input-group input:hover, .input-group textarea:hover { border-color: var(--border-strong); }
+    .input-group input:focus, .input-group textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+
+    /* ── Field Inputs (Client/Invoice forms) ──────────────────────── */
+    .field-label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); margin-bottom: 4px; margin-top: 12px;
+    }
+    .field-label:first-child { margin-top: 0; }
+    .field-input {
+      width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 13px; font-family: inherit; background: var(--surface);
+      color: var(--text); transition: border-color var(--transition);
+    }
+    .field-input:hover { border-color: var(--border-strong); }
+    .field-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+    select.field-input { cursor: pointer; }
+    .mt-8 { margin-top: 8px; }
+
+    /* ── Fator R Gauge ────────────────────────────────────────────── */
+    .gauge-container { display: flex; flex-direction: column; align-items: center; }
+    .gauge-wrap { position: relative; width: 140px; height: 80px; }
+    .gauge-wrap svg { width: 140px; height: 80px; }
+    .gauge-label {
+      text-align: center; font-size: 11px; color: var(--muted); margin-top: 4px;
+    }
+    .gauge-val {
+      position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700;
+    }
+
+    /* ── Deadline Cards ───────────────────────────────────────────── */
+    .dl-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+      transition: all var(--transition);
+    }
+    .dl-card:hover { box-shadow: var(--shadow-md); }
+    .dl-card.overdue { border-left: 3px solid var(--red); background: var(--red-bg); }
+    .dl-card.today { border-left: 3px solid var(--red); background: var(--red-bg); }
+    .dl-card.upcoming { border-left: 3px solid var(--yellow); }
+    .dl-card.ok { border-left: 3px solid var(--green); }
+    .dl-card.future { border-left: 3px solid var(--muted); }
+    .dl-card.passed { border-left: 3px solid var(--surface3); opacity: 0.6; }
+    .dl-card .dl-name { font-weight: 600; font-size: 13px; }
+    .dl-card .dl-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .dl-card .dl-days { font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .dl-card .dl-notes {
+      font-size: 11px; color: var(--muted); margin-top: 6px;
+      padding-top: 6px; border-top: 1px solid var(--border);
+    }
+
+    /* ── Compliance Checks ────────────────────────────────────────── */
+    .check-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 18px; box-shadow: var(--shadow); transition: all var(--transition);
+    }
+    .check-card:hover { box-shadow: var(--shadow-md); }
+    .check-card .check-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .check-card .check-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .check-card .check-icon.ok { background: var(--green-bg2); color: var(--green); }
+    .check-card .check-icon.warning { background: var(--yellow-bg2); color: var(--yellow); }
+    .check-card .check-icon.critical { background: var(--red-bg2); color: var(--red); }
+    .check-card .check-icon svg { width: 16px; height: 16px; }
+    .check-card .check-name { font-weight: 600; font-size: 14px; }
+    .check-card .check-value { font-size: 22px; font-weight: 700; margin: 6px 0; font-family: 'JetBrains Mono', monospace; }
+    .check-card .check-detail { font-size: 12px; color: var(--muted); }
+
+    /* ── Chat ─────────────────────────────────────────────────────── */
+    .chat-layout { display: flex; gap: 16px; height: calc(100vh - 140px); }
+    .chat-sidebar {
+      width: 240px; flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .chat-sidebar-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--muted); font-weight: 600; margin-bottom: 4px;
+    }
+    .chat-main {
+      flex: 1; display: flex; flex-direction: column;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+    }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      scroll-behavior: smooth;
+    }
+    .chat-input-wrap {
+      border-top: 1px solid var(--border); padding: 12px 16px;
+      display: flex; gap: 8px; background: var(--surface2);
+    }
+    .chat-input {
+      flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; resize: none; background: var(--surface);
+      color: var(--text); transition: border-color var(--transition);
+    }
+    .chat-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+
+    .msg {
+      max-width: 80%; padding: 12px 16px; border-radius: 12px;
+      font-size: 13px; line-height: 1.6; position: relative;
+    }
+    .msg-user {
+      background: var(--accent); color: #fff; align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-ai {
+      background: var(--surface2); color: var(--text); align-self: flex-start;
+      border-bottom-left-radius: 4px; border: 1px solid var(--border);
+    }
+    .msg-ai pre {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      white-space: pre-wrap; margin: 8px 0; background: var(--bg);
+      padding: 10px 12px; border-radius: var(--radius-xs); border: 1px solid var(--border);
+    }
+    .msg-source { font-size: 10px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .msg-source svg { width: 10px; height: 10px; }
+
+    .quick-btn {
+      display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+      padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 12px; color: var(--text); cursor: pointer;
+      transition: all var(--transition); font-family: inherit; line-height: 1.4;
+    }
+    .quick-btn:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+    .quick-btn svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--muted); }
+    .quick-btn:hover svg { color: var(--accent); }
+
+    /* ── Context Preview ──────────────────────────────────────────── */
+    .ctx-panel {
+      margin-top: 6px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .ctx-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; font-size: 11px; color: var(--muted); cursor: pointer;
+      background: var(--surface2); border: none; width: 100%; font-family: inherit;
+      transition: background var(--transition); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;
+    }
+    .ctx-toggle:hover { background: var(--surface3); }
+    .ctx-toggle svg { width: 12px; height: 12px; transition: transform var(--transition); }
+    .ctx-toggle.open svg { transform: rotate(180deg); }
+    .ctx-body {
+      display: none; padding: 10px 12px; font-size: 11px; color: var(--muted);
+      max-height: 200px; overflow-y: auto; font-family: 'JetBrains Mono', monospace;
+      line-height: 1.6;
+    }
+    .ctx-body.open { display: block; }
+
+    /* ── Toast ────────────────────────────────────────────────────── */
+    .toast-container {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      background: var(--text); color: #fff; padding: 10px 16px; border-radius: 8px;
+      font-size: 13px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 8px;
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+      max-width: 360px;
+    }
+    .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .toast.success { background: #065f46; }
+    .toast.error { background: #991b1b; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
+
+    /* ── Loading ──────────────────────────────────────────────────── */
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-dots::after { content: ''; animation: dots 1.5s steps(4) infinite; }
+    @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-xs); height: 20px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* ── Pagination ───────────────────────────────────────────────── */
+    .pagination { display: flex; align-items: center; gap: 8px; margin-top: 16px; justify-content: center; }
+    .pagination .btn { min-width: 36px; justify-content: center; }
+    .pagination .page-info { font-size: 12px; color: var(--muted); }
+
+    /* ── Projection Breakdown ─────────────────────────────────────── */
+    .proj-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px; }
+    .proj-row.total { font-weight: 600; border-top: 2px solid var(--border); padding-top: 12px; margin-top: 6px; }
+    .proj-row.highlight { background: var(--green-bg); margin: 0 -12px; padding: 8px 12px; border-radius: var(--radius-xs); }
+    .proj-label { color: var(--muted); }
+    .proj-value { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+    .proj-section-title {
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--muted); margin: 14px 0 6px; padding-top: 8px; border-top: 1px dashed var(--border);
+    }
+
+    /* ── Bar Chart ────────────────────────────────────────────────── */
+    .chart-bar { fill: var(--accent); rx: 3; transition: opacity var(--transition); cursor: pointer; }
+    .chart-bar:hover { opacity: 0.75; }
+    .chart-bar-obl { fill: var(--red); opacity: 0.4; rx: 3; cursor: pointer; }
+    .chart-bar-obl:hover { opacity: 0.6; }
+    .chart-label { font-size: 10px; fill: var(--muted); font-family: 'Inter', sans-serif; }
+    .chart-value { font-size: 9px; fill: var(--text); font-family: 'JetBrains Mono', monospace; }
+    .chart-grid { stroke: var(--border); stroke-dasharray: 4 3; }
+    .chart-legend {
+      display: flex; gap: 20px; margin-top: 10px; font-size: 11px; color: var(--muted);
+      justify-content: center;
+    }
+    .chart-legend-dot {
+      display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* ── Filter Bar ───────────────────────────────────────────────── */
+    .filter-bar {
+      display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .filter-bar .sep { width: 1px; height: 20px; background: var(--border); }
+
+    /* ── Empty State ──────────────────────────────────────────────── */
+    .empty {
+      text-align: center; padding: 48px 24px; color: var(--muted); font-size: 13px;
+    }
+    .empty svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.3; }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 900px) {
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .chat-layout { flex-direction: column; height: auto; }
+      .chat-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; padding: 12px 0; }
+      .sidebar-logo, .nav-section, .sidebar-footer { display: none; }
+      .nav-item { padding: 12px; justify-content: center; }
+      .nav-item span { display: none; }
+      .main { margin-left: 60px; padding: 16px; }
+    }
+
+    /* ── Utility ──────────────────────────────────────────────────── */
+    .mt-24 { margin-top: 24px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-8 { margin-top: 8px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mb-12 { margin-bottom: 12px; }
+    .mb-8 { margin-bottom: 8px; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .flex-center { display: flex; align-items: center; gap: 8px; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-yellow { color: var(--yellow); }
+    .text-accent { color: var(--accent); }
+    .fw-600 { font-weight: 600; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Divider ──────────────────────────────────────────────────── */
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* ── Scrollbar ─────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* ── Tab Group ─────────────────────────────────────────────────── */
+    .tab-group { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+    .tab-item {
+      padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--muted);
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: all var(--transition);
+    }
+    .tab-item:hover { color: var(--text); }
+    .tab-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- ── Sidebar ─────────────────────────────────────────────── -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <h1>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          ISARV
+        </h1>
+        <span>Fiscal Mission Control</span>
+      </div>
+
+      <div class="nav-section">Dashboard</div>
+      <div class="nav-item active" onclick="navigate('overview', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Overview</span>
+      </div>
+      <div class="nav-item" onclick="navigate('transactions', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>Transactions</span>
+        <span class="nav-badge" id="nav-pending" style="display:none">0</span>
+      </div>
+
+      <div class="nav-section">Analysis</div>
+      <div class="nav-item" onclick="navigate('projections', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Projections</span>
+      </div>
+      <div class="nav-item" onclick="navigate('deadlines', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Deadlines</span>
+      </div>
+      <div class="nav-item" onclick="navigate('compliance', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>Compliance</span>
+      </div>
+      <div class="nav-item" onclick="navigate('cashflow', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Cashflow</span>
+      </div>
+
+      <div class="nav-section">Operations</div>
+      <div class="nav-item" onclick="navigate('clients', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Clients</span>
+      </div>
+      <div class="nav-item" onclick="navigate('invoices', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Invoices</span>
+      </div>
+
+      <div class="nav-section">Intelligence</div>
+      <div class="nav-item" onclick="navigate('advisor', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>AI Advisor</span>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status">
+          <div class="status-row">
+            <span class="status-dot live" id="ptax-dot"></span>
+            <span class="status-label">PTAX</span>
+            <span class="status-val" id="ptax-val">...</span>
+          </div>
+          <div class="status-row">
+            <span class="status-dot live" id="wise-dot"></span>
+            <span class="status-label">Wise</span>
+            <span class="status-val" id="wise-val">...</span>
+          </div>
+          <div class="status-row">
+            <span class="status-dot" id="groq-dot"></span>
+            <span class="status-label">Groq AI</span>
+            <span class="status-val" id="groq-val">...</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Main Content ────────────────────────────────────────── -->
+    <main class="main">
+
+      <!-- ═══ OVERVIEW ══════════════════════════════════════════ -->
+      <div class="page active" id="page-overview">
+        <div class="page-header flex-between">
+          <div>
+            <h2>Monthly Overview</h2>
+            <p id="ov-date"></p>
+          </div>
+          <button class="btn" onclick="loadOverview()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+
+        <div class="grid-4 mb-12" id="ov-stats">
+          <div class="stat-card"><div class="skeleton" style="width:80%"></div></div>
+          <div class="stat-card"><div class="skeleton" style="width:70%"></div></div>
+          <div class="stat-card"><div class="skeleton" style="width:60%"></div></div>
+          <div class="stat-card"><div class="skeleton" style="width:75%"></div></div>
+        </div>
+
+        <div class="grid-2 gap-24 mt-16">
+          <div>
+            <div class="card mb-12" id="ov-projection">
+              <div class="skeleton" style="height:200px"></div>
+            </div>
+          </div>
+          <div>
+            <div class="card mb-12" id="ov-gauge">
+              <div class="skeleton" style="height:120px"></div>
+            </div>
+            <div class="card mb-12" id="ov-deadlines">
+              <div class="skeleton" style="height:100px"></div>
+            </div>
+            <div class="card" id="ov-pending">
+              <div class="skeleton" style="height:60px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TRANSACTIONS ══════════════════════════════════════ -->
+      <div class="page" id="page-transactions">
+        <div class="page-header flex-between">
+          <div>
+            <h2>Transactions</h2>
+            <p>Wise activities synced to Google Sheets</p>
+          </div>
+          <button class="btn btn-primary" id="sync-btn" onclick="syncWise()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Sync Wise
+          </button>
+        </div>
+        <div class="filter-bar">
+          <select class="sel" id="tx-year" onchange="loadTransactions()"></select>
+          <select class="sel" id="tx-month" onchange="loadTransactions()"></select>
+          <div class="sep"></div>
+          <select class="sel" id="tx-status" onchange="loadTransactions()">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+          </select>
+        </div>
+        <div class="card" id="tx-table-wrap">
+          <div class="empty">Loading transactions...</div>
+        </div>
+        <div class="pagination" id="tx-pagination"></div>
+      </div>
+
+      <!-- ═══ PROJECTIONS ═══════════════════════════════════════ -->
+      <div class="page" id="page-projections">
+        <div class="page-header">
+          <h2>Monthly Projection</h2>
+          <p>Interactive fiscal calculator with live PTAX rate</p>
+        </div>
+        <div class="grid-2 gap-24">
+          <div class="card">
+            <div class="card-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Parameters
+            </div>
+            <div class="input-group">
+              <label>Revenue (USD)</label>
+              <input type="number" id="proj-revenue" placeholder="Enter revenue USD" step="50" />
+            </div>
+            <div class="input-group">
+              <label>PTAX Override (leave empty for live rate)</label>
+              <input type="number" id="proj-ptax" placeholder="Auto" step="0.01" />
+            </div>
+            <div class="input-group">
+              <label>Pro-labore Override (BRL, leave empty for optimal)</label>
+              <input type="number" id="proj-prolabore" placeholder="Auto (~30% for Fator R)" step="50" />
+            </div>
+            <button class="btn btn-primary" onclick="calcProjection()" style="width:100%;justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Calculate
+            </button>
+          </div>
+          <div class="card" id="proj-result">
+            <div class="empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <div>Enter values and click Calculate</div>
+            </div>
+          </div>
+        </div>
+        <div class="card mt-24" id="proj-comparison" style="display:none"></div>
+      </div>
+
+      <!-- ═══ DEADLINES ═════════════════════════════════════════ -->
+      <div class="page" id="page-deadlines">
+        <div class="page-header flex-between">
+          <div>
+            <h2>Fiscal Deadlines</h2>
+            <p>Monthly and annual obligations calendar</p>
+          </div>
+          <div class="flex-center">
+            <span class="badge badge-red" id="dl-overdue-count" style="display:none"></span>
+            <span class="badge badge-yellow" id="dl-upcoming-count" style="display:none"></span>
+          </div>
+        </div>
+        <div class="card-label mt-8 mb-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Monthly Deadlines
+        </div>
+        <div id="dl-monthly" style="display:flex;flex-direction:column;gap:8px"></div>
+
+        <div class="card-label mt-24 mb-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Annual Deadlines
+        </div>
+        <div id="dl-annual" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- ═══ COMPLIANCE ════════════════════════════════════════ -->
+      <div class="page" id="page-compliance">
+        <div class="page-header flex-between">
+          <div>
+            <h2>Compliance Status</h2>
+            <p>Real-time fiscal health checks for ISARV LTDA</p>
+          </div>
+          <button class="btn" onclick="loadCompliance()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Re-check
+          </button>
+        </div>
+        <div class="grid-3" id="comp-checks">
+          <div class="check-card"><div class="skeleton" style="height:100px"></div></div>
+          <div class="check-card"><div class="skeleton" style="height:100px"></div></div>
+          <div class="check-card"><div class="skeleton" style="height:100px"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ CASHFLOW ══════════════════════════════════════════ -->
+      <div class="page" id="page-cashflow">
+        <div class="page-header flex-between">
+          <div>
+            <h2>Cashflow History</h2>
+            <p>Revenue, obligations, and Fator R trend</p>
+          </div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="cf-toggle-monthly" onclick="setCashflowView('monthly')">Monthly</button>
+            <button class="toggle-btn" id="cf-toggle-annual" onclick="setCashflowView('annual')">Annual</button>
+          </div>
+        </div>
+        <div class="card mb-16" id="cf-chart">
+          <div class="skeleton" style="height:220px"></div>
+        </div>
+        <div class="card" id="cf-table">
+          <div class="skeleton" style="height:200px"></div>
+        </div>
+      </div>
+
+      <!-- ═══ AI ADVISOR ════════════════════════════════════════ -->
+      <div class="page" id="page-advisor">
+        <div class="page-header">
+          <h2>AI Fiscal Advisor</h2>
+          <p>Expert fiscal consultant powered by Groq LLM with live data access</p>
+        </div>
+        <div class="chat-layout">
+          <div class="chat-sidebar">
+            <div class="chat-sidebar-label">Quick Actions</div>
+            <div id="adv-quick"></div>
+            <div class="ctx-panel mt-8" id="ctx-panel">
+              <button class="ctx-toggle" onclick="toggleContext()">
+                Data Context
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="ctx-body" id="ctx-body"></div>
+            </div>
+          </div>
+          <div class="chat-main">
+            <div class="chat-messages" id="adv-messages">
+              <div class="msg msg-ai">
+                Soy tu asesor fiscal para ISARV LTDA. Tengo acceso a tus datos fiscales en tiempo real (PTAX, saldos Wise, proyecciones, plazos, compliance).
+                <br><br>
+                Preguntame cualquier cosa sobre la situacion fiscal de tu empresa, o usa las acciones rapidas a la izquierda.
+              </div>
+            </div>
+            <div class="chat-input-wrap">
+              <textarea class="chat-input" id="adv-input" rows="1" placeholder="Pregunta algo sobre tu situacion fiscal..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdvisor();}"></textarea>
+              <button class="btn btn-primary" onclick="sendAdvisor()" id="adv-send-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ CLIENTS ═══════════════════════════════════════════ -->
+      <div class="page" id="page-clients">
+        <div class="page-header flex-between">
+          <div>
+            <h2>Client Management</h2>
+            <p>Manage your client portfolio</p>
+          </div>
+          <button class="btn btn-primary" onclick="showClientForm()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Client
+          </button>
+        </div>
+
+        <!-- Client Form (hidden by default) -->
+        <div class="card mb-12" id="client-form-card" style="display:none">
+          <div class="card-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span id="client-form-title">New Client</span>
+          </div>
+          <div class="grid-2 gap-24 mt-16">
+            <div>
+              <label class="field-label">Name *</label>
+              <input type="text" class="field-input" id="cf-name" placeholder="Company Name" />
+              <label class="field-label mt-8">Key (slug, auto-generated if empty)</label>
+              <input type="text" class="field-input" id="cf-key" placeholder="company-name" />
+              <label class="field-label mt-8">Email</label>
+              <input type="email" class="field-input" id="cf-email" placeholder="billing@company.com" />
+              <label class="field-label mt-8">Address</label>
+              <input type="text" class="field-input" id="cf-address" placeholder="City, Country" />
+            </div>
+            <div>
+              <label class="field-label">Currency *</label>
+              <select class="field-input" id="cf-currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="BRL">BRL</option>
+                <option value="GBP">GBP</option>
+              </select>
+              <label class="field-label mt-8">Monthly Rate</label>
+              <input type="number" class="field-input" id="cf-rate" placeholder="0.00" step="0.01" min="0" />
+              <label class="field-label mt-8">Payment Terms</label>
+              <select class="field-input" id="cf-terms">
+                <option value="Net 30">Net 30</option>
+                <option value="Net 7">Net 7</option>
+                <option value="Net 15">Net 15</option>
+                <option value="Net 60">Net 60</option>
+              </select>
+              <label class="field-label mt-8">Language</label>
+              <select class="field-input" id="cf-lang">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="pt">Portuguese</option>
+              </select>
+            </div>
+          </div>
+          <label class="field-label mt-8">Service Description</label>
+          <input type="text" class="field-input" id="cf-service" placeholder="IT Consulting - ..." />
+          <label class="field-label mt-8">Legal Notes</label>
+          <input type="text" class="field-input" id="cf-legal" placeholder="Optional legal notes for invoices" />
+          <div class="mt-16" style="display:flex;gap:8px">
+            <button class="btn btn-primary" id="cf-submit-btn" onclick="submitClient()">Create Client</button>
+            <button class="btn" onclick="hideClientForm()">Cancel</button>
+          </div>
+        </div>
+
+        <div class="card" id="clients-table">
+          <div class="empty">Loading clients...</div>
+        </div>
+      </div>
+
+      <!-- ═══ INVOICES ═════════════════════════════════════════════ -->
+      <div class="page" id="page-invoices">
+        <div class="page-header flex-between">
+          <div>
+            <h2>Invoice Management</h2>
+            <p>Generate and track client invoices</p>
+          </div>
+          <button class="btn btn-primary" onclick="showInvoiceForm()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Generate Invoice
+          </button>
+        </div>
+
+        <!-- Invoice Generation Form (hidden by default) -->
+        <div class="card mb-12" id="invoice-form-card" style="display:none">
+          <div class="card-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Generate New Invoice
+          </div>
+          <div class="grid-2 gap-24 mt-16">
+            <div>
+              <label class="field-label">Client *</label>
+              <select class="field-input" id="if-client">
+                <option value="">Select client...</option>
+              </select>
+              <label class="field-label mt-8">Amount (USD) — leave empty for client default</label>
+              <input type="number" class="field-input" id="if-amount" placeholder="Client's monthly rate" step="0.01" min="0" />
+              <label class="field-label mt-8">Period</label>
+              <input type="text" class="field-input" id="if-period" placeholder="March 2026 (auto if empty)" />
+            </div>
+            <div>
+              <label class="field-label">Service Description (default from client)</label>
+              <input type="text" class="field-input" id="if-service" placeholder="IT Consulting..." />
+              <label class="field-label mt-8">Invoice Date</label>
+              <input type="date" class="field-input" id="if-date" />
+              <label class="field-label mt-8">PO Number (optional)</label>
+              <input type="text" class="field-input" id="if-po" placeholder="PO-12345" />
+            </div>
+          </div>
+          <div class="mt-16" style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="submitInvoice()">Generate Invoice</button>
+            <button class="btn" onclick="hideInvoiceForm()">Cancel</button>
+          </div>
+        </div>
+
+        <div class="card" id="invoices-table">
+          <div class="empty">Loading invoices...</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════════════
+
+const state = {
+  currentPage: 'overview',
+  txPage: 1,
+  advisorHistory: [],
+  advisorLoading: false,
+  quickActions: {},
+  contextLoaded: false,
+  cashflowView: 'monthly',
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════
+
+function navigate(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (el) el.classList.add('active');
+  state.currentPage = page;
+
+  const loaders = {
+    overview: loadOverview,
+    transactions: loadTransactions,
+    projections: loadProjectionPage,
+    deadlines: loadDeadlines,
+    compliance: loadCompliance,
+    cashflow: loadCashflow,
+    clients: loadClients,
+    invoices: loadInvoices,
+    advisor: loadAdvisorQuickActions,
+  };
+  if (loaders[page]) loaders[page]();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  API + HELPERS
+// ══════════════════════════════════════════════════════════════════════════
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+  return r.json();
+}
+
+function fmt(val, dec = 2) {
+  if (val === null || val === undefined || val === '?') return '?';
+  const n = typeof val === 'string' ? parseFloat(val) : val;
+  if (isNaN(n)) return '?';
+  return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function statusBadge(status) {
+  const m = {
+    ok: 'badge-green', confirmed: 'badge-green', future: 'badge-muted',
+    upcoming: 'badge-yellow', warning: 'badge-yellow', pending: 'badge-yellow',
+    overdue: 'badge-red', today: 'badge-red badge-pulse', critical: 'badge-red',
+    passed: 'badge-muted',
+    generated: 'badge-yellow', sent: 'badge-blue', paid: 'badge-green',
+  };
+  return `<span class="badge ${m[status] || 'badge-muted'}">${status}</span>`;
+}
+
+function catBadge(cat) {
+  const colors = {
+    Revenue: 'badge-green', DAS: 'badge-red', INSS: 'badge-red',
+    'Pro-labore': 'badge-yellow', Contabilizei: 'badge-yellow',
+    Tools: 'badge-blue', Software: 'badge-blue',
+    'Bank Fees': 'badge-muted', Other: 'badge-muted', Office: 'badge-muted',
+  };
+  return `<span class="badge ${colors[cat] || 'badge-muted'}">${cat || 'Uncategorized'}</span>`;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toasts');
+  const icon = type === 'success'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `${icon} ${escapeHtml(message)}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3200);
+}
+
+const CATEGORIES = ['Revenue','DAS','INSS','Pro-labore','Contabilizei','Tools','Software','Office','Bank Fees','Other'];
+
+// ══════════════════════════════════════════════════════════════════════════
+//  FATOR R GAUGE (SVG semicircle)
+// ══════════════════════════════════════════════════════════════════════════
+
+function renderGauge(percentage, status) {
+  const pct = parseFloat(percentage) || 0;
+  const isOK = status === 'OK';
+  const color = isOK ? 'var(--green)' : 'var(--red)';
+  const bgColor = isOK ? 'var(--green-bg)' : 'var(--red-bg)';
+
+  // Semicircle gauge: 0% = left, 100% = right, 28% threshold marked
+  const cx = 70, cy = 62, r = 50;
+  const startAngle = Math.PI;
+  const endAngle = 0;
+
+  function polarToCart(angle) {
+    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+  }
+
+  // Background arc
+  const bgStart = polarToCart(startAngle);
+  const bgEnd = polarToCart(endAngle);
+
+  // Value arc (pct capped at 60% for display)
+  const displayPct = Math.min(pct, 60) / 60;
+  const valAngle = startAngle - displayPct * Math.PI;
+  const valEnd = polarToCart(valAngle);
+  const largeArc = displayPct > 0.5 ? 1 : 0;
+
+  // Threshold line at 28%
+  const threshAngle = startAngle - (28 / 60) * Math.PI;
+  const threshPt = polarToCart(threshAngle);
+  const threshInner = { x: cx + (r - 12) * Math.cos(threshAngle), y: cy + (r - 12) * Math.sin(threshAngle) };
+
+  return `
+    <div class="gauge-container">
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 140 80">
+          <path d="M ${bgStart.x} ${bgStart.y} A ${r} ${r} 0 1 1 ${bgEnd.x} ${bgEnd.y}"
+                fill="none" stroke="var(--surface3)" stroke-width="10" stroke-linecap="round"/>
+          <path d="M ${bgStart.x} ${bgStart.y} A ${r} ${r} 0 ${largeArc} 1 ${valEnd.x} ${valEnd.y}"
+                fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"/>
+          <line x1="${threshInner.x}" y1="${threshInner.y}" x2="${threshPt.x}" y2="${threshPt.y}"
+                stroke="var(--yellow)" stroke-width="2" stroke-dasharray="3 2"/>
+          <text x="${threshPt.x + 2}" y="${threshPt.y - 4}" font-size="8" fill="var(--yellow)" font-family="Inter">28%</text>
+        </svg>
+        <div class="gauge-val" style="color:${color}">${percentage}</div>
+      </div>
+      <div class="gauge-label">${isOK ? 'Anexo III (6%)' : 'Anexo V (15.5%)'}</div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  OVERVIEW PAGE
+// ══════════════════════════════════════════════════════════════════════════
+
+async function loadOverview() {
+  try {
+    const d = await api('/api/overview');
+    const proj = d.projection || {};
+    const rev = proj.revenue || {};
+    const obl = proj.obligations || {};
+    const fr = proj.fator_r || {};
+    const div = proj.dividends || {};
+    const wise = d.wise_balances || {};
+    const wiseUSD = wise.USD ? wise.USD.amount : 0;
+
+    const ovDate = d.date || new Date().toISOString().substring(0, 10);
+    const ovMonthName = new Date(ovDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    document.getElementById('ov-date').textContent = ovMonthName;
+
+    // Sidebar status
+    document.getElementById('ptax-val').textContent = `R$ ${fmt(d.ptax, 4)}`;
+    document.getElementById('ptax-dot').className = 'status-dot live';
+    document.getElementById('wise-val').textContent = `$${fmt(wiseUSD, 0)}`;
+    document.getElementById('wise-dot').className = 'status-dot live';
+
+    // Stat cards
+    document.getElementById('ov-stats').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">PTAX (BCB)</div>
+          <div class="stat-value">R$ ${fmt(d.ptax, 4)}</div>
+          <div class="stat-sub">USD/BRL sell rate</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Wise Business</div>
+          <div class="stat-value">USD ${fmt(wiseUSD)}</div>
+          <div class="stat-sub">${Object.keys(wise).filter(c => wise[c].amount > 0).map(c => `${c} ${fmt(wise[c].amount)}`).join(' &middot; ') || 'No balances'}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon accent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Revenue this month</div>
+          <div class="stat-value">R$ ${fmt(rev.brl)}</div>
+          <div class="stat-sub">USD ${fmt(rev.usd)} &middot; ${rev.source === 'transactions' ? 'from Sheet' : (rev.source === 'no_revenue' ? 'no revenue yet' : 'manual')}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon ${(d.deadlines && d.deadlines.length > 0) ? 'yellow' : 'green'}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Deadline Alerts</div>
+          <div class="stat-value">${d.deadlines ? d.deadlines.length : 0}</div>
+          <div class="stat-sub">${d.pending_review_count || 0} transactions pending</div>
+        </div>
+      </div>
+    `;
+
+    // Nav badge for pending transactions
+    const navPending = document.getElementById('nav-pending');
+    if (d.pending_review_count > 0) {
+      navPending.textContent = d.pending_review_count;
+      navPending.style.display = '';
+    } else {
+      navPending.style.display = 'none';
+    }
+
+    // Projection card
+    document.getElementById('ov-projection').innerHTML = `
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Monthly Projection — ${ovMonthName}
+      </div>
+      <div class="proj-row"><span class="proj-label">Revenue <span class="badge ${rev.source === 'transactions' ? 'badge-green' : 'badge-muted'}" style="font-size:9px">${rev.source === 'transactions' ? 'SHEET' : (rev.source === 'no_revenue' ? 'NO REVENUE' : 'MANUAL')}</span></span><span class="proj-value">USD ${fmt(rev.usd)} &rarr; R$ ${fmt(rev.brl)}</span></div>
+      <div class="proj-row"><span class="proj-label">Pro-labore (bruto)</span><span class="proj-value">R$ ${fmt(obl.prolabore_bruto)}</span></div>
+      <div class="proj-row"><span class="proj-label">INSS (11%)</span><span class="proj-value">R$ ${fmt(obl.inss_11pct)}</span></div>
+      <div class="proj-row"><span class="proj-label">DAS ${obl.das_anexo || ''} (${obl.das_rate || ''})</span><span class="proj-value">R$ ${fmt(obl.das)}</span></div>
+      <div class="proj-row"><span class="proj-label">Contabilizei</span><span class="proj-value">R$ ${fmt(obl.contabilizei)}</span></div>
+      <div class="proj-row total"><span class="proj-label">Total Obligations</span><span class="proj-value">R$ ${fmt(obl.total_brl)}</span></div>
+      <div class="proj-row highlight mt-8">
+        <span class="proj-label fw-600 text-green">Dividends Available</span>
+        <span class="proj-value fw-600 text-green">USD ${fmt(div.available_usd)} (R$ ${fmt(div.available_brl)})</span>
+      </div>
+      <div style="margin-top:12px;padding:8px 12px;background:var(--yellow-bg);border-radius:var(--radius-xs);font-size:11px;color:var(--yellow);border:1px solid var(--yellow-bg2)">
+        Valores estimados — validar con contador antes de acciones fiscales
+      </div>
+    `;
+
+    // Fator R gauge
+    document.getElementById('ov-gauge').innerHTML = `
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Fator R
+      </div>
+      ${renderGauge(fr.percentage || '0.0%', fr.status || 'FAIL')}
+    `;
+
+    // Deadline alerts
+    const dls = d.deadlines || [];
+    document.getElementById('ov-deadlines').innerHTML = `
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Deadline Alerts
+      </div>
+      ${dls.length === 0
+        ? '<div style="font-size:13px;color:var(--green);margin-top:8px;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> All deadlines clear</div>'
+        : dls.map(dl => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px;border-bottom:1px solid var(--border)">
+            <span>${dl.name}</span>
+            <span class="flex-center">
+              ${statusBadge(dl.days_remaining < 0 ? 'overdue' : (dl.days_remaining === 0 ? 'today' : 'upcoming'))}
+              <span class="mono" style="font-size:11px;min-width:40px;text-align:right">${Math.abs(dl.days_remaining)}d</span>
+            </span>
+          </div>
+        `).join('')}
+    `;
+
+    // Pending review
+    document.getElementById('ov-pending').innerHTML = `
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Pending Review
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="font-size:24px;font-weight:700">${d.pending_review_count || 0}</span>
+        ${d.pending_review_count > 0
+          ? '<button class="btn btn-sm btn-primary" onclick="navigate(\'transactions\', document.querySelectorAll(\'.nav-item\')[2])">Review</button>'
+          : '<span class="badge badge-green">All confirmed</span>'}
+      </div>
+    `;
+
+  } catch (e) {
+    console.error('Overview load failed:', e);
+    showToast('Failed to load overview', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  TRANSACTIONS PAGE
+// ══════════════════════════════════════════════════════════════════════════
+
+function initTxFilters() {
+  const now = new Date();
+  const yearSel = document.getElementById('tx-year');
+  const monthSel = document.getElementById('tx-month');
+  if (yearSel.options.length > 0) return;
+  for (let y = now.getFullYear(); y >= 2025; y--) {
+    yearSel.add(new Option(y, y));
+  }
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  months.forEach((m, i) => monthSel.add(new Option(m, i + 1)));
+  monthSel.value = now.getMonth() + 1;
+}
+
+async function loadTransactions() {
+  initTxFilters();
+  const year = document.getElementById('tx-year').value;
+  const month = document.getElementById('tx-month').value;
+  const status = document.getElementById('tx-status').value;
+  const page = state.txPage;
+
+  try {
+    const d = await api(`/api/transactions?year=${year}&month=${month}&status=${status}&page=${page}&per_page=15`);
+    const wrap = document.getElementById('tx-table-wrap');
+
+    if (!d.transactions || d.transactions.length === 0) {
+      wrap.innerHTML = `<div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <div>No transactions found for this period</div>
+      </div>`;
+      document.getElementById('tx-pagination').innerHTML = '';
+      return;
+    }
+
+    wrap.innerHTML = `
+      <table class="tbl">
+        <thead><tr>
+          <th>Date</th><th class="right">Amount</th><th>Currency</th><th>Category</th>
+          <th>Description</th><th>Status</th><th style="width:90px">Actions</th>
+        </tr></thead>
+        <tbody>
+          ${d.transactions.map(tx => `
+            <tr>
+              <td class="mono">${(tx.date || '').substring(0, 10)}</td>
+              <td class="mono right" style="color:${parseFloat(tx.amount) >= 0 ? 'var(--green)' : 'var(--text)'};font-weight:500">
+                ${parseFloat(tx.amount) >= 0 ? '+' : ''}${tx.amount}
+              </td>
+              <td>${tx.currency}</td>
+              <td>
+                <select class="sel" onchange="updateCategory(${tx.row}, this.value)" style="min-width:100px">
+                  <option value="" ${!tx.category ? 'selected' : ''}>Select...</option>
+                  ${CATEGORIES.map(c => `<option ${c === tx.category ? 'selected' : ''}>${c}</option>`).join('')}
+                </select>
+              </td>
+              <td class="truncate" style="max-width:220px" title="${escapeHtml(tx.description || '')}">${tx.description || ''}</td>
+              <td>${statusBadge(tx.status || 'pending')}</td>
+              <td>
+                ${(tx.status || 'pending') !== 'confirmed'
+                  ? `<button class="btn btn-sm btn-primary" onclick="confirmTx(${tx.row})">Confirm</button>`
+                  : '<span class="badge badge-green">Done</span>'}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    // Pagination
+    const pag = document.getElementById('tx-pagination');
+    if (d.total_pages <= 1) { pag.innerHTML = ''; return; }
+    let html = '';
+    if (d.page > 1) html += `<button class="btn btn-sm" onclick="state.txPage=${d.page-1};loadTransactions()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>`;
+    html += `<span class="page-info">Page ${d.page} of ${d.total_pages} (${d.total} records)</span>`;
+    if (d.page < d.total_pages) html += `<button class="btn btn-sm" onclick="state.txPage=${d.page+1};loadTransactions()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>`;
+    pag.innerHTML = html;
+
+  } catch (e) {
+    console.error('Transactions load failed:', e);
+    document.getElementById('tx-table-wrap').innerHTML = `<div class="empty" style="color:var(--red)">Failed to load: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function confirmTx(row) {
+  try {
+    await api(`/api/transactions/${row}/confirm`, { method: 'POST' });
+    showToast('Transaction confirmed');
+    loadTransactions();
+  } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+}
+
+async function updateCategory(row, category) {
+  if (!category) return;
+  try {
+    await api(`/api/transactions/${row}/category`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category }),
+    });
+    showToast(`Category set to ${category}`);
+    loadTransactions();
+  } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+}
+
+async function syncWise() {
+  const btn = document.getElementById('sync-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Syncing...';
+  try {
+    const d = await api('/api/sync-wise', { method: 'POST' });
+    const count = d.new_count || 0;
+    showToast(`Synced ${count} new transaction${count !== 1 ? 's' : ''}`);
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Done';
+    setTimeout(() => {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync Wise';
+      btn.disabled = false;
+    }, 3000);
+    loadTransactions();
+  } catch (e) {
+    showToast('Sync failed: ' + e.message, 'error');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync Wise';
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  PROJECTIONS PAGE
+// ══════════════════════════════════════════════════════════════════════════
+
+async function loadProjectionPage() {
+  try {
+    const d = await api('/api/ptax');
+    document.getElementById('proj-ptax').placeholder = `Auto (R$ ${fmt(d.rate, 4)})`;
+  } catch (e) {}
+}
+
+async function calcProjection() {
+  const revenue = document.getElementById('proj-revenue').value;
+  const ptax = document.getElementById('proj-ptax').value;
+  const prolabore = document.getElementById('proj-prolabore').value;
+
+  const body = { revenue_usd: parseFloat(revenue) || 0 };
+  if (ptax) body.exchange_rate = parseFloat(ptax);
+  if (prolabore) body.prolabore_brl = parseFloat(prolabore);
+
+  const resultEl = document.getElementById('proj-result');
+  resultEl.innerHTML = '<div style="text-align:center;padding:40px"><span class="spinner"></span> Calculating...</div>';
+
+  try {
+    const p = await api('/api/projection/calc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const rev = p.revenue || {};
+    const obl = p.obligations || {};
+    const fr = p.fator_r || {};
+    const div = p.dividends || {};
+    const flows = p.flows || {};
+
+    resultEl.innerHTML = `
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Projection Result
+      </div>
+      <div class="proj-row"><span class="proj-label">Revenue</span><span class="proj-value">USD ${fmt(rev.usd)} = R$ ${fmt(rev.brl)}</span></div>
+      <div class="proj-row"><span class="proj-label">PTAX Rate</span><span class="proj-value">R$ ${fmt(rev.exchange_rate, 4)}</span></div>
+
+      <div class="proj-section-title">Obligations</div>
+      <div class="proj-row"><span class="proj-label">Pro-labore (bruto)</span><span class="proj-value">R$ ${fmt(obl.prolabore_bruto)}</span></div>
+      <div class="proj-row"><span class="proj-label">INSS (11%)</span><span class="proj-value">R$ ${fmt(obl.inss_11pct)}</span></div>
+      <div class="proj-row"><span class="proj-label">Pro-labore (liquido)</span><span class="proj-value">R$ ${fmt(obl.prolabore_liquido)}</span></div>
+      <div class="proj-row"><span class="proj-label">DAS ${obl.das_anexo || ''} (${obl.das_rate || ''})</span><span class="proj-value">R$ ${fmt(obl.das)}</span></div>
+      <div class="proj-row"><span class="proj-label">Contabilizei</span><span class="proj-value">R$ ${fmt(obl.contabilizei)}</span></div>
+      <div class="proj-row total"><span class="proj-label">Total BRL</span><span class="proj-value">R$ ${fmt(obl.total_brl)} (~USD ${fmt(obl.total_usd)})</span></div>
+
+      <div class="proj-section-title">Analysis</div>
+      <div class="proj-row"><span class="proj-label">Fator R</span><span class="proj-value ${fr.status === 'OK' ? 'text-green' : 'text-red'}">${fr.percentage} [${fr.status}]</span></div>
+
+      <div class="proj-row highlight mt-8"><span class="proj-label fw-600 text-green">Dividends</span><span class="proj-value fw-600 text-green">USD ${fmt(div.available_usd)} (${flows.pct_kept_usd || '?'})</span></div>
+      <div class="proj-row"><span class="proj-label">IRRF Dividends</span><span class="proj-value">${div.irrf || 'Isento'}</span></div>
+      <div class="proj-row"><span class="proj-label">Convert to BRL</span><span class="proj-value">USD ${fmt(flows.convert_to_brl_usd)} (${flows.pct_converted || '?'})</span></div>
+    `;
+
+    // Comparison: optimal vs minimum pro-labore
+    try {
+      const minBody = { revenue_usd: body.revenue_usd, prolabore_brl: 1621 };
+      if (body.exchange_rate) minBody.exchange_rate = body.exchange_rate;
+      const pMin = await api('/api/projection/calc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(minBody),
+      });
+      const mObl = pMin.obligations || {};
+      const mFr = pMin.fator_r || {};
+      const mDiv = pMin.dividends || {};
+
+      const savings = obl.total_brl - mObl.total_brl;
+      const compEl = document.getElementById('proj-comparison');
+      compEl.style.display = '';
+      compEl.innerHTML = `
+        <div class="card-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Comparison: Your Plan vs Minimum Pro-labore
+        </div>
+        <table class="tbl" style="margin-top:8px">
+          <thead><tr>
+            <th></th>
+            <th class="right">Your Plan (${obl.das_anexo || 'III'})</th>
+            <th class="right">Minimum (${mObl.das_anexo || 'V'})</th>
+            <th class="right">Difference</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>Pro-labore</td>
+              <td class="mono right">R$ ${fmt(obl.prolabore_bruto)}</td>
+              <td class="mono right">R$ ${fmt(mObl.prolabore_bruto)}</td>
+              <td class="mono right">R$ ${fmt(obl.prolabore_bruto - mObl.prolabore_bruto)}</td>
+            </tr>
+            <tr>
+              <td>DAS</td>
+              <td class="mono right">R$ ${fmt(obl.das)}</td>
+              <td class="mono right">R$ ${fmt(mObl.das)}</td>
+              <td class="mono right ${obl.das < mObl.das ? 'text-green' : 'text-red'}">R$ ${fmt(obl.das - mObl.das)}</td>
+            </tr>
+            <tr>
+              <td>Total Tax</td>
+              <td class="mono right fw-600">R$ ${fmt(obl.total_brl)}</td>
+              <td class="mono right fw-600">R$ ${fmt(mObl.total_brl)}</td>
+              <td class="mono right fw-600 ${savings < 0 ? 'text-green' : 'text-red'}">R$ ${fmt(savings)}</td>
+            </tr>
+            <tr>
+              <td>Fator R</td>
+              <td class="mono right ${fr.status === 'OK' ? 'text-green' : 'text-red'}">${fr.percentage}</td>
+              <td class="mono right ${mFr.status === 'OK' ? 'text-green' : 'text-red'}">${mFr.percentage}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Dividends</td>
+              <td class="mono right text-green">USD ${fmt(div.available_usd)}</td>
+              <td class="mono right text-green">USD ${fmt(mDiv.available_usd)}</td>
+              <td class="mono right">${div.available_usd > mDiv.available_usd ? '<span class="badge badge-green">Better</span>' : '<span class="badge badge-red">Worse</span>'}</td>
+            </tr>
+          </tbody>
+        </table>
+        ${savings < 0 ? `<div style="margin-top:12px;padding:10px 14px;background:var(--green-bg);border-radius:var(--radius-sm);font-size:13px;color:var(--green);font-weight:500">
+          Your optimized pro-labore saves R$ ${fmt(Math.abs(savings))} in total taxes vs minimum salary.
+        </div>` : `<div style="margin-top:12px;padding:10px 14px;background:var(--yellow-bg);border-radius:var(--radius-sm);font-size:13px;color:var(--yellow);font-weight:500">
+          Higher pro-labore costs R$ ${fmt(savings)} more, but secures Anexo III rate.
+        </div>`}
+      `;
+    } catch (e) { console.warn('Comparison calc failed:', e); }
+
+  } catch (e) {
+    resultEl.innerHTML = `<div class="empty" style="color:var(--red)">Calculation failed: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  DEADLINES PAGE
+// ══════════════════════════════════════════════════════════════════════════
+
+async function loadDeadlines() {
+  try {
+    const d = await api('/api/deadlines');
+    const monthly = d.monthly || [];
+    const annual = d.annual || [];
+
+    // Count overdue + upcoming
+    const overdue = monthly.filter(dl => dl.status === 'overdue' || dl.status === 'today').length;
+    const upcoming = monthly.filter(dl => dl.status === 'upcoming').length;
+
+    const overdueEl = document.getElementById('dl-overdue-count');
+    const upcomingEl = document.getElementById('dl-upcoming-count');
+    if (overdue > 0) { overdueEl.textContent = `${overdue} overdue`; overdueEl.style.display = ''; }
+    else { overdueEl.style.display = 'none'; }
+    if (upcoming > 0) { upcomingEl.textContent = `${upcoming} upcoming`; upcomingEl.style.display = ''; }
+    else { upcomingEl.style.display = 'none'; }
+
+    document.getElementById('dl-monthly').innerHTML = monthly.map(dl => `
+      <div class="dl-card ${dl.status}">
+        <div style="flex:1">
+          <div class="flex-between mb-8">
+            <div class="dl-name">${dl.name}</div>
+            ${statusBadge(dl.status)}
+          </div>
+          <div class="dl-desc">${dl.description || ''}</div>
+          ${dl.notes ? `<div class="dl-notes">${dl.notes}</div>` : ''}
+        </div>
+        <div style="text-align:right;min-width:80px">
+          <div class="dl-days" style="color:${dl.days_remaining < 0 ? 'var(--red)' : (dl.days_remaining <= 5 ? 'var(--yellow)' : 'var(--muted)')}">
+            ${dl.days_remaining < 0 ? Math.abs(dl.days_remaining) + 'd overdue' : (dl.days_remaining === 0 ? 'TODAY' : dl.days_remaining + 'd remaining')}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Day ${dl.day} &middot; ${dl.severity}</div>
+          ${dl.requires_approval ? '<div style="font-size:10px;color:var(--accent);margin-top:2px">Requires approval</div>' : ''}
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('dl-annual').innerHTML = annual.map(dl => `
+      <div class="dl-card ${dl.status}">
+        <div style="flex:1">
+          <div class="flex-between mb-8">
+            <div class="dl-name">${dl.name}</div>
+            ${statusBadge(dl.status)}
+          </div>
+          <div class="dl-desc">${dl.description || ''}</div>
+          ${dl.notes ? `<div class="dl-notes">${dl.notes}</div>` : ''}
+        </div>
+        <div style="text-align:right;min-width:100px">
+          <div class="dl-days" style="color:${dl.days_remaining < 0 ? 'var(--muted)' : (dl.days_remaining <= 30 ? 'var(--yellow)' : 'var(--muted)')}">
+            ${dl.days_remaining < 0 ? 'Passed' : dl.days_remaining + 'd remaining'}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">${dl.deadline_date} &middot; ${dl.severity}</div>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (e) {
+    console.error('Deadlines load failed:', e);
+    showToast('Failed to load deadlines', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  COMPLIANCE PAGE
+// ══════════════════════════════════════════════════════════════════════════
+
+function checkIcon(status) {
+  if (status === 'ok') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+  if (status === 'warning') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+}
+
+async function loadCompliance() {
+  try {
+    const d = await api('/api/compliance');
+
+    document.getElementById('comp-checks').innerHTML = (d.checks || []).map(ch => `
+      <div class="check-card">
+        <div class="check-header">
+          <div class="flex-center">
+            <div class="check-icon ${ch.status}">${checkIcon(ch.status)}</div>
+            <span class="check-name">${ch.name}</span>
+          </div>
+          ${statusBadge(ch.status)}
+        </div>
+        <div class="check-value" style="color:${ch.status === 'ok' ? 'var(--green)' : (ch.status === 'critical' ? 'var(--red)' : 'var(--yellow)')}">${ch.value}</div>
+        <div class="check-detail">${ch.detail}</div>
+        ${ch.alerts && ch.alerts.length > 0 ? ch.alerts.map(a => `
+          <div style="margin-top:10px;padding:10px 12px;background:${a.severity === 'critical' ? 'var(--red-bg)' : 'var(--yellow-bg)'};border-radius:var(--radius-sm);font-size:12px;border-left:3px solid ${a.severity === 'critical' ? 'var(--red)' : 'var(--yellow)'}">
+            <div style="color:${a.severity === 'critical' ? 'var(--red)' : 'var(--yellow)'};font-weight:600">${a.message}</div>
+            <div style="color:var(--muted);margin-top:4px">Action: ${a.action}</div>
+          </div>
+        `).join('') : ''}
+      </div>
+    `).join('');
+
+  } catch (e) {
+    console.error('Compliance load failed:', e);
+    showToast('Failed to load compliance', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  CASHFLOW PAGE
+// ══════════════════════════════════════════════════════════════════════════
+
+function setCashflowView(view) {
+  state.cashflowView = view;
+  document.getElementById('cf-toggle-monthly').classList.toggle('active', view === 'monthly');
+  document.getElementById('cf-toggle-annual').classList.toggle('active', view === 'annual');
+  loadCashflow();
+}
+
+async function loadCashflow() {
+  const view = state.cashflowView;
+  try {
+    const d = await api(`/api/cashflow?view=${view}`);
+
+    if (view === 'annual') {
+      renderCashflowAnnual(d.annual || []);
+    } else {
+      renderCashflowMonthly(d.history || [], d.totals_12m || {});
+    }
+  } catch (e) {
+    console.error('Cashflow load failed:', e);
+    showToast('Failed to load cashflow', 'error');
+  }
+}
+
+function renderCashflowMonthly(history, totals) {
+    // SVG Bar Chart
+    if (history.length > 0) {
+      const W = 700, H = 220, padL = 55, padR = 15, padT = 15, padB = 35;
+      const chartW = W - padL - padR;
+      const chartH = H - padT - padB;
+      const maxRev = Math.max(...history.map(h => parseFloat(h.revenue?.brl || 0)), 1);
+      const barGroupW = chartW / history.length;
+      const barW = Math.min(28, barGroupW * 0.35);
+      const gap = 3;
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%">`;
+      for (let i = 0; i <= 4; i++) {
+        const y = padT + chartH * i / 4;
+        const val = maxRev * (4 - i) / 4;
+        svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" class="chart-grid" />`;
+        svg += `<text x="${padL - 6}" y="${y + 3}" text-anchor="end" class="chart-label">${(val / 1000).toFixed(1)}k</text>`;
+      }
+      history.forEach((h, i) => {
+        const rev = parseFloat(h.revenue?.brl || 0);
+        const obl = parseFloat(h.obligations?.total_brl || 0);
+        const x = padL + i * barGroupW + (barGroupW - barW * 2 - gap) / 2;
+        const revH = maxRev > 0 ? (rev / maxRev) * chartH : 0;
+        const oblH = maxRev > 0 ? (obl / maxRev) * chartH : 0;
+        svg += `<rect x="${x}" y="${padT + chartH - revH}" width="${barW}" height="${revH}" class="chart-bar"><title>Revenue: R$ ${fmt(rev)}</title></rect>`;
+        svg += `<rect x="${x + barW + gap}" y="${padT + chartH - oblH}" width="${barW}" height="${oblH}" class="chart-bar-obl"><title>Obligations: R$ ${fmt(obl)}</title></rect>`;
+        const label = h.period ? h.period.substring(5) : '';
+        svg += `<text x="${x + barW + gap/2}" y="${H - 8}" text-anchor="middle" class="chart-label">${label}</text>`;
+      });
+      svg += '</svg>';
+
+      document.getElementById('cf-chart').innerHTML = `
+        <div class="card-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Revenue vs Obligations (BRL) — Monthly
+        </div>
+        ${svg}
+        <div class="chart-legend">
+          <span><span class="chart-legend-dot" style="background:var(--accent)"></span>Revenue</span>
+          <span><span class="chart-legend-dot" style="background:var(--red);opacity:0.5"></span>Obligations</span>
+        </div>
+      `;
+    } else {
+      document.getElementById('cf-chart').innerHTML = `<div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <div>No cashflow history recorded yet</div>
+      </div>`;
+    }
+
+    // Table
+    if (history.length > 0) {
+      document.getElementById('cf-table').innerHTML = `
+        <div class="card-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Monthly Breakdown
+        </div>
+        <table class="tbl" style="margin-top:8px">
+          <thead><tr>
+            <th>Period</th><th class="right">Rev USD</th><th class="right">Rev BRL</th>
+            <th class="right">DAS</th><th>Fator R</th><th>Anexo</th>
+          </tr></thead>
+          <tbody>
+            ${history.map(h => `
+              <tr>
+                <td class="mono">${h.period}</td>
+                <td class="mono right">${fmt(h.revenue?.usd)}</td>
+                <td class="mono right">${fmt(h.revenue?.brl)}</td>
+                <td class="mono right">${fmt(h.obligations?.das_brl)}</td>
+                <td class="mono">${h.fator_r_pct || '?'}</td>
+                <td>
+                  <span class="badge ${h.anexo === 'III' ? 'badge-green' : 'badge-red'}">${h.anexo || '?'}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ${totals.months_recorded ? `
+          <div style="margin-top:16px;padding:14px 16px;background:var(--accent-bg);border-radius:var(--radius-sm);font-size:13px;border:1px solid var(--accent-bg2)">
+            <div style="font-weight:600;color:var(--accent);margin-bottom:6px">12-Month Rolling Summary</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+              <div><span class="stat-label">Fator R</span><div class="mono fw-600">${totals.fator_r_12m_pct || '?'}</div></div>
+              <div><span class="stat-label">Anexo</span><div class="mono fw-600">${totals.anexo_12m || '?'}</div></div>
+              <div><span class="stat-label">Revenue</span><div class="mono fw-600">R$ ${fmt(totals.total_revenue_brl)}</div></div>
+              <div><span class="stat-label">Folha</span><div class="mono fw-600">R$ ${fmt(totals.total_folha_brl)}</div></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px">${totals.months_recorded} months recorded</div>
+          </div>
+        ` : ''}
+      `;
+    } else {
+      document.getElementById('cf-table').innerHTML = '<div class="empty">No data available</div>';
+    }
+}
+
+function renderCashflowAnnual(annual) {
+    if (annual.length > 0) {
+      const W = 700, H = 220, padL = 55, padR = 15, padT = 15, padB = 35;
+      const chartW = W - padL - padR;
+      const chartH = H - padT - padB;
+      const maxRev = Math.max(...annual.map(a => parseFloat(a.revenue_brl || 0)), 1);
+      const barGroupW = chartW / annual.length;
+      const barW = Math.min(50, barGroupW * 0.35);
+      const gap = 4;
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%">`;
+      for (let i = 0; i <= 4; i++) {
+        const y = padT + chartH * i / 4;
+        const val = maxRev * (4 - i) / 4;
+        svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" class="chart-grid" />`;
+        svg += `<text x="${padL - 6}" y="${y + 3}" text-anchor="end" class="chart-label">${(val / 1000).toFixed(0)}k</text>`;
+      }
+      annual.forEach((a, i) => {
+        const rev = parseFloat(a.revenue_brl || 0);
+        const obl = parseFloat(a.total_obligations_brl || 0);
+        const x = padL + i * barGroupW + (barGroupW - barW * 2 - gap) / 2;
+        const revH = maxRev > 0 ? (rev / maxRev) * chartH : 0;
+        const oblH = maxRev > 0 ? (obl / maxRev) * chartH : 0;
+        svg += `<rect x="${x}" y="${padT + chartH - revH}" width="${barW}" height="${revH}" class="chart-bar"><title>${a.year} Revenue: R$ ${fmt(rev)}</title></rect>`;
+        svg += `<rect x="${x + barW + gap}" y="${padT + chartH - oblH}" width="${barW}" height="${oblH}" class="chart-bar-obl"><title>${a.year} Obligations: R$ ${fmt(obl)}</title></rect>`;
+        svg += `<text x="${x + barW + gap/2}" y="${H - 8}" text-anchor="middle" class="chart-label">${a.year}</text>`;
+      });
+      svg += '</svg>';
+
+      document.getElementById('cf-chart').innerHTML = `
+        <div class="card-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Revenue vs Obligations (BRL) — Annual
+        </div>
+        ${svg}
+        <div class="chart-legend">
+          <span><span class="chart-legend-dot" style="background:var(--accent)"></span>Revenue</span>
+          <span><span class="chart-legend-dot" style="background:var(--red);opacity:0.5"></span>Obligations</span>
+        </div>
+      `;
+    } else {
+      document.getElementById('cf-chart').innerHTML = `<div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <div>No cashflow history recorded yet</div>
+      </div>`;
+    }
+
+    // Annual table
+    if (annual.length > 0) {
+      document.getElementById('cf-table').innerHTML = `
+        <div class="card-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Annual Summary
+        </div>
+        <table class="tbl" style="margin-top:8px">
+          <thead><tr>
+            <th>Year</th><th class="right">Months</th><th class="right">Rev USD</th><th class="right">Rev BRL</th>
+            <th class="right">Obligations</th><th class="right">DAS</th><th>Fator R</th><th>Anexo</th>
+          </tr></thead>
+          <tbody>
+            ${annual.map(a => `
+              <tr>
+                <td class="mono fw-600">${a.year}</td>
+                <td class="mono right">${a.months}</td>
+                <td class="mono right">${fmt(a.revenue_usd)}</td>
+                <td class="mono right">${fmt(a.revenue_brl)}</td>
+                <td class="mono right">${fmt(a.total_obligations_brl)}</td>
+                <td class="mono right">${fmt(a.das_brl)}</td>
+                <td class="mono">${a.fator_r_pct || '?'}</td>
+                <td>
+                  <span class="badge ${a.anexo === 'III' ? 'badge-green' : 'badge-red'}">${a.anexo || '?'}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else {
+      document.getElementById('cf-table').innerHTML = '<div class="empty">No annual data available</div>';
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  AI ADVISOR PAGE
+// ══════════════════════════════════════════════════════════════════════════
+
+const QUICK_ICONS = {
+  fator_r: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  dividends: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  monthly_review: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
+  deadlines: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  tax_optimization: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  compliance_audit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+};
+
+const QUICK_LABELS = {
+  fator_r: 'Fator R Analysis',
+  dividends: 'Dividend Strategy',
+  monthly_review: 'Monthly Review',
+  deadlines: 'Deadline Summary',
+  tax_optimization: 'Tax Optimization',
+  compliance_audit: 'Compliance Audit',
+};
+
+async function loadAdvisorQuickActions() {
+  try {
+    const actions = await api('/api/advisor/quick-actions');
+    state.quickActions = actions;
+    document.getElementById('adv-quick').innerHTML =
+      '<div class="chat-sidebar-label">Quick Actions</div>' +
+      Object.entries(actions).map(([key, q]) =>
+        `<button class="quick-btn" onclick="askQuick('${key}')">
+          ${QUICK_ICONS[key] || ''}
+          <span>${QUICK_LABELS[key] || key}</span>
+        </button>`
+      ).join('');
+  } catch (e) {}
+
+  // Load context preview
+  if (!state.contextLoaded) {
+    loadContextPreview();
+  }
+}
+
+async function loadContextPreview() {
+  try {
+    const ctx = await api('/api/advisor/context');
+    state.contextLoaded = true;
+    const keys = Object.keys(ctx);
+    let html = '';
+    keys.forEach(k => {
+      const val = ctx[k];
+      const preview = typeof val === 'string' ? val : (typeof val === 'object' ? `{${Object.keys(val).join(', ')}}` : String(val));
+      html += `<div style="margin-bottom:4px"><span style="color:var(--accent)">${k}</span>: ${escapeHtml(preview).substring(0, 80)}${preview.length > 80 ? '...' : ''}</div>`;
+    });
+    document.getElementById('ctx-body').innerHTML = html || 'No context data';
+  } catch (e) {
+    document.getElementById('ctx-body').innerHTML = 'Failed to load context';
+  }
+}
+
+function toggleContext() {
+  const toggle = document.querySelector('.ctx-toggle');
+  const body = document.getElementById('ctx-body');
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+function askQuick(key) {
+  const question = state.quickActions[key];
+  if (question) {
+    document.getElementById('adv-input').value = question;
+    sendAdvisor();
+  }
+}
+
+async function sendAdvisor() {
+  if (state.advisorLoading) return;
+  const input = document.getElementById('adv-input');
+  const question = input.value.trim();
+  if (!question) return;
+
+  input.value = '';
+  state.advisorLoading = true;
+  document.getElementById('adv-send-btn').disabled = true;
+
+  // Add user message
+  const msgs = document.getElementById('adv-messages');
+  msgs.innerHTML += `<div class="msg msg-user">${escapeHtml(question)}</div>`;
+  msgs.innerHTML += `<div class="msg msg-ai" id="adv-loading">
+    <span class="spinner"></span> Analyzing fiscal data<span class="loading-dots"></span>
+  </div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  state.advisorHistory.push({ role: 'user', content: question });
+
+  try {
+    const d = await api('/api/advisor/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, history: state.advisorHistory.slice(-6) }),
+    });
+
+    const loading = document.getElementById('adv-loading');
+    if (loading) loading.remove();
+
+    const response = d.response || 'No response received.';
+    state.advisorHistory.push({ role: 'assistant', content: response });
+
+    msgs.innerHTML += `
+      <div class="msg msg-ai">
+        ${formatAdvisorResponse(response)}
+        <div class="msg-source">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          via ${d.source || '?'} &middot; context: ${((d.context_size || 0) / 1024).toFixed(1)}KB
+        </div>
+      </div>
+    `;
+    msgs.scrollTop = msgs.scrollHeight;
+
+  } catch (e) {
+    const loading = document.getElementById('adv-loading');
+    if (loading) loading.remove();
+    msgs.innerHTML += `<div class="msg msg-ai" style="border:1px solid var(--red);background:var(--red-bg)">Error: ${escapeHtml(e.message)}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  state.advisorLoading = false;
+  document.getElementById('adv-send-btn').disabled = false;
+}
+
+function formatAdvisorResponse(text) {
+  let html = escapeHtml(text);
+  // Bold
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Code blocks
+  html = html.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
+  // Inline code
+  html = html.replace(/`(.*?)`/g, '<code style="background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:12px;font-family:\'JetBrains Mono\',monospace">$1</code>');
+  // Newlines
+  html = html.replace(/\n/g, '<br>');
+  // Lists (- item)
+  html = html.replace(/<br>- (.*?)(?=<br>|$)/g, '<br>&bull; $1');
+  return html;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  GROQ STATUS CHECK
+// ══════════════════════════════════════════════════════════════════════════
+
+async function checkGroqStatus() {
+  try {
+    // Quick health check via a simple advisor context fetch
+    await api('/api/advisor/quick-actions');
+    document.getElementById('groq-dot').className = 'status-dot live';
+    document.getElementById('groq-val').textContent = 'Ready';
+  } catch {
+    document.getElementById('groq-dot').className = 'status-dot off';
+    document.getElementById('groq-val').textContent = 'Offline';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  CLIENTS
+// ══════════════════════════════════════════════════════════════════════════
+
+state._editingClient = null;
+
+async function loadClients() {
+  try {
+    const clients = await api('/api/clients?active_only=false');
+    const el = document.getElementById('clients-table');
+    if (!clients.length) {
+      el.innerHTML = '<div class="empty">No clients registered yet.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Client Portfolio (${clients.length})
+      </div>
+      <table class="tbl">
+        <thead><tr>
+          <th>Key</th><th>Name</th><th>Currency</th><th class="right">Rate</th>
+          <th>Terms</th><th>Lang</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody>
+          ${clients.map(c => `<tr>
+            <td class="mono">${esc(c.key)}</td>
+            <td><strong>${esc(c.name)}</strong>${c.email ? '<br><span style="font-size:11px;color:var(--muted)">' + esc(c.email) + '</span>' : ''}</td>
+            <td>${esc(c.currency || 'USD')}</td>
+            <td class="mono right">${fmt(c.monthly_rate || 0)}</td>
+            <td>${esc(c.payment_terms || 'Net 30')}</td>
+            <td>${esc(c.language || 'en')}</td>
+            <td>${c.active !== false ? '<span class="badge badge-green">active</span>' : '<span class="badge badge-muted">inactive</span>'}</td>
+            <td style="white-space:nowrap">
+              <button class="btn btn-sm btn-ghost" onclick="editClient('${esc(c.key)}')">Edit</button>
+              ${c.active !== false ? '<button class="btn btn-sm btn-danger" onclick="deactivateClient(\'' + esc(c.key) + '\')">Deactivate</button>' : ''}
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    console.error('Load clients failed:', e);
+    document.getElementById('clients-table').innerHTML = '<div class="empty" style="color:var(--red)">Failed to load clients.</div>';
+  }
+}
+
+function esc(s) { return escapeHtml(String(s || '')); }
+
+function showClientForm(client) {
+  state._editingClient = client || null;
+  const card = document.getElementById('client-form-card');
+  document.getElementById('client-form-title').textContent = client ? 'Edit Client' : 'New Client';
+  document.getElementById('cf-submit-btn').textContent = client ? 'Save Changes' : 'Create Client';
+  document.getElementById('cf-name').value = client ? client.name : '';
+  document.getElementById('cf-key').value = client ? client.key : '';
+  document.getElementById('cf-key').disabled = !!client;
+  document.getElementById('cf-email').value = client ? (client.email || '') : '';
+  document.getElementById('cf-address').value = client ? (client.address || '') : '';
+  document.getElementById('cf-currency').value = client ? (client.currency || 'USD') : 'USD';
+  document.getElementById('cf-rate').value = client ? (client.monthly_rate || '') : '';
+  document.getElementById('cf-terms').value = client ? (client.payment_terms || 'Net 30') : 'Net 30';
+  document.getElementById('cf-lang').value = client ? (client.language || 'en') : 'en';
+  document.getElementById('cf-service').value = client ? (client.service || '') : '';
+  document.getElementById('cf-legal').value = client ? (client.legal_notes || '') : '';
+  card.style.display = 'block';
+  document.getElementById('cf-name').focus();
+}
+
+function hideClientForm() {
+  document.getElementById('client-form-card').style.display = 'none';
+  state._editingClient = null;
+}
+
+async function editClient(key) {
+  try {
+    const clients = await api('/api/clients?active_only=false');
+    const client = clients.find(c => c.key === key);
+    if (client) showClientForm(client);
+  } catch (e) {
+    showToast('Failed to load client', 'error');
+  }
+}
+
+async function submitClient() {
+  const payload = {};
+  const name = document.getElementById('cf-name').value.trim();
+  if (!name) { showToast('Name is required', 'error'); return; }
+  payload.name = name;
+
+  const key = document.getElementById('cf-key').value.trim();
+  if (key && !state._editingClient) payload.key = key;
+  const email = document.getElementById('cf-email').value.trim();
+  if (email) payload.email = email;
+  payload.address = document.getElementById('cf-address').value.trim();
+  payload.currency = document.getElementById('cf-currency').value;
+  const rate = document.getElementById('cf-rate').value;
+  if (rate) payload.monthly_rate = parseFloat(rate);
+  payload.payment_terms = document.getElementById('cf-terms').value;
+  payload.language = document.getElementById('cf-lang').value;
+  const service = document.getElementById('cf-service').value.trim();
+  if (service) payload.service = service;
+  const legal = document.getElementById('cf-legal').value.trim();
+  if (legal) payload.legal_notes = legal;
+
+  try {
+    if (state._editingClient) {
+      await api('/api/clients/' + state._editingClient.key, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+      });
+      showToast('Client updated');
+    } else {
+      await api('/api/clients', {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+      });
+      showToast('Client created');
+    }
+    hideClientForm();
+    loadClients();
+  } catch (e) {
+    showToast(e.message || 'Failed to save client', 'error');
+  }
+}
+
+async function deactivateClient(key) {
+  if (!confirm('Deactivate client "' + key + '"?')) return;
+  try {
+    await api('/api/clients/' + key, {
+      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({active: false})
+    });
+    showToast('Client deactivated');
+    loadClients();
+  } catch (e) {
+    showToast('Failed to deactivate', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  INVOICES
+// ══════════════════════════════════════════════════════════════════════════
+
+async function loadInvoices() {
+  // Populate client dropdown
+  try {
+    const clients = await api('/api/clients');
+    const sel = document.getElementById('if-client');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Select client...</option>' +
+      clients.map(c => `<option value="${esc(c.key)}">${esc(c.name)} (${esc(c.currency)} ${fmt(c.monthly_rate || 0)})</option>`).join('');
+    if (current) sel.value = current;
+  } catch (e) {
+    console.error('Failed to load clients for invoice form:', e);
+  }
+
+  // Load invoice index
+  try {
+    const invoices = await api('/api/invoices');
+    const el = document.getElementById('invoices-table');
+    if (!invoices.length) {
+      el.innerHTML = '<div class="empty">No invoices generated yet. Click "Generate Invoice" to create one.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Invoice History (${invoices.length})
+      </div>
+      <table class="tbl">
+        <thead><tr>
+          <th>Invoice #</th><th>Client</th><th>Date</th><th>Due</th>
+          <th>Period</th><th class="right">Amount</th><th>Status</th>
+        </tr></thead>
+        <tbody>
+          ${invoices.map(inv => `<tr>
+            <td class="mono">${esc(inv.invoice_number)}</td>
+            <td>${esc(inv.client_key)}</td>
+            <td class="mono">${esc(inv.date)}</td>
+            <td class="mono">${esc(inv.due_date)}</td>
+            <td>${esc(inv.period)}</td>
+            <td class="mono right">${inv.currency || 'USD'} ${fmt(inv.amount)}</td>
+            <td>${statusBadge(inv.status || 'generated')}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    console.error('Load invoices failed:', e);
+    document.getElementById('invoices-table').innerHTML = '<div class="empty" style="color:var(--red)">Failed to load invoices.</div>';
+  }
+}
+
+function showInvoiceForm() {
+  document.getElementById('invoice-form-card').style.display = 'block';
+  document.getElementById('if-client').focus();
+}
+
+function hideInvoiceForm() {
+  document.getElementById('invoice-form-card').style.display = 'none';
+}
+
+async function submitInvoice() {
+  const clientKey = document.getElementById('if-client').value;
+  if (!clientKey) { showToast('Select a client', 'error'); return; }
+
+  const payload = { client_key: clientKey };
+  const amount = document.getElementById('if-amount').value;
+  if (amount) payload.amount_usd = parseFloat(amount);
+  const period = document.getElementById('if-period').value.trim();
+  if (period) payload.period = period;
+  const service = document.getElementById('if-service').value.trim();
+  if (service) payload.service_description = service;
+  const invDate = document.getElementById('if-date').value;
+  if (invDate) payload.invoice_date = invDate;
+  const po = document.getElementById('if-po').value.trim();
+  if (po) payload.custom_fields = { po_number: po };
+
+  try {
+    const result = await api('/api/invoices/generate', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+    });
+    showToast('Invoice ' + result.invoice_number + ' generated!');
+    hideInvoiceForm();
+    // Reset form
+    document.getElementById('if-amount').value = '';
+    document.getElementById('if-period').value = '';
+    document.getElementById('if-service').value = '';
+    document.getElementById('if-date').value = '';
+    document.getElementById('if-po').value = '';
+    loadInvoices();
+  } catch (e) {
+    showToast(e.message || 'Failed to generate invoice', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════════════
+
+loadOverview();
+checkGroqStatus();
+setInterval(loadOverview, 120000);
+setInterval(checkGroqStatus, 300000);
+</script>
+</body>
+</html>
