@@ -17,10 +17,11 @@ interface DataTableProps<T> {
 
 export default function DataTable<T extends Record<string, any>>({
   columns,
-  data,
+  data: rawData,
   keyField,
   emptyMessage = 'No data available',
 }: DataTableProps<T>) {
+  const data = Array.isArray(rawData) ? rawData : []
   const alignClass = (align?: string) => {
     if (align === 'right') return 'text-right'
     if (align === 'center') return 'text-center'

@@ -176,7 +176,7 @@ export default function OverviewTab({ data, loading }: OverviewTabProps) {
         >
           <DataTable
             columns={batchColumns}
-            data={data.latest_batch || []}
+            data={Array.isArray(data.latest_batch) ? data.latest_batch : []}
             keyField="file"
             emptyMessage="No scrapers in latest batch"
           />
