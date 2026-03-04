@@ -23,10 +23,10 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null)
 
 const borderColors: Record<ToastType, string> = {
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  info: '#3b82f6',
+  success: 'var(--status-ok)',
+  warning: 'var(--status-warn)',
+  error: 'var(--status-error)',
+  info: 'var(--status-info)',
 }
 
 const AUTO_DISMISS_MS = 4000

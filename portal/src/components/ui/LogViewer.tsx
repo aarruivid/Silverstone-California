@@ -8,10 +8,10 @@ interface LogViewerProps {
 
 function classifyLine(line: string): string | null {
   const lower = line.toLowerCase()
-  if (lower.includes('error') || lower.includes('fatal') || lower.includes('exception')) return '#ef4444'
-  if (lower.includes('warn')) return '#f59e0b'
-  if (lower.includes('success') || lower.includes('ok') || lower.includes('done')) return '#22c55e'
-  if (lower.includes('info')) return '#3b82f6'
+  if (lower.includes('error') || lower.includes('fatal') || lower.includes('exception')) return 'var(--status-error)'
+  if (lower.includes('warn')) return 'var(--status-warn)'
+  if (lower.includes('success') || lower.includes('ok') || lower.includes('done')) return 'var(--status-ok)'
+  if (lower.includes('info')) return 'var(--status-info)'
   return null
 }
 

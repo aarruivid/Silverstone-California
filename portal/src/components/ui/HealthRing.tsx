@@ -5,9 +5,9 @@ interface HealthRingProps {
 }
 
 function getColor(score: number): string {
-  if (score >= 80) return '#22c55e'
-  if (score >= 50) return '#f59e0b'
-  return '#ef4444'
+  if (score >= 80) return 'var(--status-ok)'
+  if (score >= 50) return 'var(--status-warn)'
+  return 'var(--status-error)'
 }
 
 export default function HealthRing({ score, size = 120, label }: HealthRingProps) {

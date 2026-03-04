@@ -36,7 +36,7 @@ describe('StatCard', () => {
   it('applies accent color to value', () => {
     render(<StatCard label="Errors" value={5} icon={Activity} accent="red" />)
     const valueEl = screen.getByText('5')
-    expect(valueEl.style.color).toBe('rgb(239, 68, 68)')
+    expect(valueEl.style.color).toBe('var(--status-error)')
   })
 
   it('defaults accent to var(--accent)', () => {

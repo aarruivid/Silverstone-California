@@ -9,10 +9,10 @@ interface StatCardProps {
 }
 
 const accentColors: Record<string, string> = {
-  green: '#22c55e',
-  blue: '#3b82f6',
-  yellow: '#f59e0b',
-  red: '#ef4444',
+  green: 'var(--status-ok)',
+  blue: 'var(--status-info)',
+  yellow: 'var(--status-warn)',
+  red: 'var(--status-error)',
   accent: 'var(--accent)',
 }
 

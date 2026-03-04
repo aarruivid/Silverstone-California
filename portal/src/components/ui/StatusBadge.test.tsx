@@ -33,13 +33,13 @@ describe('StatusBadge', () => {
   it('applies correct color for ok status', () => {
     const { container } = render(<StatusBadge status="ok" />)
     const badge = container.querySelector('span')
-    expect(badge?.style.color).toBe('rgb(34, 197, 94)')
+    expect(badge?.style.color).toBe('var(--status-ok)')
   })
 
   it('applies correct color for error status', () => {
     const { container } = render(<StatusBadge status="error" />)
     const badge = container.querySelector('span')
-    expect(badge?.style.color).toBe('rgb(239, 68, 68)')
+    expect(badge?.style.color).toBe('var(--status-error)')
   })
 
   it('renders as inline-flex pill', () => {
