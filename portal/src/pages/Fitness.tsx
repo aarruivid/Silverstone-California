@@ -55,11 +55,11 @@ export function Fitness() {
       api.get<PersonalRecord[]>('/fitness/gym/prs'),
     ])
       .then(([da, ml, wk, wt, pr]) => {
-        setDaily(da)
-        setMeals(ml)
-        setWorkouts(wk)
-        setWeights(wt)
-        setPrs(pr)
+        setDaily(da && typeof da === 'object' && 'calories' in da ? da : null)
+        setMeals(Array.isArray(ml) ? ml : [])
+        setWorkouts(Array.isArray(wk) ? wk : [])
+        setWeights(Array.isArray(wt) ? wt : [])
+        setPrs(Array.isArray(pr) ? pr : [])
       })
       .catch(() => {
         setDaily(null)

@@ -59,10 +59,10 @@ export function IsarvFiscal() {
       api.get<CashflowEntry[]>('/isarv/cashflow?view=monthly'),
     ])
       .then(([ov, dl, co, cf]) => {
-        setOverview(ov)
-        setDeadlines(dl)
-        setCompliance(co)
-        setCashflow(cf)
+        setOverview(ov && typeof ov === 'object' && !Array.isArray(ov) ? ov : null)
+        setDeadlines(Array.isArray(dl) ? dl : [])
+        setCompliance(Array.isArray(co) ? co : [])
+        setCashflow(Array.isArray(cf) ? cf : [])
       })
       .catch(() => {
         setOverview(null)

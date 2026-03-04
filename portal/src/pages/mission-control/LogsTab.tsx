@@ -28,14 +28,16 @@ export default function LogsTab() {
     if (source === 'bridge-history') {
       api.get<BridgeEvent[]>('/mission-control/bridge-history')
         .then((events) => {
-          setLines(events.map((e) => `[${e.timestamp}] ${e.event}${e.detail ? ' — ' + e.detail : ''}`))
+          const arr = Array.isArray(events) ? events : []
+          setLines(arr.map((e) => `[${e.timestamp}] ${e.event}${e.detail ? ' — ' + e.detail : ''}`))
         })
         .catch((err) => setLines([`ERROR: ${err.message}`]))
         .finally(() => setLoading(false))
     } else {
       api.get<{ task_name: string; started_at: string; success: boolean; error: string | null }[]>('/mission-control/runs')
         .then((runs) => {
-          setLines(runs.map((r) =>
+          const arr = Array.isArray(runs) ? runs : []
+          setLines(arr.map((r) =>
             `[${r.started_at}] ${r.task_name} — ${r.success ? 'SUCCESS' : 'FAILED'}${r.error ? ': ' + r.error : ''}`
           ))
         })

@@ -28,7 +28,10 @@ export function SolarOps() {
       api.get<SolarData>('/solar/data'),
       api.get<Deal[]>('/solar/deals'),
     ])
-      .then(([d, dl]) => { setData(d); setDeals(dl) })
+      .then(([d, dl]) => {
+        setData(d && typeof d === 'object' && 'total_paid' in d ? d : null)
+        setDeals(Array.isArray(dl) ? dl : [])
+      })
       .catch(() => { setData(null); setDeals([]) })
       .finally(() => setLoading(false))
   }, [])

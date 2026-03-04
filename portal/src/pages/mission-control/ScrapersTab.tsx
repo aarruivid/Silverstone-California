@@ -54,7 +54,7 @@ export default function ScrapersTab() {
   useEffect(() => {
     const api = getApi()
     api.get<PerformanceData[]>('/mission-control/performance')
-      .then(setData)
+      .then(d => setData(Array.isArray(d) ? d : []))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
