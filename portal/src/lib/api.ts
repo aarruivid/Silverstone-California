@@ -5,7 +5,7 @@ export function createApiClient(baseUrl: string, token: string) {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
     })
@@ -22,9 +22,17 @@ export function createApiClient(baseUrl: string, token: string) {
 
 let _client: ReturnType<typeof createApiClient> | null = null
 
+export function hasToken(): boolean {
+  return !!(import.meta.env.VITE_API_TOKEN || localStorage.getItem('portal_token'))
+}
+
+export function getApiUrl(): string {
+  return import.meta.env.VITE_API_URL || localStorage.getItem('portal_api_url') || 'http://localhost:5080'
+}
+
 export function getApi() {
   if (!_client) {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5080'
+    const baseUrl = getApiUrl()
     const token = import.meta.env.VITE_API_TOKEN || localStorage.getItem('portal_token') || ''
     _client = createApiClient(baseUrl, token)
   }
@@ -32,3 +40,15 @@ export function getApi() {
 }
 
 export function resetApi() { _client = null }
+
+/** Check if the API gateway is reachable (uses /api/health which is public) */
+export async function checkHealth(): Promise<{ status: string; services: Record<string, string> } | null> {
+  try {
+    const baseUrl = getApiUrl()
+    const resp = await fetch(`${baseUrl}/api/health`, { signal: AbortSignal.timeout(5000) })
+    if (!resp.ok) return null
+    return resp.json()
+  } catch {
+    return null
+  }
+}

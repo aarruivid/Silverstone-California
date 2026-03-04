@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Monitor, DollarSign, Receipt, Dumbbell, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
+import { checkHealth } from '../lib/api'
 
 const NAV_ITEMS = [
   { to: '/', icon: LayoutDashboard, label: 'Overview', end: true },
@@ -11,10 +12,42 @@ const NAV_ITEMS = [
   { to: '/fitness', icon: Dumbbell, label: 'Fitness' },
 ]
 
+type ConnectionStatus = 'connected' | 'degraded' | 'offline'
+
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const { theme, toggle } = useTheme()
+  const [status, setStatus] = useState<ConnectionStatus>('offline')
   const w = collapsed ? 'w-[60px]' : 'w-[230px]'
+
+  const pollHealth = useCallback(async () => {
+    const health = await checkHealth()
+    if (!health) {
+      setStatus('offline')
+      return
+    }
+    const services = Object.values(health.services)
+    const allOk = services.every(s => s === 'ok')
+    setStatus(allOk ? 'connected' : 'degraded')
+  }, [])
+
+  useEffect(() => {
+    pollHealth()
+    const interval = setInterval(pollHealth, 30_000)
+    return () => clearInterval(interval)
+  }, [pollHealth])
+
+  const statusColor = {
+    connected: 'var(--status-ok)',
+    degraded: 'var(--status-warn)',
+    offline: 'var(--status-error)',
+  }[status]
+
+  const statusLabel = {
+    connected: 'Mac mini connected',
+    degraded: 'Partially connected',
+    offline: 'Mac mini offline',
+  }[status]
 
   return (
     <aside className={`fixed left-0 top-0 bottom-0 ${w} bg-[var(--bg-surface)] border-r border-[var(--border)] flex flex-col z-50 transition-all duration-200`}>
@@ -52,8 +85,11 @@ export function Sidebar() {
       <div className="p-3 border-t border-[var(--border)] space-y-2">
         {/* Status indicator */}
         <div className={`flex items-center gap-2 ${collapsed ? 'justify-center' : 'px-1'}`}>
-          <div className="w-2 h-2 rounded-full bg-[var(--status-ok,#22c55e)] animate-pulse" />
-          {!collapsed && <span className="text-xs text-[var(--text-muted)]">Mac mini connected</span>}
+          <div
+            className={`w-2 h-2 rounded-full ${status === 'connected' ? 'animate-pulse' : ''}`}
+            style={{ background: statusColor }}
+          />
+          {!collapsed && <span className="text-xs text-[var(--text-muted)]">{statusLabel}</span>}
         </div>
 
         {/* Theme toggle */}
