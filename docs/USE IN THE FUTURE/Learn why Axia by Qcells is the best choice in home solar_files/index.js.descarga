@@ -1,0 +1,1 @@
+!function(){"use strict";addEventListener("DOMContentLoaded",(()=>{const e=window.document.querySelector(".qcells-video-background-no-loop video");e?.removeAttribute("loop")}))}();
