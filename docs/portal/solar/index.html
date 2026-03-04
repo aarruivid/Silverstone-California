@@ -10,6 +10,28 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <script>
+    /* Patch fetch for Solar: rewrite /api/* to gateway with auth */
+    (function () {
+      var base = (localStorage.getItem('portal_api_base') || '').replace(/\/+$/, '');
+      var token = localStorage.getItem('portal_api_token') || '';
+      if (!base) return;
+      var _origFetch = window.fetch;
+      window.fetch = function (url, opts) {
+        if (typeof url === 'string' && url.startsWith('/api/')) {
+          url = base + '/api/solar/' + url.slice(5);
+          if (token) {
+            opts = opts || {};
+            opts.headers = Object.assign({}, opts.headers || {});
+            if (!opts.headers['Authorization']) {
+              opts.headers['Authorization'] = 'Bearer ' + token;
+            }
+          }
+        }
+        return _origFetch.call(this, url, opts);
+      };
+    })();
+    </script>
     <script type="module" crossorigin src="./assets/index-UKwe25z4.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-BZdW9OeI.css">
   </head>
