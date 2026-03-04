@@ -7,6 +7,7 @@ import { MissionControl } from './pages/MissionControl'
 import { SolarOps } from './pages/SolarOps'
 import { IsarvFiscal } from './pages/IsarvFiscal'
 import { Fitness } from './pages/Fitness'
+import { Settings } from './pages/Settings'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="solar" element={<ErrorBoundary fallbackTitle="Solar Ops error"><SolarOps /></ErrorBoundary>} />
             <Route path="isarv" element={<ErrorBoundary fallbackTitle="ISARV error"><IsarvFiscal /></ErrorBoundary>} />
             <Route path="fitness" element={<ErrorBoundary fallbackTitle="Fitness error"><Fitness /></ErrorBoundary>} />
+            <Route path="settings" element={<ErrorBoundary fallbackTitle="Settings error"><Settings /></ErrorBoundary>} />
           </Route>
         </Routes>
       </BrowserRouter>

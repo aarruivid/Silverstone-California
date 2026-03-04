@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Monitor, DollarSign, Receipt, Dumbbell, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Monitor, DollarSign, Receipt, Dumbbell, Settings, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 import { checkHealth } from '../lib/api'
 
@@ -80,6 +80,24 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Settings link */}
+      <div className="px-2 pb-1">
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors duration-150 ${
+              isActive
+                ? 'bg-[var(--accent-dim)] text-[var(--accent)] font-medium'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text)]'
+            }` + (collapsed ? ' justify-center' : '')
+          }
+          title={collapsed ? 'Settings' : undefined}
+        >
+          <Settings size={18} />
+          {!collapsed && 'Settings'}
+        </NavLink>
+      </div>
 
       {/* Bottom controls */}
       <div className="p-3 border-t border-[var(--border)] space-y-2">
