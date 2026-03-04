@@ -52,7 +52,7 @@ export function MissionControl() {
             className="px-4 py-2 rounded-[var(--radius-sm)] text-sm font-medium cursor-pointer transition-all duration-150"
             style={{
               background: activeTab === tab ? 'var(--accent)' : 'transparent',
-              color: activeTab === tab ? '#fff' : 'var(--text-secondary)',
+              color: activeTab === tab ? 'var(--text-on-accent)' : 'var(--text-secondary)',
             }}
           >
             {tab}

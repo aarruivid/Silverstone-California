@@ -55,7 +55,7 @@ export default function LogsTab() {
             className="px-3 py-1.5 rounded-[var(--radius-sm)] text-xs font-medium cursor-pointer transition-all duration-150"
             style={{
               background: source === s ? 'var(--accent)' : 'var(--bg-surface)',
-              color: source === s ? '#fff' : 'var(--text-secondary)',
+              color: source === s ? 'var(--text-on-accent)' : 'var(--text-secondary)',
               border: `1px solid ${source === s ? 'var(--accent)' : 'var(--border)'}`,
             }}
           >

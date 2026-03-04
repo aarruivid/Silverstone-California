@@ -108,7 +108,7 @@ export function SolarOps() {
             className="px-4 py-2 rounded-[var(--radius-sm)] text-sm font-medium cursor-pointer transition-all duration-150"
             style={{
               background: tab === t ? 'var(--accent)' : 'transparent',
-              color: tab === t ? '#fff' : 'var(--text-secondary)',
+              color: tab === t ? 'var(--text-on-accent)' : 'var(--text-secondary)',
             }}
           >
             {t}
