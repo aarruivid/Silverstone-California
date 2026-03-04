@@ -205,7 +205,10 @@
         <p style="font-size:0.8rem;color:#64748b;margin-bottom:1.5rem;">Configure the Cloudflare tunnel URL for backend API access.</p>
         <label style="font-size:0.8rem;color:#94a3b8;font-weight:500;display:block;margin-bottom:0.5rem;">API Base URL</label>
         <input id="settings-api-url" type="url" placeholder="https://xxx.trycloudflare.com" style="width:100%;padding:0.75rem 1rem;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-size:0.9rem;font-family:JetBrains Mono,monospace;outline:none;margin-bottom:0.5rem;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-        <p style="font-size:0.7rem;color:#64748b;margin-bottom:1.5rem;">Leave empty to use relative paths (local development).</p>
+        <p style="font-size:0.7rem;color:#64748b;margin-bottom:1rem;">Leave empty to use relative paths (local development).</p>
+        <label style="font-size:0.8rem;color:#94a3b8;font-weight:500;display:block;margin-bottom:0.5rem;">API Token</label>
+        <input id="settings-api-token" type="password" placeholder="PORTAL_API_TOKEN from .env" style="width:100%;padding:0.75rem 1rem;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-size:0.9rem;font-family:JetBrains Mono,monospace;outline:none;margin-bottom:0.5rem;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <p style="font-size:0.7rem;color:#64748b;margin-bottom:1.5rem;">Bearer token for gateway authentication.</p>
         <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
             <button onclick="closeSettings()" style="padding:0.6rem 1.25rem;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#94a3b8;cursor:pointer;font-size:0.85rem;">Cancel</button>
             <button onclick="saveSettings()" style="padding:0.6rem 1.25rem;background:#6366f1;border:none;border-radius:8px;color:white;cursor:pointer;font-weight:600;font-size:0.85rem;">Save</button>
@@ -252,11 +255,13 @@
             closeSidebar();
             const modal = document.getElementById('settings-modal');
             const overlay = document.getElementById('settings-overlay');
-            const input = document.getElementById('settings-api-url');
-            input.value = localStorage.getItem('portal_api_base') || '';
+            const urlInput = document.getElementById('settings-api-url');
+            const tokenInput = document.getElementById('settings-api-token');
+            urlInput.value = localStorage.getItem('portal_api_base') || '';
+            tokenInput.value = localStorage.getItem('portal_api_token') || '';
             modal.style.opacity = '1'; modal.style.visibility = 'visible'; modal.style.transform = 'translate(-50%,-50%) scale(1)';
             overlay.style.opacity = '1'; overlay.style.visibility = 'visible';
-            setTimeout(() => input.focus(), 100);
+            setTimeout(() => urlInput.focus(), 100);
         }
         function closeSettings() {
             const modal = document.getElementById('settings-modal');
@@ -267,10 +272,13 @@
         }
         function saveSettings() {
             const url = document.getElementById('settings-api-url').value.replace(/\/+$/, '').trim();
+            const token = document.getElementById('settings-api-token').value.trim();
             if (url) { localStorage.setItem('portal_api_base', url); }
             else { localStorage.removeItem('portal_api_base'); }
+            if (token) { localStorage.setItem('portal_api_token', token); }
+            else { localStorage.removeItem('portal_api_token'); }
             const status = document.getElementById('settings-status');
-            status.textContent = url ? 'Saved: ' + url : 'Cleared — using relative paths';
+            status.textContent = url ? 'Saved!' : 'Cleared — using relative paths';
             status.style.opacity = '1';
             setTimeout(closeSettings, 1200);
         }
