@@ -179,10 +179,10 @@
             </div>
         </div>
         <div class="sidebar-footer">
-            <a href="portal-v1/" class="settings-link">
+            <button onclick="openSettings()" class="settings-link" style="background:none;border:none;cursor:pointer;width:100%;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                Settings (v1 Portal)
-            </a>
+                Settings
+            </button>
         </div>
     </div>
     <section class="hero-section">
@@ -197,6 +197,22 @@
         </div>
     </section>
     <div class="version-badge">v2.0</div>
+
+    <!-- Settings Modal -->
+    <div id="settings-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;opacity:0;visibility:hidden;transition:all 0.3s;" onclick="closeSettings()"></div>
+    <div id="settings-modal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);z-index:9999;background:#111827;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;width:90%;max-width:440px;opacity:0;visibility:hidden;transition:all 0.3s;">
+        <h2 style="font-size:1.25rem;font-weight:700;color:#e2e8f0;margin-bottom:0.5rem;">API Settings</h2>
+        <p style="font-size:0.8rem;color:#64748b;margin-bottom:1.5rem;">Configure the Cloudflare tunnel URL for backend API access.</p>
+        <label style="font-size:0.8rem;color:#94a3b8;font-weight:500;display:block;margin-bottom:0.5rem;">API Base URL</label>
+        <input id="settings-api-url" type="url" placeholder="https://xxx.trycloudflare.com" style="width:100%;padding:0.75rem 1rem;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-size:0.9rem;font-family:JetBrains Mono,monospace;outline:none;margin-bottom:0.5rem;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <p style="font-size:0.7rem;color:#64748b;margin-bottom:1.5rem;">Leave empty to use relative paths (local development).</p>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button onclick="closeSettings()" style="padding:0.6rem 1.25rem;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#94a3b8;cursor:pointer;font-size:0.85rem;">Cancel</button>
+            <button onclick="saveSettings()" style="padding:0.6rem 1.25rem;background:#6366f1;border:none;border-radius:8px;color:white;cursor:pointer;font-weight:600;font-size:0.85rem;">Save</button>
+        </div>
+        <div id="settings-status" style="margin-top:1rem;font-size:0.8rem;text-align:center;color:#22c55e;opacity:0;transition:opacity 0.3s;"></div>
+    </div>
+
     <script>
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
@@ -229,7 +245,35 @@
                 e.preventDefault();
             });
         });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebar(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { closeSettings(); closeSidebar(); }
+        });
+        function openSettings() {
+            closeSidebar();
+            const modal = document.getElementById('settings-modal');
+            const overlay = document.getElementById('settings-overlay');
+            const input = document.getElementById('settings-api-url');
+            input.value = localStorage.getItem('portal_api_base') || '';
+            modal.style.opacity = '1'; modal.style.visibility = 'visible'; modal.style.transform = 'translate(-50%,-50%) scale(1)';
+            overlay.style.opacity = '1'; overlay.style.visibility = 'visible';
+            setTimeout(() => input.focus(), 100);
+        }
+        function closeSettings() {
+            const modal = document.getElementById('settings-modal');
+            const overlay = document.getElementById('settings-overlay');
+            modal.style.opacity = '0'; modal.style.visibility = 'hidden'; modal.style.transform = 'translate(-50%,-50%) scale(0.95)';
+            overlay.style.opacity = '0'; overlay.style.visibility = 'hidden';
+            document.getElementById('settings-status').style.opacity = '0';
+        }
+        function saveSettings() {
+            const url = document.getElementById('settings-api-url').value.replace(/\/+$/, '').trim();
+            if (url) { localStorage.setItem('portal_api_base', url); }
+            else { localStorage.removeItem('portal_api_base'); }
+            const status = document.getElementById('settings-status');
+            status.textContent = url ? 'Saved: ' + url : 'Cleared — using relative paths';
+            status.style.opacity = '1';
+            setTimeout(closeSettings, 1200);
+        }
     </script>
 </body>
 </html>

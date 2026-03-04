@@ -746,6 +746,8 @@
 </head>
 
 <body>
+  <script src="../portal-config.js"></script>
+  <a href="../" style="position:fixed;top:16px;left:16px;z-index:9999;background:#6366f1;color:#fff;text-decoration:none;padding:8px 18px;border-radius:50px;font-size:13px;font-weight:600;font-family:Inter,sans-serif;box-shadow:0 2px 12px rgba(99,102,241,0.4);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">&#8592; Portal</a>
   <div class="layout">
 
     <!-- ── Sidebar ── -->
@@ -1112,7 +1114,7 @@
 
     // ── Fetch helpers ───────────────────────────────────────────────────────
     async function api(path) {
-      const r = await fetch(path);
+      const r = await fetch(portalApiUrl(path));
       if (!r.ok) throw new Error(`${path} → ${r.status}`);
       return r.json();
     }
@@ -1413,7 +1415,7 @@
       btn.textContent = '⏳ Generating…';
       btn.disabled = true;
       try {
-        const res = await fetch('/api/scraper-fix-prompt', {
+        const res = await fetch(portalApiUrl('/api/scraper-fix-prompt'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1740,7 +1742,7 @@
       const note = await customPrompt('Mark as Reviewed', `Review <b>${name}</b>?<br>You can add an optional note below:`, true);
       if (note === null) return; // cancelled
       try {
-        await fetch(`/api/performance/${name}/reviewed`, {
+        await fetch(portalApiUrl(`/api/performance/${name}/reviewed`), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ note })
@@ -1809,7 +1811,7 @@
       const ok = await customPrompt('▶ Auto-Resume', `Start automatic background extraction for <b>${name}</b>?<br><br><span style="font-size:11px;color:var(--muted)">Logs will stream live in the panel below.</span>`, false);
       if (!ok) return;
       try {
-        const res = await fetch(`/api/performance/${name}/auto-resume`, { method: 'POST' });
+        const res = await fetch(portalApiUrl(`/api/performance/${name}/auto-resume`), { method: 'POST' });
         const data = await res.json();
         if (data.ok) {
           // Refresh log list after short delay so file appears
