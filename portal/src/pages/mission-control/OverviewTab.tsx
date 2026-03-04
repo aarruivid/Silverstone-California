@@ -69,7 +69,7 @@ export default function OverviewTab({ data, loading }: OverviewTabProps) {
     colors: ['var(--status-ok)', 'var(--status-error)'],
     dataLabels: { enabled: false },
     xaxis: {
-      categories: data?.recent_runs.slice(0, 10).map((r) => r.task_name) ?? [],
+      categories: (data?.recent_runs ?? []).slice(0, 10).map((r) => r.task_name),
       labels: { style: { colors: 'var(--text-secondary)' } },
     },
     yaxis: {
@@ -88,7 +88,7 @@ export default function OverviewTab({ data, loading }: OverviewTabProps) {
 
   const chartSeries = useMemo(() => {
     if (!data) return []
-    const runs = data.recent_runs.slice(0, 10)
+    const runs = (data.recent_runs ?? []).slice(0, 10)
     return [
       {
         name: 'Duration (s)',

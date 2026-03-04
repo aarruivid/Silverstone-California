@@ -72,7 +72,7 @@ export function SolarOps() {
     chart: { type: 'bar', stacked: true, background: 'transparent', foreColor: 'var(--text)', toolbar: { show: false } },
     colors: ['var(--status-ok)', 'var(--status-warn)'],
     plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
-    xaxis: { categories: data?.by_month.map(m => m.month) ?? [] },
+    xaxis: { categories: (data?.by_month ?? []).map(m => m.month) },
     yaxis: { labels: { formatter: (v: number) => fmt(v) } },
     tooltip: { theme: theme === 'dark' ? 'dark' : 'light' },
     legend: { labels: { colors: 'var(--text)' } },

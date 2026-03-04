@@ -176,7 +176,7 @@ export function Fitness() {
               </div>
 
               {/* Today's meals quick view */}
-              {daily.meals.length > 0 && (
+              {(daily.meals ?? []).length > 0 && (
                 <div
                   className="rounded-[var(--radius)] p-5"
                   style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
@@ -185,7 +185,7 @@ export function Fitness() {
                     Comidas de hoy
                   </h3>
                   <div className="space-y-2">
-                    {daily.meals.map((m: Meal, i: number) => (
+                    {(daily.meals ?? []).map((m: Meal, i: number) => (
                       <div
                         key={i}
                         className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-sm)]"

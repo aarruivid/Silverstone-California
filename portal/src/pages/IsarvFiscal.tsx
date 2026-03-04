@@ -131,7 +131,7 @@ export function IsarvFiscal() {
                   accent="blue"
                   subtitle={`Updated ${overview.ptax.date}`}
                 />
-                {overview.wise.balances.map((b) => (
+                {(overview.wise?.balances ?? []).map((b) => (
                   <StatCard
                     key={b.currency}
                     label={`Wise ${b.currency}`}
@@ -193,7 +193,7 @@ export function IsarvFiscal() {
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {overview.deadlines.slice(0, 4).map((d) => (
+                  {(overview.deadlines ?? []).slice(0, 4).map((d) => (
                     <div
                       key={d.name}
                       className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-sm)]"
