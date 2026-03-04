@@ -45,12 +45,12 @@ export default function OverviewTab({ data, loading }: OverviewTabProps) {
   const { theme } = useTheme()
 
   const failedToday = useMemo(() => {
-    if (!data) return 0
+    if (!data || !Array.isArray(data.latest_batch)) return 0
     return data.latest_batch.filter((s) => s.status === 'error').length
   }, [data])
 
   const uptimePercent = useMemo(() => {
-    if (!data || data.recent_runs.length === 0) return 100
+    if (!data || !Array.isArray(data.recent_runs) || data.recent_runs.length === 0) return 100
     const successes = data.recent_runs.filter((r) => r.success).length
     return Math.round((successes / data.recent_runs.length) * 100)
   }, [data])
@@ -159,7 +159,7 @@ export default function OverviewTab({ data, loading }: OverviewTabProps) {
           value={`${uptimePercent}%`}
           icon={Clock}
           accent={uptimePercent >= 90 ? 'green' : uptimePercent >= 70 ? 'yellow' : 'red'}
-          subtitle={`${data.recent_runs.length} recent runs`}
+          subtitle={`${(data.recent_runs || []).length} recent runs`}
         />
       </div>
 
@@ -176,7 +176,7 @@ export default function OverviewTab({ data, loading }: OverviewTabProps) {
         >
           <DataTable
             columns={batchColumns}
-            data={data.latest_batch}
+            data={data.latest_batch || []}
             keyField="file"
             emptyMessage="No scrapers in latest batch"
           />
@@ -184,12 +184,12 @@ export default function OverviewTab({ data, loading }: OverviewTabProps) {
 
         {/* Run Timeline Chart */}
         <ChartCard title="Run Timeline">
-          {data.recent_runs.length > 0 ? (
+          {(data.recent_runs || []).length > 0 ? (
             <Chart
               options={chartOptions}
               series={chartSeries}
               type="bar"
-              height={Math.max(200, data.recent_runs.slice(0, 10).length * 36)}
+              height={Math.max(200, (data.recent_runs || []).slice(0, 10).length * 36)}
             />
           ) : (
             <div className="flex items-center justify-center h-48" style={{ color: 'var(--text-muted)' }}>

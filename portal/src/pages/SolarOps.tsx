@@ -147,8 +147,8 @@ export function SolarOps() {
                 <ReactApexChart
                   options={monthlyChart}
                   series={[
-                    { name: 'Paid', data: data.by_month.map(m => m.paid) },
-                    { name: 'Pending', data: data.by_month.map(m => m.pending) },
+                    { name: 'Paid', data: (data.by_month || []).map(m => m.paid) },
+                    { name: 'Pending', data: (data.by_month || []).map(m => m.pending) },
                   ]}
                   type="bar"
                   height={320}
@@ -159,14 +159,14 @@ export function SolarOps() {
                 <ReactApexChart
                   options={{
                     ...repChart,
-                    xaxis: { ...repChart.xaxis, categories: data.by_rep.map(r => r.rep) },
+                    xaxis: { ...repChart.xaxis, categories: (data.by_rep || []).map(r => r.rep) },
                   }}
                   series={[
-                    { name: 'Paid', data: data.by_rep.map(r => r.paid) },
-                    { name: 'Pending', data: data.by_rep.map(r => r.pending) },
+                    { name: 'Paid', data: (data.by_rep || []).map(r => r.paid) },
+                    { name: 'Pending', data: (data.by_rep || []).map(r => r.pending) },
                   ]}
                   type="bar"
-                  height={Math.max(200, data.by_rep.length * 50)}
+                  height={Math.max(200, (data.by_rep || []).length * 50)}
                 />
               </ChartCard>
             </div>
