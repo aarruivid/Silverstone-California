@@ -3,6 +3,9 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { PortalLayout } from './layouts/PortalLayout'
 import { DashboardHome } from './pages/DashboardHome'
 import { MissionControl } from './pages/MissionControl'
+import { SolarOps } from './pages/SolarOps'
+import { IsarvFiscal } from './pages/IsarvFiscal'
+import { Fitness } from './pages/Fitness'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -14,9 +17,9 @@ export default function App() {
           <Route element={<PortalLayout />}>
             <Route index element={<DashboardHome />} />
             <Route path="mission-control" element={<MissionControl />} />
-            <Route path="solar" element={<div className="text-[var(--text)]">Solar Ops — Coming soon</div>} />
-            <Route path="isarv" element={<div className="text-[var(--text)]">ISARV — Coming soon</div>} />
-            <Route path="fitness" element={<div className="text-[var(--text)]">Fitness — Coming soon</div>} />
+            <Route path="solar" element={<SolarOps />} />
+            <Route path="isarv" element={<IsarvFiscal />} />
+            <Route path="fitness" element={<Fitness />} />
           </Route>
         </Routes>
       </BrowserRouter>
