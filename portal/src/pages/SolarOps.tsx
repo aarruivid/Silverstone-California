@@ -196,7 +196,7 @@ export function SolarOps() {
           ) : (
             <DataTable
               columns={dealColumns}
-              data={filteredDeals as unknown as Record<string, unknown>[]}
+              data={filteredDeals}
               keyField="customer"
               emptyMessage="No deals found"
             />

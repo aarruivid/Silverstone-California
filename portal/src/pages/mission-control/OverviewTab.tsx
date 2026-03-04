@@ -4,7 +4,7 @@ import { Activity, Server, AlertTriangle, Clock } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { StatCard, StatusBadge, DataTable, HealthRing, ChartCard, CardSkeleton, ChartSkeleton } from '../../components/ui'
 import type { Column } from '../../components/ui/DataTable'
-import type { DashboardData, BatchScraper, TaskRun } from '../../types/mission-control'
+import type { DashboardData, BatchScraper } from '../../types/mission-control'
 import type { Status } from '../../components/ui/StatusBadge'
 
 interface OverviewTabProps {
