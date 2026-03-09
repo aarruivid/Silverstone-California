@@ -4,166 +4,114 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fitness Tracker</title>
+
+  <!-- Theme flash prevention -->
+  <script>
+    (function() {
+      var saved = localStorage.getItem('portal_theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <!-- Fonts: Barlow Condensed (headings) + Barlow (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS v4 Browser CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-  <style>
-    /* App-specific overrides that bridge CSS file classes with app.js usage */
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 20px; }
-    .stat-card.accent-blue .stat-value { color: var(--blue); }
-    .stat-card.accent-green .stat-value { color: var(--green); }
-    .stat-card.accent-yellow .stat-value { color: var(--yellow); }
-    .stat-value.ok { color: var(--green); }
-    .stat-value.warn { color: var(--yellow); }
-    .stat-value.over { color: var(--red); }
-    .budget-bar-container { position: relative; height: 28px; background: var(--surface2); border-radius: 14px; overflow: hidden; margin: 12px 0; }
-    .budget-bar { height: 100%; border-radius: 14px; transition: width 0.5s ease; }
-    .budget-bar.ok { background: var(--green); }
-    .budget-bar.warn { background: var(--yellow); }
-    .budget-bar.over { background: var(--red); }
-    .budget-label { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 600; color: var(--text); }
-    .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    @media (max-width: 768px) { .card-row { grid-template-columns: 1fr; } }
-    .card-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .card-header-row h3 { margin: 0; }
-    .form-section { margin-bottom: 16px; padding: 16px; background: var(--surface2); border-radius: var(--radius, 10px); }
-    .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
-    .form-group { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-    .form-group.flex-2 { flex: 2; }
-    .form-group label { font-size: 12px; color: var(--muted); font-weight: 500; }
-    .form-group input, .form-group select { padding: 8px 12px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 6px; color: var(--text); font-size: 14px; }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--blue); }
-    .form-actions { display: flex; gap: 8px; margin-top: 8px; }
-    .form-actions-inline { justify-content: flex-end; align-self: flex-end; }
-    .input-with-btn { display: flex; gap: 8px; }
-    .input-with-btn input { flex: 1; }
-    .btn { padding: 8px 16px; border: 1px solid var(--border-strong); background: var(--surface2); color: var(--text); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
-    .btn:hover { background: var(--surface3); }
-    .btn-primary { background: var(--green); border-color: var(--green); color: #000; font-weight: 600; }
-    .btn-primary:hover { background: var(--green-dim); }
-    .btn-sm { padding: 5px 10px; font-size: 12px; }
-    .btn-icon { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; font-size: 18px; line-height: 1; }
-    .btn-icon:hover { color: var(--red); }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-    .badge-blue { background: var(--blue-bg); color: var(--blue); }
-    .badge-green { background: var(--green-bg); color: var(--green); }
-    .badge-purple { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-    .badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
-    .badge-gray { background: var(--surface3); color: var(--muted); }
-    .badge-rpe { background: var(--yellow-bg); color: var(--yellow); font-size: 11px; }
-    .badge-sm { font-size: 10px; padding: 1px 6px; }
-    .meal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; overflow: hidden; }
-    .meal-card:hover { border-color: var(--border-strong); }
-    .meal-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; flex-wrap: wrap; }
-    .meal-type { font-weight: 600; }
-    .meal-desc { flex: 1; color: var(--text-secondary); }
-    .meal-kcal { font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-    .meal-macros { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-    .meal-details { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
-    .meal-card.expanded .meal-details { max-height: 500px; padding: 0 16px 12px; }
-    .workout-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; padding: 12px 16px; }
-    .workout-main { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .workout-name { font-weight: 600; }
-    .workout-detail { font-family: 'JetBrains Mono', monospace; color: var(--blue); }
-    .workout-volume { font-size: 12px; color: var(--muted); margin-left: auto; }
-    .workout-notes { font-size: 12px; color: var(--muted); margin-top: 6px; }
-    .workout-entry { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-    .pr-card { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-    .pr-card:last-child { border: none; }
-    .pr-name { flex: 1; font-weight: 500; }
-    .pr-weight { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--green); }
-    .targets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-    .target-item { display: flex; justify-content: space-between; padding: 10px 14px; background: var(--surface2); border-radius: 8px; }
-    .target-label { color: var(--muted); font-size: 13px; }
-    .target-value { font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-    .body-comp { margin: 16px 0; }
-    .comp-bar { display: flex; height: 36px; border-radius: 8px; overflow: hidden; }
-    .comp-lean { background: var(--blue); display: flex; align-items: center; justify-content: center; }
-    .comp-lean span, .comp-fat span { font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; padding: 0 8px; }
-    .comp-fat { background: var(--yellow); display: flex; align-items: center; justify-content: center; }
-    .macro-legend { display: flex; gap: 16px; justify-content: center; margin-top: 8px; font-size: 12px; color: var(--muted); }
-    .reminder-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-    .reminder-item:last-child { border: none; }
-    .reminder-msg { flex: 1; font-size: 13px; color: var(--text-secondary); }
-    .reminder-time { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-    .reminder-status { font-size: 11px; font-weight: 600; }
-    .reminder-status.on { color: var(--green); }
-    .reminder-status.off { color: var(--red); }
-    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-    .photo-item { position: relative; border-radius: 8px; overflow: hidden; }
-    .photo-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
-    .photo-item span { display: block; text-align: center; font-size: 11px; color: var(--muted); padding: 4px; }
-    .lookup-found { padding: 8px; background: var(--green-bg); border-radius: 6px; font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
-    .lookup-found .muted { color: var(--muted); font-size: 12px; }
-    .loading { text-align: center; padding: 40px; color: var(--muted); }
-    .loading-sm { color: var(--muted); font-size: 12px; }
-    .error-msg { text-align: center; padding: 40px; color: var(--red); }
-    .error-sm { color: var(--red); font-size: 12px; }
-    .empty-state { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
-    .empty-state-sm { text-align: center; padding: 8px; color: var(--muted); font-size: 12px; }
-    .empty-row td { opacity: 0.4; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .data-table th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-strong); }
-    .data-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
-    .data-table.compact th, .data-table.compact td { padding: 5px 8px; }
-    .data-table tr:hover td { background: var(--surface2); }
-    .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 2000; transform: translateX(120%); transition: transform 0.3s ease; }
-    .toast.show { transform: translateX(0); }
-    .toast-success { background: var(--green); color: #000; }
-    .toast-error { background: var(--red); color: #fff; }
-    .toast-info { background: var(--blue); color: #fff; }
-    .page { display: none; }
-    .page.active { display: block; }
-    @media (max-width: 768px) { .form-row { flex-direction: column; } .stats-row { grid-template-columns: 1fr 1fr; } }
-  </style>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <a href="../" class="portal-home-btn" title="Back to Portal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></a>
-  <style>.portal-home-btn{position:fixed;top:0;left:0;z-index:9999;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0);background:transparent;text-decoration:none;border-bottom-right-radius:12px;transition:all .25s ease;cursor:default;}.portal-home-btn:hover{color:#fff;background:rgba(99,102,241,.85);box-shadow:0 2px 12px rgba(99,102,241,.4);cursor:pointer;}</style>
+
+  <!-- Portal Home Button (hidden hover-reveal) -->
+  <a href="../" class="portal-home-btn" title="Back to Portal" aria-label="Back to Portal">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  </a>
+
   <div class="layout">
-    <!-- Sidebar -->
-    <nav class="sidebar">
+
+    <!-- ═══ Sidebar (Desktop + Tablet) ═══ -->
+    <nav class="sidebar" role="navigation" aria-label="Main navigation">
       <div class="sidebar-logo">
         <h1>Fitness Tracker</h1>
         <span>MOLTBOT Dashboard</span>
       </div>
-      <div class="nav-section">Navegación</div>
-      <div class="nav-item active" data-page="home" onclick="navigate('home', this)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Inicio
+
+      <div class="nav-section">Navegacion</div>
+
+      <div class="nav-item active" data-page="home" onclick="navigate('home', this)" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>Inicio</span>
       </div>
-      <div class="nav-item" data-page="diet" onclick="navigate('diet', this)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-        Dieta
+
+      <div class="nav-item" data-page="diet" onclick="navigate('diet', this)" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+          <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+        </svg>
+        <span>Dieta</span>
       </div>
-      <div class="nav-item" data-page="gym" onclick="navigate('gym', this)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/><rect x="6" y="7" width="4" height="10" rx="1"/><rect x="14" y="7" width="4" height="10" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-        Gym
+
+      <div class="nav-item" data-page="gym" onclick="navigate('gym', this)" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/>
+          <rect x="6" y="7" width="4" height="10" rx="1"/><rect x="14" y="7" width="4" height="10" rx="1"/>
+          <line x1="10" y1="12" x2="14" y2="12"/>
+        </svg>
+        <span>Gym</span>
       </div>
-      <div class="nav-item" data-page="body" onclick="navigate('body', this)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M12 8v4m-3 4l3-4 3 4m-7 0v4m8-4v4"/></svg>
-        Cuerpo
+
+      <div class="nav-item" data-page="body" onclick="navigate('body', this)" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="5" r="3"/><path d="M12 8v4m-3 4l3-4 3 4m-7 0v4m8-4v4"/>
+        </svg>
+        <span>Cuerpo</span>
       </div>
-      <div class="nav-item" data-page="plan" onclick="navigate('plan', this)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-        Plan & Metas
+
+      <div class="nav-item" data-page="plan" onclick="navigate('plan', this)" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>
+        </svg>
+        <span>Plan & Metas</span>
       </div>
 
       <div class="nav-section" style="margin-top:auto">Vista</div>
-      <div class="view-toggle" style="padding: 8px 20px; display: flex; gap: 4px;">
-        <button class="btn btn-sm" data-mode="daily" onclick="toggleView('daily')">Día</button>
-        <button class="btn btn-sm active" data-mode="weekly" onclick="toggleView('weekly')" style="background:var(--green);color:#000;border-color:var(--green);">Semana</button>
+      <div class="view-toggle">
+        <button data-mode="daily" onclick="toggleView('daily')">Dia</button>
+        <button data-mode="weekly" class="active" onclick="toggleView('weekly')">Semana</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <span>Cambiar tema</span>
+        </button>
       </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- ═══ Main Content ═══ -->
     <main class="main">
       <!-- Date Navigation -->
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-        <button class="btn btn-sm" onclick="navigateDate(-1)">&larr;</button>
-        <span id="date-display" style="font-weight:600; font-size:15px; flex:1; text-align:center;"></span>
-        <button class="btn btn-sm" onclick="navigateDate(1)">&rarr;</button>
+      <div class="date-nav">
+        <button class="btn btn-sm" onclick="navigateDate(-1)" aria-label="Previous">&larr;</button>
+        <span class="date-display" id="date-display"></span>
+        <button class="btn btn-sm" onclick="navigateDate(1)" aria-label="Next">&rarr;</button>
         <button class="btn btn-sm" onclick="goToToday()">Hoy</button>
       </div>
 
@@ -171,25 +119,61 @@
       <div id="page-home" class="page active">
         <div id="home-content"><div class="loading">Cargando...</div></div>
       </div>
-
       <div id="page-diet" class="page">
         <div id="diet-content"><div class="loading">Cargando...</div></div>
       </div>
-
       <div id="page-gym" class="page">
         <div id="gym-content"><div class="loading">Cargando...</div></div>
       </div>
-
       <div id="page-body" class="page">
         <div id="body-content"><div class="loading">Cargando...</div></div>
       </div>
-
       <div id="page-plan" class="page">
         <div id="plan-content"><div class="loading">Cargando...</div></div>
       </div>
     </main>
   </div>
 
+  <!-- ═══ Bottom Navigation (Mobile) ═══ -->
+  <nav class="bottom-nav" role="navigation" aria-label="Mobile navigation">
+    <div class="bottom-nav-inner">
+      <div class="bottom-nav-item active" data-page="home" onclick="navigateMobile('home', this)" role="button" tabindex="0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Inicio
+      </div>
+      <div class="bottom-nav-item" data-page="diet" onclick="navigateMobile('diet', this)" role="button" tabindex="0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+          <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+        </svg>
+        Dieta
+      </div>
+      <div class="bottom-nav-item" data-page="gym" onclick="navigateMobile('gym', this)" role="button" tabindex="0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/>
+          <rect x="6" y="7" width="4" height="10" rx="1"/><rect x="14" y="7" width="4" height="10" rx="1"/>
+          <line x1="10" y1="12" x2="14" y2="12"/>
+        </svg>
+        Gym
+      </div>
+      <div class="bottom-nav-item" data-page="body" onclick="navigateMobile('body', this)" role="button" tabindex="0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="5" r="3"/><path d="M12 8v4m-3 4l3-4 3 4m-7 0v4m8-4v4"/>
+        </svg>
+        Cuerpo
+      </div>
+      <div class="bottom-nav-item" data-page="plan" onclick="navigateMobile('plan', this)" role="button" tabindex="0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>
+        </svg>
+        Plan
+      </div>
+    </div>
+  </nav>
+
+  <!-- Scripts -->
   <script>window.PORTAL_SERVICE='fitness';</script>
   <script src="../portal-config.js"></script>
   <script src="js/api.js"></script>
