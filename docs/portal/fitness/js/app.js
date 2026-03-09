@@ -1048,6 +1048,67 @@ async function submitWeight() {
    PLAN & GOALS VIEW
    ══════════════════════════════════════════════════════════════════ */
 
+/* ── TDEE Calculator Constants (mirrors macro_calculator.py) ───── */
+
+const ACTIVITY_MULTIPLIERS = {
+  sedentary: 1.2, light: 1.375, moderate: 1.55, very_active: 1.725, extreme: 1.9,
+};
+const ACTIVITY_LABELS = {
+  sedentary: 'Sedentario (1.2)', light: 'Ligero (1.375)', moderate: 'Moderado (1.55)',
+  very_active: 'Muy Activo (1.725)', extreme: 'Extremo (1.9)',
+};
+const GOAL_MULTIPLIERS = {
+  recomposition: 0.875, cutting: 0.775, bulking: 1.125, maintenance: 1.0,
+};
+const GOAL_LABELS = {
+  recomposition: 'Recomposicion (-12.5%)', cutting: 'Definicion (-22.5%)',
+  bulking: 'Volumen (+12.5%)', maintenance: 'Mantenimiento (0%)',
+};
+const FAT_G_PER_KG = 0.9;
+
+function calcBMR(weight, height, age) {
+  return 10 * weight + 6.25 * height - 5 * age + 5;
+}
+function calcTDEE(bmr, activityKey) {
+  return Math.round(bmr * (ACTIVITY_MULTIPLIERS[activityKey] || 1.725));
+}
+function calcGoalKcal(tdee, goalKey) {
+  return Math.round(tdee * (GOAL_MULTIPLIERS[goalKey] || 1.0));
+}
+function calcMacros(dailyKcal, weight, protPerKg) {
+  const protein = Math.round(weight * protPerKg * 10) / 10;
+  const fat = Math.round(weight * FAT_G_PER_KG * 10) / 10;
+  const carbs = Math.round((dailyKcal - protein * 4 - fat * 9) / 4 * 10) / 10;
+  return { protein, fat, carbs };
+}
+
+function updateTDEEPreview() {
+  const w = parseFloat(document.getElementById('plan-weight')?.value) || 74;
+  const h = parseFloat(document.getElementById('plan-height')?.value) || 177;
+  const a = parseInt(document.getElementById('plan-age')?.value) || 23;
+  const act = document.getElementById('plan-activity')?.value || 'very_active';
+  const goal = document.getElementById('plan-goal')?.value || 'recomposition';
+  const protPerKg = parseFloat(document.getElementById('plan-prot')?.value) || 2.0;
+
+  const bmr = calcBMR(w, h, a);
+  const tdee = calcTDEE(bmr, act);
+  const goalKcal = calcGoalKcal(tdee, goal);
+  const macros = calcMacros(goalKcal, w, protPerKg);
+
+  const bmrEl = document.getElementById('tdee-bmr');
+  const tdeeEl = document.getElementById('tdee-tdee');
+  const goalEl = document.getElementById('tdee-goal');
+  if (bmrEl) bmrEl.textContent = fmtNum(Math.round(bmr));
+  if (tdeeEl) tdeeEl.textContent = fmtNum(tdee);
+  if (goalEl) goalEl.textContent = fmtNum(goalKcal);
+
+  // Update macro preview
+  const macroEl = document.getElementById('tdee-macros-preview');
+  if (macroEl) {
+    macroEl.innerHTML = `Prot: <strong>${macros.protein}g</strong> · Carbs: <strong>${macros.carbs}g</strong> · Grasa: <strong>${macros.fat}g</strong>`;
+  }
+}
+
 async function loadPlan() {
   const container = document.getElementById('plan-content');
   if (!container) return;
@@ -1074,30 +1135,59 @@ function renderPlan(el, profile, targets, reminders) {
   const goalFatMass = leanMass / (1 - (profile.goal_body_fat_pct || 12) / 100) * ((profile.goal_body_fat_pct || 12) / 100);
   const fatToLose = fatMass - goalFatMass;
 
+  const activityLevel = profile.activity_level || 'very_active';
+  const goalType = profile.goal || 'recomposition';
+
+  // Pre-calculate current TDEE preview values
+  const curBMR = calcBMR(profile.weight_kg, profile.height_cm, profile.age);
+  const curTDEE = calcTDEE(curBMR, activityLevel);
+  const curGoalKcal = calcGoalKcal(curTDEE, goalType);
+  const curMacros = calcMacros(curGoalKcal, profile.weight_kg, profile.protein_g_per_kg || 2.0);
+
+  const activityOptions = Object.entries(ACTIVITY_LABELS).map(([k, v]) =>
+    `<option value="${k}" ${k === activityLevel ? 'selected' : ''}>${v}</option>`
+  ).join('');
+  const goalOptions = Object.entries(GOAL_LABELS).map(([k, v]) =>
+    `<option value="${k}" ${k === goalType ? 'selected' : ''}>${v}</option>`
+  ).join('');
+
   el.innerHTML = `
     <div class="stats-row">
       <div class="stat-card"><div class="stat-value">${profile.weight_kg} kg</div><div class="stat-label">peso actual</div></div>
-      <div class="stat-card"><div class="stat-value">${profile.body_fat_pct || '—'}%</div><div class="stat-label">grasa actual</div></div>
+      <div class="stat-card"><div class="stat-value">${profile.body_fat_pct || '\u2014'}%</div><div class="stat-label">grasa actual</div></div>
       <div class="stat-card accent-green"><div class="stat-value">${profile.goal_body_fat_pct || 12}%</div><div class="stat-label">objetivo grasa</div></div>
-      <div class="stat-card accent-blue"><div class="stat-value">${fatToLose > 0 ? fatToLose.toFixed(1) + ' kg' : '—'}</div><div class="stat-label">grasa por perder</div></div>
+      <div class="stat-card accent-blue"><div class="stat-value">${fatToLose > 0 ? fatToLose.toFixed(1) + ' kg' : '\u2014'}</div><div class="stat-label">grasa por perder</div></div>
     </div>
 
     <div class="card-row">
       <div class="card">
-        <h3>Perfil & Objetivos</h3>
+        <h3>Calculadora TDEE</h3>
         <div class="form-row">
-          <div class="form-group"><label>Peso (kg)</label><input type="number" id="plan-weight" step="0.1" value="${profile.weight_kg}"></div>
+          <div class="form-group"><label>Peso (kg)</label><input type="number" id="plan-weight" step="0.1" value="${profile.weight_kg}" oninput="updateTDEEPreview()"></div>
+          <div class="form-group"><label>Altura (cm)</label><input type="number" id="plan-height" step="0.1" value="${profile.height_cm}" oninput="updateTDEEPreview()"></div>
+          <div class="form-group"><label>Edad</label><input type="number" id="plan-age" value="${profile.age || 23}" oninput="updateTDEEPreview()"></div>
+        </div>
+        <div class="form-row">
           <div class="form-group"><label>Grasa % actual</label><input type="number" id="plan-bf" step="0.1" value="${profile.body_fat_pct || ''}"></div>
           <div class="form-group"><label>Grasa % objetivo</label><input type="number" id="plan-goal-bf" step="0.1" value="${profile.goal_body_fat_pct || 12}"></div>
+          <div class="form-group"><label>Proteina g/kg</label><input type="number" id="plan-prot" step="0.1" value="${profile.protein_g_per_kg || 2.0}" oninput="updateTDEEPreview()"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>TDEE (kcal)</label><input type="number" id="plan-tdee" value="${profile.tdee_kcal || 2950}"></div>
-          <div class="form-group"><label>Proteina g/kg</label><input type="number" id="plan-prot" step="0.1" value="${profile.protein_g_per_kg || 2.0}"></div>
-          <div class="form-group"><label>Edad</label><input type="number" id="plan-age" value="${profile.age || 23}"></div>
+          <div class="form-group"><label>Actividad</label><select id="plan-activity" onchange="updateTDEEPreview()">${activityOptions}</select></div>
+          <div class="form-group"><label>Objetivo</label><select id="plan-goal" onchange="updateTDEEPreview()">${goalOptions}</select></div>
         </div>
+
+        <div class="tdee-preview">
+          <div class="tdee-row">
+            <div class="tdee-item"><span class="tdee-label">BMR</span><span class="tdee-value" id="tdee-bmr">${fmtNum(Math.round(curBMR))}</span><span class="tdee-unit">kcal</span></div>
+            <div class="tdee-item"><span class="tdee-label">TDEE</span><span class="tdee-value accent" id="tdee-tdee">${fmtNum(curTDEE)}</span><span class="tdee-unit">kcal</span></div>
+            <div class="tdee-item"><span class="tdee-label">Meta</span><span class="tdee-value goal" id="tdee-goal">${fmtNum(curGoalKcal)}</span><span class="tdee-unit">kcal</span></div>
+          </div>
+          <div class="tdee-macros" id="tdee-macros-preview">Prot: <strong>${curMacros.protein}g</strong> · Carbs: <strong>${curMacros.carbs}g</strong> · Grasa: <strong>${curMacros.fat}g</strong></div>
+        </div>
+
         <div class="form-actions">
-          <button class="btn btn-primary" onclick="updatePlanProfile()">Guardar Cambios</button>
-          <button class="btn" onclick="recalcTargets()">Recalcular Objetivos</button>
+          <button class="btn btn-primary" onclick="saveAndRecalcPlan()">Guardar y Recalcular</button>
         </div>
       </div>
 
@@ -1105,9 +1195,9 @@ function renderPlan(el, profile, targets, reminders) {
         <h3>Distribucion de Macros</h3>
         <canvas id="chart-plan-macros"></canvas>
         <div class="macro-legend">
-          <span>Proteina: ${tg.daily_protein_g || '—'}g/dia</span>
-          <span>Carbos: ${tg.daily_carbs_g || '—'}g/dia</span>
-          <span>Grasa: ${tg.daily_fat_g || '—'}g/dia</span>
+          <span>Proteina: ${tg.daily_protein_g || curMacros.protein}g/dia</span>
+          <span>Carbos: ${tg.daily_carbs_g || curMacros.carbs}g/dia</span>
+          <span>Grasa: ${tg.daily_fat_g || curMacros.fat}g/dia</span>
         </div>
       </div>
     </div>
@@ -1153,43 +1243,37 @@ function renderPlan(el, profile, targets, reminders) {
   `;
 
   destroyChart('planMacros');
+  const macroData = tg.daily_protein_g ? [tg.daily_protein_g * 4, tg.daily_carbs_g * 4, tg.daily_fat_g * 9]
+    : [curMacros.protein * 4, curMacros.carbs * 4, curMacros.fat * 9];
   const ctx = document.getElementById('chart-plan-macros');
-  if (ctx && tg.daily_protein_g) {
+  if (ctx && macroData[0] > 0) {
     state.charts.planMacros = new Chart(ctx, {
       type: 'doughnut',
       data: {
         labels: ['Proteina', 'Carbohidratos', 'Grasa'],
-        datasets: [{ data: [tg.daily_protein_g * 4, tg.daily_carbs_g * 4, tg.daily_fat_g * 9], backgroundColor: [t.blue, t.green, t.yellow], borderWidth: 0 }]
+        datasets: [{ data: macroData, backgroundColor: [t.blue, t.green, t.yellow], borderWidth: 0 }]
       },
       options: { responsive: true, plugins: { legend: chartLegend() } }
     });
   }
 }
 
-async function updatePlanProfile() {
+async function saveAndRecalcPlan() {
   const data = {
     weight_kg: parseFloat(document.getElementById('plan-weight')?.value),
+    height_cm: parseFloat(document.getElementById('plan-height')?.value),
+    age: parseInt(document.getElementById('plan-age')?.value),
     body_fat_pct: parseFloat(document.getElementById('plan-bf')?.value) || null,
     goal_body_fat_pct: parseFloat(document.getElementById('plan-goal-bf')?.value) || 12,
-    tdee_kcal: parseInt(document.getElementById('plan-tdee')?.value),
     protein_g_per_kg: parseFloat(document.getElementById('plan-prot')?.value),
-    age: parseInt(document.getElementById('plan-age')?.value),
+    activity_level: document.getElementById('plan-activity')?.value,
+    goal: document.getElementById('plan-goal')?.value,
   };
   try {
-    await API.updateProfile(data);
-    state.profile = await API.getProfile();
-    showToast('Perfil actualizado', 'success');
-    loadPlan();
-  } catch (e) {
-    showToast('Error: ' + e.message, 'error');
-  }
-}
-
-async function recalcTargets() {
-  try {
-    const result = await API.recalculateTargets();
-    showToast(`TDEE: ${result.tdee || result.tdee_kcal} kcal — Objetivos recalculados`, 'success');
-    state.profile = await API.getProfile();
+    const result = await API.updateProfile(data);
+    state.profile = result.recalculated ? result : await API.getProfile();
+    const tdee = result.recalculated?.tdee_kcal || result.tdee_kcal;
+    showToast(`TDEE: ${fmtNum(tdee)} kcal — Perfil y objetivos actualizados`, 'success');
     loadPlan();
   } catch (e) {
     showToast('Error: ' + e.message, 'error');
