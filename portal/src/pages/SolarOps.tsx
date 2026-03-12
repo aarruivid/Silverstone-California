@@ -82,8 +82,10 @@ export function SolarOps() {
     )
   }, [deals, filter])
 
-  const paidByMonth = useMemo(() => (data?.by_month ?? []).map(m => m.paid), [data])
-  const pendingByMonth = useMemo(() => (data?.by_month ?? []).map(m => m.pending), [data])
+  const months = useMemo(() => Array.isArray(data?.by_month) ? data.by_month : [], [data])
+  const reps = useMemo(() => Array.isArray(data?.by_rep) ? data.by_rep : [], [data])
+  const paidByMonth = useMemo(() => months.map(m => m.paid), [months])
+  const pendingByMonth = useMemo(() => months.map(m => m.pending), [months])
   const totalByMonth = useMemo(() => paidByMonth.map((p, i) => p + (pendingByMonth[i] ?? 0)), [paidByMonth, pendingByMonth])
 
   const dealColumns: Column<Deal>[] = [
@@ -115,7 +117,7 @@ export function SolarOps() {
       type: 'gradient',
       gradient: { shade: 'dark', type: 'vertical', opacityFrom: 0.9, opacityTo: 0.4, stops: [0, 100] },
     },
-    xaxis: { categories: (data?.by_month ?? []).map(m => m.month) },
+    xaxis: { categories: months.map(m => m.month) },
     yaxis: { labels: { formatter: (v: number) => fmt(v) } },
     tooltip: { theme: 'dark' },
     legend: { labels: { colors: '#94a3b8' } },
@@ -248,14 +250,14 @@ export function SolarOps() {
                   <ReactApexChart
                     options={{
                       ...repChart,
-                      xaxis: { ...repChart.xaxis, categories: (data.by_rep || []).map(r => r.rep) },
+                      xaxis: { ...repChart.xaxis, categories: reps.map(r => r.rep) },
                     }}
                     series={[
-                      { name: 'Paid', data: (data.by_rep || []).map(r => r.paid) },
-                      { name: 'Pending', data: (data.by_rep || []).map(r => r.pending) },
+                      { name: 'Paid', data: reps.map(r => r.paid) },
+                      { name: 'Pending', data: reps.map(r => r.pending) },
                     ]}
                     type="bar"
-                    height={Math.max(200, (data.by_rep || []).length * 50)}
+                    height={Math.max(200, reps.length * 50)}
                   />
                 </ChartCard>
               </div>
