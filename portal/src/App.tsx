@@ -10,21 +10,8 @@ import { Fitness } from './pages/Fitness'
 import { Settings } from './pages/Settings'
 
 const BASE = import.meta.env.BASE_URL
-const IS_STANDALONE = BASE.endsWith('/solar/')
 
 export default function App() {
-  if (IS_STANDALONE) {
-    return (
-      <ThemeProvider>
-        <div className="dark" style={{ minHeight: '100vh' }}>
-          <ErrorBoundary fallbackTitle="Solar Ops error">
-            <SolarOps />
-          </ErrorBoundary>
-        </div>
-      </ThemeProvider>
-    )
-  }
-
   return (
     <ThemeProvider>
       <BrowserRouter basename={BASE}>
