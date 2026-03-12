@@ -61,6 +61,63 @@
   --text-on-accent: #ffffff;
 }
 
+.solar-ops {
+  --bg-base: #09090b;
+  --bg-surface: #111318;
+  --bg-surface-2: #1a1d25;
+  --bg-surface-3: #252830;
+  --border: rgba(59,130,246,0.08);
+  --border-hover: rgba(59,130,246,0.20);
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-dim: rgba(59,130,246,0.10);
+  --accent-glow: 0 0 20px rgba(59,130,246,0.15);
+  --highlight: #f59e0b;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-on-accent: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.6);
+  --status-ok: #22c55e;
+  --status-warn: #f59e0b;
+  --status-error: #ef4444;
+  --status-info: #3b82f6;
+  --status-pending: #64748b;
+  --status-ok-bg: rgba(34,197,94,0.12);
+  --status-warn-bg: rgba(245,158,11,0.12);
+  --status-error-bg: rgba(239,68,68,0.12);
+  --status-info-bg: rgba(59,130,246,0.12);
+  --status-pending-bg: rgba(148,163,184,0.12);
+}
+
+.solar-ops .solar-tab-active {
+  box-shadow: 0 0 12px rgba(59,130,246,0.3);
+}
+
+.solar-ops .solar-filter:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+.solar-ops .solar-row:hover {
+  background: var(--bg-surface-2) !important;
+  border-left: 2px solid var(--accent);
+}
+
+.solar-ops .solar-kpi:hover {
+  box-shadow: var(--accent-glow), var(--shadow-md) !important;
+  border-color: var(--border-hover) !important;
+  transform: translateY(-2px) !important;
+}
+
+.solar-ops .apexcharts-tooltip {
+  border: 1px solid rgba(59,130,246,0.2) !important;
+  background: #1a1d25 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {

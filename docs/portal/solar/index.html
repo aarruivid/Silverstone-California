@@ -1,43 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" href="data:," />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Income Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <script>
-    /* Patch fetch for Solar: rewrite /api/* to gateway with auth */
-    (function () {
-      var base = (localStorage.getItem('portal_api_base') || '').replace(/\/+$/, '');
-      var token = localStorage.getItem('portal_api_token') || '';
-      if (!base) return;
-      var _origFetch = window.fetch;
-      window.fetch = function (url, opts) {
-        if (typeof url === 'string' && url.startsWith('/api/')) {
-          url = base + '/api/solar/' + url.slice(5);
-          if (token) {
-            opts = opts || {};
-            opts.headers = Object.assign({}, opts.headers || {});
-            if (!opts.headers['Authorization']) {
-              opts.headers['Authorization'] = 'Bearer ' + token;
-            }
-          }
+    <title>MOLTBOT Portal</title>
+    <!-- GitHub Pages SPA redirect handler -->
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
         }
-        return _origFetch.call(this, url, opts);
-      };
-    })();
+      }(window.location))
     </script>
-    <script type="module" crossorigin src="./assets/index-UKwe25z4.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BZdW9OeI.css">
+    <script type="module" crossorigin src="/Silverstone-California/portal/solar/assets/index-DHaKSDDa.js"></script>
+    <link rel="stylesheet" crossorigin href="/Silverstone-California/portal/solar/assets/index-DmSt38yB.css">
   </head>
   <body>
-    <a href="../" class="portal-home-btn" title="Back to Portal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></a>
-    <style>.portal-home-btn{position:fixed;top:0;left:0;z-index:9999;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0);background:transparent;text-decoration:none;border-bottom-right-radius:12px;transition:all .25s ease;cursor:default;}.portal-home-btn:hover{color:#fff;background:rgba(99,102,241,.85);box-shadow:0 2px 12px rgba(99,102,241,.4);cursor:pointer;}</style>
     <div id="root"></div>
   </body>
 </html>
