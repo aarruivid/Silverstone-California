@@ -36,6 +36,9 @@ export function SolarOps() {
       .finally(() => setLoading(false))
   }, [])
 
+  const months = Array.isArray(data?.by_month) ? data.by_month : []
+  const reps = Array.isArray(data?.by_rep) ? data.by_rep : []
+
   const filteredDeals = useMemo(() => {
     if (!filter) return deals
     const q = filter.toLowerCase()
@@ -72,7 +75,7 @@ export function SolarOps() {
     chart: { type: 'bar', stacked: true, background: 'transparent', foreColor: 'var(--text)', toolbar: { show: false } },
     colors: ['var(--status-ok)', 'var(--status-warn)'],
     plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
-    xaxis: { categories: (data?.by_month ?? []).map(m => m.month) },
+    xaxis: { categories: months.map(m => m.month) },
     yaxis: { labels: { formatter: (v: number) => fmt(v) } },
     tooltip: { theme: theme === 'dark' ? 'dark' : 'light' },
     legend: { labels: { colors: 'var(--text)' } },
@@ -150,8 +153,8 @@ export function SolarOps() {
                 <ReactApexChart
                   options={monthlyChart}
                   series={[
-                    { name: 'Paid', data: (data.by_month || []).map(m => m.paid) },
-                    { name: 'Pending', data: (data.by_month || []).map(m => m.pending) },
+                    { name: 'Paid', data: months.map(m => m.paid) },
+                    { name: 'Pending', data: months.map(m => m.pending) },
                   ]}
                   type="bar"
                   height={320}
@@ -162,14 +165,14 @@ export function SolarOps() {
                 <ReactApexChart
                   options={{
                     ...repChart,
-                    xaxis: { ...repChart.xaxis, categories: (data.by_rep || []).map(r => r.rep) },
+                    xaxis: { ...repChart.xaxis, categories: reps.map(r => r.rep) },
                   }}
                   series={[
-                    { name: 'Paid', data: (data.by_rep || []).map(r => r.paid) },
-                    { name: 'Pending', data: (data.by_rep || []).map(r => r.pending) },
+                    { name: 'Paid', data: reps.map(r => r.paid) },
+                    { name: 'Pending', data: reps.map(r => r.pending) },
                   ]}
                   type="bar"
-                  height={Math.max(200, (data.by_rep || []).length * 50)}
+                  height={Math.max(200, reps.length * 50)}
                 />
               </ChartCard>
             </div>
