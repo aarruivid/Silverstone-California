@@ -6,10 +6,6 @@ import { useTheme } from '../contexts/ThemeContext'
 import { StatCard, StatusBadge, DataTable, ChartCard, CardSkeleton, ChartSkeleton } from '../components/ui'
 import type { Column } from '../components/ui'
 import type { SolarData, Deal } from '../types/solar'
-import { TrioSolar } from './TrioSolar'
-
-const SECTIONS = ['PERSONAL', 'TRIO SOLAR'] as const
-type Section = typeof SECTIONS[number]
 
 const TABS = ['Overview', 'Deals'] as const
 type Tab = typeof TABS[number]
@@ -20,7 +16,6 @@ function fmt(n: number): string {
 
 export function SolarOps() {
   const { theme } = useTheme()
-  const [section, setSection] = useState<Section>('PERSONAL')
   const [tab, setTab] = useState<Tab>('Overview')
   const [data, setData] = useState<SolarData | null>(null)
   const [deals, setDeals] = useState<Deal[]>([])
@@ -97,36 +92,12 @@ export function SolarOps() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Solar Ops</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Solar income tracking and commission management
-          </p>
-        </div>
-
-        {/* Section Toggle */}
-        <div
-          className="flex gap-1 p-1 rounded-[var(--radius)]"
-          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
-        >
-          {SECTIONS.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSection(s)}
-              className="px-4 py-2 rounded-[var(--radius-sm)] text-xs font-semibold uppercase tracking-wider cursor-pointer transition-all duration-150"
-              style={{
-                background: section === s ? 'var(--accent)' : 'transparent',
-                color: section === s ? 'var(--text-on-accent)' : 'var(--text-secondary)',
-              }}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Solar Ops</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+          Solar income tracking and commission management
+        </p>
       </div>
-
-      {section === 'TRIO SOLAR' ? <TrioSolar /> : <>
 
       {/* Tab Bar */}
       <div
@@ -235,7 +206,6 @@ export function SolarOps() {
           )}
         </div>
       )}
-      </>}
     </div>
   )
 }

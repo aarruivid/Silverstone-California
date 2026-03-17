@@ -4,9 +4,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Silverstone-California/portal/solar/',
+  base: '/Silverstone-California/portal/',
   build: {
-    outDir: '../.build-tmp',
+    outDir: '../docs/portal',
     emptyOutDir: true,
   },
   server: {
