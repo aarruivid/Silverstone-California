@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/Silverstone-California/portal/',
   build: {
-    outDir: '../.build-tmp',
+    outDir: '../docs/portal',
     emptyOutDir: true,
   },
   server: {
