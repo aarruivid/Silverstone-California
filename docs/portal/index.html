@@ -1,27 +1,287 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="data:," />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="data:,">
     <title>MOLTBOT Portal</title>
-    <!-- GitHub Pages SPA redirect handler -->
-    <script type="text/javascript">
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
-          );
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e1a; color: #e2e8f0; line-height: 1.6;
+            overflow-x: hidden; -webkit-font-smoothing: antialiased;
         }
-      }(window.location))
+        .hero-section {
+            background: linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #1e293b 100%);
+            min-height: 100vh; position: relative;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .hero-section::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.12) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(99,102,241,0.08) 0%, transparent 50%);
+            z-index: 1;
+        }
+        .hero-content { text-align: center; z-index: 2; position: relative; max-width: 800px; padding: 0 2rem; }
+        .hero-logo {
+            font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 500;
+            color: #6366f1; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 1.5rem; opacity: 0;
+        }
+        .hero-title { color: white; font-size: 4rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1.1; opacity: 0; }
+        .hero-title span { background: linear-gradient(135deg, #6366f1, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-subtitle { color: rgba(255,255,255,0.6); font-size: 1.25rem; font-weight: 400; margin-bottom: 3rem; opacity: 0; }
+        .cta-button {
+            display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; text-decoration: none;
+            border-radius: 50px; font-weight: 600; font-size: 1.05rem; transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.4); border: none; cursor: pointer; opacity: 0;
+        }
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.6); }
+        .cta-button svg { width: 18px; height: 18px; }
+        .menu-toggle {
+            position: fixed; top: 30px; right: 30px; width: 56px; height: 56px;
+            background: rgba(255,255,255,0.06); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; cursor: pointer;
+            z-index: 1001; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
+        }
+        .menu-toggle:hover { background: rgba(255,255,255,0.12); transform: scale(1.05); }
+        .menu-toggle.open { background: #6366f1; border-color: #6366f1; }
+        .hamburger { width: 22px; height: 16px; position: relative; cursor: pointer; }
+        .hamburger span { display: block; position: absolute; height: 2px; width: 100%; background: #818cf8; border-radius: 1px; transition: all 0.3s ease; }
+        .hamburger span:nth-child(1) { top: 0; }
+        .hamburger span:nth-child(2) { top: 7px; }
+        .hamburger span:nth-child(3) { top: 14px; }
+        .menu-toggle.open .hamburger span { background: white; }
+        .menu-toggle.open .hamburger span:nth-child(1) { transform: rotate(45deg); top: 7px; }
+        .menu-toggle.open .hamburger span:nth-child(2) { opacity: 0; }
+        .menu-toggle.open .hamburger span:nth-child(3) { transform: rotate(-45deg); top: 7px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .overlay.active { opacity: 1; visibility: visible; }
+        .sidebar {
+            position: fixed; top: 0; right: -380px; width: 380px; height: 100vh;
+            background: #111827; box-shadow: -5px 0 30px rgba(0,0,0,0.3); z-index: 1000;
+            transition: right 0.4s ease; overflow-y: auto; border-left: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar.open { right: 0; }
+        .sidebar-header {
+            background: linear-gradient(135deg, #0a0e1a 0%, #1e293b 100%);
+            padding: 2.5rem 2rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-brand { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; color: white; }
+        .sidebar-brand span { color: #6366f1; }
+        .sidebar-subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; }
+        .sidebar-content { padding: 1.5rem; }
+        .tool-item { margin-bottom: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s ease; background: rgba(255,255,255,0.02); }
+        .tool-item:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); border-color: rgba(99,102,241,0.3); }
+        .tool-header { padding: 1.25rem; }
+        .tool-name { font-size: 1rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+        .tool-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .tool-icon svg { width: 18px; height: 18px; }
+        .tool-icon.mc { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .tool-icon.solar { background: rgba(250,204,21,0.15); color: #facc15; }
+        .tool-icon.isarv { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .tool-icon.fitness { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .tool-description { font-size: 0.8rem; color: #64748b; line-height: 1.4; margin-left: 42px; }
+        .tool-link {
+            display: flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.25rem;
+            background: rgba(99,102,241,0.06); color: #818cf8; text-decoration: none;
+            font-weight: 500; font-size: 0.85rem; transition: all 0.3s ease;
+            border-top: 1px solid rgba(255,255,255,0.04); min-height: 44px; cursor: pointer;
+        }
+        .tool-link:hover { background: #6366f1; color: white; }
+        .tool-link svg { width: 14px; height: 14px; }
+        .sidebar-footer { padding: 1rem 1.5rem 2rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .settings-link {
+            display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem;
+            color: #64748b; text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s ease;
+        }
+        .settings-link:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
+        .settings-link svg { width: 16px; height: 16px; }
+        .version-badge { position: fixed; bottom: 20px; left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.15); z-index: 2; }
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.8rem; }
+            .hero-subtitle { font-size: 1.05rem; margin-bottom: 2rem; }
+            .sidebar { width: 90vw; max-width: 380px; right: -90vw; }
+            .sidebar.open { right: 0; }
+            .menu-toggle { top: 20px; right: 20px; width: 50px; height: 50px; }
+            .hero-content { padding: 0 1.5rem; }
+        }
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .hero-title { font-size: 3.2rem; }
+            .sidebar { width: 400px; right: -400px; }
+            .menu-toggle { width: 54px; height: 54px; top: 25px; right: 25px; }
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .hero-content > * { animation: fadeInUp 0.8s ease-out forwards; }
+        .hero-content > *:nth-child(1) { animation-delay: 0.2s; }
+        .hero-content > *:nth-child(2) { animation-delay: 0.4s; }
+        .hero-content > *:nth-child(3) { animation-delay: 0.6s; }
+        .hero-content > *:nth-child(4) { animation-delay: 0.8s; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-spinner { animation: spin 1s linear infinite; width: 14px; height: 14px; }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open menu">
+        <div class="hamburger"><span></span><span></span><span></span></div>
+    </button>
+    <div class="overlay" onclick="closeSidebar()"></div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">MOLT<span>BOT</span></div>
+            <div class="sidebar-subtitle">Operations Portal</div>
+        </div>
+        <div class="sidebar-content">
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-name">
+                        <div class="tool-icon mc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+                        Mission Control
+                    </div>
+                    <div class="tool-description">Scraper orchestration, task scheduling, diagnostics, and performance monitoring</div>
+                </div>
+                <a href="mission-control/" class="tool-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> Open Mission Control</a>
+            </div>
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-name">
+                        <div class="tool-icon solar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+                        Solar Ops
+                    </div>
+                    <div class="tool-description">Income tracking, commission management, deal pipeline and rep performance</div>
+                </div>
+                <a href="solar/" class="tool-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> Open Solar Ops</a>
+            </div>
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-name">
+                        <div class="tool-icon isarv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                        ISARV Fiscal
+                    </div>
+                    <div class="tool-description">MEI fiscal management — taxes, compliance, cashflow, invoices and AI advisor</div>
+                </div>
+                <a href="isarv/" class="tool-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> Open ISARV Fiscal</a>
+            </div>
+            <div class="tool-item">
+                <div class="tool-header">
+                    <div class="tool-name">
+                        <div class="tool-icon fitness"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 0"/><path d="m6.5 17.5 11 0"/><path d="M3 12h1.5"/><path d="M19.5 12H21"/><path d="M4.5 8.5v7"/><path d="M19.5 8.5v7"/><path d="M7.5 5v14"/><path d="M16.5 5v14"/><path d="M12 3v18"/></svg></div>
+                        Fitness
+                    </div>
+                    <div class="tool-description">Nutricion, entrenamiento, seguimiento corporal, plan de comidas y metas</div>
+                </div>
+                <a href="fitness/" class="tool-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> Open Fitness</a>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <button onclick="openSettings()" class="settings-link" style="background:none;border:none;cursor:pointer;width:100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Settings
+            </button>
+        </div>
+    </div>
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-logo">OPERATIONS PORTAL</div>
+            <h1 class="hero-title">MOLT<span>BOT</span></h1>
+            <p class="hero-subtitle">Sistema unificado de operaciones</p>
+            <button onclick="toggleSidebar()" class="cta-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Access Dashboards
+            </button>
+        </div>
+    </section>
+    <div class="version-badge">v2.0</div>
+
+    <!-- Settings Modal -->
+    <div id="settings-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;opacity:0;visibility:hidden;transition:all 0.3s;" onclick="closeSettings()"></div>
+    <div id="settings-modal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);z-index:9999;background:#111827;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;width:90%;max-width:440px;opacity:0;visibility:hidden;transition:all 0.3s;">
+        <h2 style="font-size:1.25rem;font-weight:700;color:#e2e8f0;margin-bottom:0.5rem;">API Settings</h2>
+        <p style="font-size:0.8rem;color:#64748b;margin-bottom:1.5rem;">Configure the Cloudflare tunnel URL for backend API access.</p>
+        <label style="font-size:0.8rem;color:#94a3b8;font-weight:500;display:block;margin-bottom:0.5rem;">API Base URL</label>
+        <input id="settings-api-url" type="url" placeholder="https://xxx.trycloudflare.com" style="width:100%;padding:0.75rem 1rem;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-size:0.9rem;font-family:JetBrains Mono,monospace;outline:none;margin-bottom:0.5rem;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <p style="font-size:0.7rem;color:#64748b;margin-bottom:1rem;">Leave empty to use relative paths (local development).</p>
+        <label style="font-size:0.8rem;color:#94a3b8;font-weight:500;display:block;margin-bottom:0.5rem;">API Token</label>
+        <input id="settings-api-token" type="password" placeholder="PORTAL_API_TOKEN from .env" style="width:100%;padding:0.75rem 1rem;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-size:0.9rem;font-family:JetBrains Mono,monospace;outline:none;margin-bottom:0.5rem;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <p style="font-size:0.7rem;color:#64748b;margin-bottom:1.5rem;">Bearer token for gateway authentication.</p>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button onclick="closeSettings()" style="padding:0.6rem 1.25rem;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#94a3b8;cursor:pointer;font-size:0.85rem;">Cancel</button>
+            <button onclick="saveSettings()" style="padding:0.6rem 1.25rem;background:#6366f1;border:none;border-radius:8px;color:white;cursor:pointer;font-weight:600;font-size:0.85rem;">Save</button>
+        </div>
+        <div id="settings-status" style="margin-top:1rem;font-size:0.8rem;text-align:center;color:#22c55e;opacity:0;transition:opacity 0.3s;"></div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            const menuToggle = document.querySelector('.menu-toggle');
+            if (sidebar.classList.contains('open')) { closeSidebar(); } else {
+                sidebar.classList.add('open'); overlay.classList.add('active');
+                menuToggle.classList.add('open'); document.body.style.overflow = 'hidden';
+            }
+        }
+        function closeSidebar() {
+            document.querySelector('.sidebar').classList.remove('open');
+            document.querySelector('.overlay').classList.remove('active');
+            document.querySelector('.menu-toggle').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        const toolLinks = document.querySelectorAll('.tool-link');
+        const originalContent = new Map();
+        toolLinks.forEach(link => { originalContent.set(link, link.innerHTML); });
+        function restoreOriginalContent() {
+            toolLinks.forEach(link => { if (originalContent.has(link)) { link.innerHTML = originalContent.get(link); link.style.pointerEvents = ''; } });
+        }
+        document.addEventListener('visibilitychange', function() { if (!document.hidden) restoreOriginalContent(); });
+        window.addEventListener('pageshow', restoreOriginalContent);
+        toolLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                this.innerHTML = '<svg class="loading-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Loading...';
+                this.style.pointerEvents = 'none';
+                setTimeout(() => { window.location.href = this.getAttribute('href'); }, 300);
+                e.preventDefault();
+            });
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { closeSettings(); closeSidebar(); }
+        });
+        function openSettings() {
+            closeSidebar();
+            const modal = document.getElementById('settings-modal');
+            const overlay = document.getElementById('settings-overlay');
+            const urlInput = document.getElementById('settings-api-url');
+            const tokenInput = document.getElementById('settings-api-token');
+            urlInput.value = localStorage.getItem('portal_api_base') || '';
+            tokenInput.value = localStorage.getItem('portal_api_token') || '';
+            modal.style.opacity = '1'; modal.style.visibility = 'visible'; modal.style.transform = 'translate(-50%,-50%) scale(1)';
+            overlay.style.opacity = '1'; overlay.style.visibility = 'visible';
+            setTimeout(() => urlInput.focus(), 100);
+        }
+        function closeSettings() {
+            const modal = document.getElementById('settings-modal');
+            const overlay = document.getElementById('settings-overlay');
+            modal.style.opacity = '0'; modal.style.visibility = 'hidden'; modal.style.transform = 'translate(-50%,-50%) scale(0.95)';
+            overlay.style.opacity = '0'; overlay.style.visibility = 'hidden';
+            document.getElementById('settings-status').style.opacity = '0';
+        }
+        function saveSettings() {
+            const url = document.getElementById('settings-api-url').value.replace(/\/+$/, '').trim();
+            const token = document.getElementById('settings-api-token').value.trim();
+            if (url) { localStorage.setItem('portal_api_base', url); }
+            else { localStorage.removeItem('portal_api_base'); }
+            if (token) { localStorage.setItem('portal_api_token', token); }
+            else { localStorage.removeItem('portal_api_token'); }
+            const status = document.getElementById('settings-status');
+            status.textContent = url ? 'Saved!' : 'Cleared — using relative paths';
+            status.style.opacity = '1';
+            setTimeout(closeSettings, 1200);
+        }
     </script>
-    <script type="module" crossorigin src="/Silverstone-California/portal/assets/index-CdGs3b2s.js"></script>
-    <link rel="stylesheet" crossorigin href="/Silverstone-California/portal/assets/index-B8N5zD7R.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+</body>
 </html>
