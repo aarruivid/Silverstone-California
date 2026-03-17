@@ -422,7 +422,8 @@
 
   // Generate 66 deals with realistic month distribution
   // Mar has 12 (current month). Rest ramps up then plateaus.
-  var MONTH_COUNTS = [4, 6, 7, 8, 10, 10, 9, 12]; // = 66
+  // Dec-Jan are low activity (winter). Mar is current month (12 signed so far)
+  var MONTH_COUNTS = [5, 8, 9, 10, 5, 5, 10, 14]; // = 66
   var deals = [];
   var repWeights = [0.33,0.25,0.22,0.20];
   function pickRep(){
