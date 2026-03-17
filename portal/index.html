@@ -1,26 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:," />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MOLTBOT Portal</title>
-    <!-- GitHub Pages SPA redirect handler -->
-    <script type="text/javascript">
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
-          );
+    <title>Income Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+    (function(){
+      var s=localStorage.getItem('portal_theme');
+      var t=s||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+      document.documentElement.setAttribute('data-theme',t);
+    })();
+    </script>
+    <script>
+    /* Patch fetch for Solar: rewrite /api/* to gateway with auth */
+    (function () {
+      var base = (localStorage.getItem('portal_api_base') || '').replace(/\/+$/, '');
+      var token = localStorage.getItem('portal_api_token') || '';
+      if (!base) return;
+      var _origFetch = window.fetch;
+      window.fetch = function (url, opts) {
+        if (typeof url === 'string' && url.startsWith('/api/')) {
+          url = base + '/api/solar/' + url.slice(5);
+          if (token) {
+            opts = opts || {};
+            opts.headers = Object.assign({}, opts.headers || {});
+            if (!opts.headers['Authorization']) {
+              opts.headers['Authorization'] = 'Bearer ' + token;
+            }
+          }
         }
-      }(window.location))
+        return _origFetch.call(this, url, opts);
+      };
+    })();
     </script>
   </head>
   <body>
+    <a href="../" class="back-link" title="Back to Portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Portal</a>
+    <style>
+    .back-link{position:fixed;top:14px;left:16px;z-index:9999;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:color .2s ease;}
+    .back-link:hover{color:var(--blue);}
+    .back-link svg{width:14px;height:14px;}
+    </style>
     <div id="root"></div>
+    <button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:20px;right:20px;z-index:9999;width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.2)" aria-label="Toggle theme"></button>
+    <script>
+    function toggleTheme(){
+      var c=document.documentElement.getAttribute('data-theme');
+      var n=c==='dark'?'light':'dark';
+      document.documentElement.setAttribute('data-theme',n);
+      localStorage.setItem('portal_theme',n);
+      updateThemeIcon();
+    }
+    function updateThemeIcon(){
+      var b=document.getElementById('theme-toggle');
+      if(!b)return;
+      var d=document.documentElement.getAttribute('data-theme')==='dark';
+      b.innerHTML=d
+        ?'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>'
+        :'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+    }
+    updateThemeIcon();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
