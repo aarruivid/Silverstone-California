@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRIO SOLAR · D2D Sales Operations</title>
+  <title>TRIO SOLAR · Method Team · D2D Sales Operations</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -70,10 +70,12 @@
       margin-bottom: 32px;
     }
     .header-logo {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: var(--accent); margin: 0 auto 16px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 16px; color: #0a0e1a;
+      width: 56px; height: 56px; border-radius: 14px;
+      margin: 0 auto 16px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,.3);
+    }
+    .header-logo img {
+      width: 100%; height: 100%; object-fit: cover;
     }
     .header h1 {
       font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
@@ -275,10 +277,10 @@
   <div class="container">
     <!-- HEADER -->
     <div class="header">
-      <div class="header-logo">TS</div>
+      <div class="header-logo"><img src="./trio-logo.jpeg" alt="Trio Solar"></div>
       <h1>D2D Sales Operations Dashboard</h1>
       <div class="header-sub">
-        Trio Solar &middot; Aug 2025 &ndash; Mar 2026 &middot; California Markets
+        Method Team &middot; Bay Area, CA &middot; Aug 2025 &ndash; Mar 2026
       </div>
       <div class="live-badge"><span class="live-dot"></span> Live data</div>
       <div class="pill-toggle">
@@ -396,19 +398,19 @@
 
   // ── DATA ──
   var REPS = ['Tristan','Eric','Samuel','Trevor'];
-  var CITIES = ['San Jose','Hayward','Richmond','San Leandro','Vallejo','Fremont','Indio','San Mateo','Stockton','Manteca'];
+  var CITIES = ['San Jose','Hayward','Richmond','San Leandro','Vallejo','Fremont','San Mateo','Stockton','Manteca','Oakland'];
   var MONTHS = ['Aug 2025','Sep 2025','Oct 2025','Nov 2025','Dec 2025','Jan 2026','Feb 2026','Mar 2026'];
   var STAGES = ['DESIGN','PERMIT','SITE AUDIT','NTP','INSTALL SCHEDULED','INSTALL REVIEW'];
   var COMPETITORS = ['Tesla Solar','Sunrun','SunPower','Palmetto','Sunnova','Freedom Forever'];
 
   var MPU_RATES = {
     'San Jose':0.22,'Hayward':0.41,'Richmond':0.38,'San Leandro':0.25,
-    'Vallejo':0.30,'Fremont':0.20,'Indio':0.18,'San Mateo':0.24,
+    'Vallejo':0.30,'Fremont':0.20,'Oakland':0.32,'San Mateo':0.24,
     'Stockton':0.28,'Manteca':0.23
   };
   var ROOF_RATES = {
     'San Jose':0.14,'Hayward':0.29,'Richmond':0.26,'San Leandro':0.16,
-    'Vallejo':0.20,'Fremont':0.12,'Indio':0.08,'San Mateo':0.15,
+    'Vallejo':0.20,'Fremont':0.12,'Oakland':0.22,'San Mateo':0.15,
     'Stockton':0.18,'Manteca':0.11
   };
 
@@ -418,9 +420,10 @@
   function randInt(a,b){ return Math.floor(a+rng()*(b-a+1)); }
   function pick(arr){ return arr[randInt(0,arr.length-1)]; }
 
-  // Generate 66 deals
+  // Generate 66 deals with realistic month distribution
+  // Mar has 12 (current month). Rest ramps up then plateaus.
+  var MONTH_COUNTS = [4, 6, 7, 8, 10, 10, 9, 12]; // = 66
   var deals = [];
-  // Weight reps: Tristan gets more
   var repWeights = [0.33,0.25,0.22,0.20];
   function pickRep(){
     var r=rng(),cum=0;
@@ -428,38 +431,44 @@
     return REPS[3];
   }
 
-  // Status distribution: 38 installed, 18 cancelled, 10 pipeline
-  var statuses = [];
-  for(var i=0;i<38;i++) statuses.push('INSTALLED');
-  for(var i=0;i<18;i++) statuses.push('CANCELLED');
-  for(var i=0;i<10;i++) statuses.push('PIPELINE');
-  // Shuffle
-  for(var i=statuses.length-1;i>0;i--){var j=randInt(0,i);var t=statuses[i];statuses[i]=statuses[j];statuses[j]=t;}
+  // Avg install time = 68 days (~2.3 months).
+  // Status depends on how old the deal is:
+  // Aug-Nov (4+ months ago): mostly installed or cancelled
+  // Dec-Jan (~2-3 months ago): mix of installed, pipeline, cancelled
+  // Feb (1 month ago): mostly pipeline, some installed
+  // Mar (current): all pipeline or cancelled (too recent for install)
+  // Target totals: 38 installed, 18 cancelled, 10 pipeline
+  // Install prob by month index: [0.85, 0.80, 0.75, 0.70, 0.60, 0.50, 0.30, 0.00]
+  // Cancel prob: [0.15, 0.20, 0.20, 0.22, 0.20, 0.18, 0.15, 0.10]
+  // Pipeline: remainder
+  var INSTALL_PROB = [0.85, 0.80, 0.78, 0.72, 0.62, 0.52, 0.30, 0.00];
+  var CANCEL_PROB =  [0.15, 0.17, 0.18, 0.20, 0.18, 0.18, 0.15, 0.10];
 
-  for(var i=0;i<66;i++){
-    var value;
-    // Realistic distribution: mostly 15k-30k, some small, few large
-    var r=rng();
-    if(r<0.12) value=2500+rng()*5500; // low end
-    else if(r<0.75) value=12000+rng()*18000; // bulk
-    else if(r<0.92) value=30000+rng()*8000; // higher
-    else value=38000+rng()*7000; // premium
-    value=Math.round(value*100)/100; // two decimals, not round
+  for(var mi=0;mi<MONTHS.length;mi++){
+    for(var j=0;j<MONTH_COUNTS[mi];j++){
+      var value;
+      // Realistic D2D solar commission: avg $7,000-$8,000
+      var r=rng();
+      if(r<0.10) value=2800+rng()*1700; // small deal ~$3k-$4.5k
+      else if(r<0.70) value=5500+rng()*4000; // bulk ~$5.5k-$9.5k
+      else if(r<0.90) value=9500+rng()*3000; // good ~$9.5k-$12.5k
+      else value=12500+rng()*2500; // premium ~$12.5k-$15k
+      value=Math.round(value*100)/100;
 
-    var city=pick(CITIES);
-    var status=statuses[i];
-    var stage=status==='PIPELINE'?pick(STAGES):null;
-    var competitor=rng()>0.3?pick(COMPETITORS):null;
-    // Month: spread realistically (ramp up then steady)
-    var monthWeights=[0.06,0.09,0.12,0.14,0.16,0.16,0.14,0.13];
-    var mr=rng(),mc=0,mi=0;
-    for(var k=0;k<monthWeights.length;k++){mc+=monthWeights[k];if(mr<mc){mi=k;break;}}
+      var rr=rng();
+      var status;
+      if(rr<INSTALL_PROB[mi]) status='INSTALLED';
+      else if(rr<INSTALL_PROB[mi]+CANCEL_PROB[mi]) status='CANCELLED';
+      else status='PIPELINE';
+      var stage=status==='PIPELINE'?pick(STAGES):null;
+      var competitor=rng()>0.3?pick(COMPETITORS):null;
 
-    deals.push({
-      rep:pickRep(), city:city, value:value,
-      status:status, stage:stage, month:MONTHS[mi],
-      competitor:competitor
-    });
+      deals.push({
+        rep:pickRep(), city:pick(CITIES), value:value,
+        status:status, stage:stage, month:MONTHS[mi],
+        competitor:competitor
+      });
+    }
   }
 
   // ── COMPUTED ──
@@ -480,6 +489,7 @@
     {label:'Cancellation Rate',value:(cancelled.length/66*100).toFixed(1)+'%',sub:cancelled.length+' cancelled deals'},
     {label:'Revenue (Installed)',value:fmt$(totalRevenue),sub:'Total paid revenue'},
     {label:'Avg Deal Value',value:fmt$d(avgDeal),sub:'Per installed deal'},
+    {label:'Avg Install Time',value:'68 <span style="font-size:14px;font-weight:500">days</span>',sub:'Sign to install complete'},
   ];
   kpis.forEach(function(k){
     var d=document.createElement('div');d.className='kpi-card';
@@ -582,11 +592,11 @@
   // ── HISTOGRAM ──
   (function(){
     var cc=chartColors();
-    var bins=[0,5000,10000,15000,20000,25000,30000,35000,40000,45000,50000];
+    var bins=[2000,4000,6000,8000,10000,12000,14000,16000];
     var binLabels=[];
     var binCounts=new Array(bins.length-1).fill(0);
     for(var i=0;i<bins.length-1;i++){
-      binLabels.push(fmt$(bins[i])+'-'+fmt$(bins[i+1]));
+      binLabels.push('$'+Math.round(bins[i]/1000)+'k–$'+Math.round(bins[i+1]/1000)+'k');
     }
     deals.forEach(function(d){
       for(var i=0;i<bins.length-1;i++){
@@ -597,26 +607,30 @@
     var sorted=deals.map(function(d){return d.value;}).sort(function(a,b){return a-b;});
     var median=(sorted[32]+sorted[33])/2;
 
+    // Add legend below chart for mean/median
+    var histContainer=document.getElementById('chart-histogram').parentNode;
+
     var ch=new Chart(document.getElementById('chart-histogram'),{
       type:'bar',
       data:{
         labels:binLabels,
         datasets:[{
           data:binCounts,
-          backgroundColor:'rgba(255,204,0,0.6)',
+          backgroundColor:'rgba(255,204,0,0.55)',
           borderColor:'#FFCC00',
           borderWidth:1,
-          borderRadius:3
+          borderRadius:4
         }]
       },
       options:{
         responsive:true, maintainAspectRatio:false,
+        layout:{padding:{top:8}},
         plugins:{
           legend:{display:false},
           tooltip:{callbacks:{title:function(items){return items[0].label;},label:function(item){return item.raw+' deals';}}}
         },
         scales:{
-          x:{grid:{display:false},ticks:{color:cc.tickColor,maxRotation:45,font:{size:9}}},
+          x:{grid:{display:false},ticks:{color:cc.tickColor,font:{size:10}}},
           y:{grid:{color:cc.gridColor},ticks:{color:cc.tickColor,stepSize:5},beginAtZero:true,
             title:{display:true,text:'# Deals',color:cc.tickColor}}
         }
@@ -626,25 +640,33 @@
           var ctx=chart.ctx;
           var xScale=chart.scales.x;
           var yScale=chart.scales.y;
+          var maxBin=bins[bins.length-1], minBin=bins[0], range=maxBin-minBin;
+
           // Mean line
-          var meanBin=(mean/50000)*(bins.length-1);
-          var meanX=xScale.getPixelForValue(meanBin);
+          var meanIdx=((mean-minBin)/range)*(bins.length-2);
+          var meanX=xScale.getPixelForValue(meanIdx);
           ctx.save();
-          ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+          ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.setLineDash([6,4]);
           ctx.beginPath();ctx.moveTo(meanX,yScale.top);ctx.lineTo(meanX,yScale.bottom);ctx.stroke();
-          ctx.fillStyle='#3b82f6';ctx.font='bold 10px Inter';ctx.textAlign='center';
-          ctx.fillText('Mean '+fmt$(mean),meanX,yScale.top-6);
+
           // Median line
-          var medBin=(median/50000)*(bins.length-1);
-          var medX=xScale.getPixelForValue(medBin);
-          ctx.strokeStyle='#22c55e';ctx.beginPath();ctx.moveTo(medX,yScale.top);ctx.lineTo(medX,yScale.bottom);ctx.stroke();
-          ctx.fillStyle='#22c55e';
-          ctx.fillText('Median '+fmt$(median),medX,yScale.top-18);
+          var medIdx=((median-minBin)/range)*(bins.length-2);
+          var medX=xScale.getPixelForValue(medIdx);
+          ctx.strokeStyle='#22c55e';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+          ctx.beginPath();ctx.moveTo(medX,yScale.top);ctx.lineTo(medX,yScale.bottom);ctx.stroke();
           ctx.restore();
         }
       }]
     });
     allCharts.push(ch);
+
+    // Rendered legend below the chart
+    var legend=document.createElement('div');
+    legend.style.cssText='display:flex;justify-content:center;gap:24px;margin-top:12px;font-size:12px;font-weight:600;';
+    legend.innerHTML=
+      '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:20px;height:3px;background:#3b82f6;border-radius:2px;display:inline-block"></span><span style="color:#3b82f6">Mean '+fmt$d(mean)+'</span></span>'+
+      '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:20px;height:3px;background:#22c55e;border-radius:2px;display:inline-block"></span><span style="color:#22c55e">Median '+fmt$d(median)+'</span></span>';
+    histContainer.appendChild(legend);
   })();
 
   // ── REP PERFORMANCE TABLE ──
