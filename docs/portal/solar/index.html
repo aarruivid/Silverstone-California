@@ -51,6 +51,33 @@
     .back-link svg{width:14px;height:14px;}
     </style>
     <div id="root"></div>
+    <script>
+    /* Inject pill toggle after React renders */
+    (function(){
+      var obs=new MutationObserver(function(muts,o){
+        var el=document.querySelector('[style*="textTransform"]')||document.querySelector('[style*="text-transform"]');
+        if(!el){
+          // Fallback: find the subtitle by content
+          var spans=document.querySelectorAll('div,span,p');
+          for(var i=0;i<spans.length;i++){
+            var s=spans[i];
+            if(s.textContent&&s.textContent.indexOf('Solar Commissions')!==-1&&s.children.length===0){
+              el=s;break;
+            }
+          }
+        }
+        if(!el)return;
+        o.disconnect();
+        var pill=document.createElement('div');
+        pill.style.cssText='display:inline-flex;background:var(--bg-surface,#111827);border:1px solid var(--border,#1e293b);border-radius:8px;padding:3px;margin-top:8px;gap:2px;';
+        pill.innerHTML=
+          '<a href="./index.html" style="padding:6px 18px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;letter-spacing:0.5px;text-transform:uppercase;background:var(--accent,#FFCC00);color:#0a0e1a;box-shadow:0 1px 3px rgba(0,0,0,.2)">Aar\u00f3n</a>'+
+          '<a href="./trio.html" style="padding:6px 18px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-muted,#94a3b8);transition:all .2s">Trio Solar</a>';
+        el.parentNode.insertBefore(pill,el.nextSibling);
+      });
+      obs.observe(document.getElementById('root'),{childList:true,subtree:true});
+    })();
+    </script>
     <button id="theme-toggle" onclick="toggleTheme()" style="position:fixed;bottom:20px;right:20px;z-index:9999;width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.2)" aria-label="Toggle theme"></button>
     <script>
     function toggleTheme(){
