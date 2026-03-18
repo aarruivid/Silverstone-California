@@ -414,7 +414,9 @@
   var CITIES = ['San Jose','Hayward','Richmond','San Leandro','Vallejo','Fremont','San Mateo','Stockton','Manteca','Oakland'];
   var MONTHS = ['Aug 2025','Sep 2025','Oct 2025','Nov 2025','Dec 2025','Jan 2026','Feb 2026','Mar 2026'];
   var STAGES = ['DESIGN','PERMIT','SITE AUDIT','NTP','INSTALL SCHEDULED','INSTALL REVIEW'];
-  var COMPETITORS = ['Tesla Solar','Sunrun','SunPower','Palmetto','Sunnova','Freedom Forever'];
+  var COMPETITORS = ['Bright Planet Solar','Freedom Forever','Sunrun','SunPower','Sunnova','Tesla Solar'];
+  // Weighted competitor selection: Bright Planet > Freedom > Sunrun > SunPower > Sunnova > Tesla
+  var COMP_WEIGHTS = [0.28, 0.22, 0.20, 0.12, 0.16, 0.02];
 
   var MPU_RATES = {
     'San Jose':0.22,'Hayward':0.41,'Richmond':0.38,'San Leandro':0.25,
@@ -457,9 +459,9 @@
     'Hayward':82,'Richmond':78,'Oakland':74,'Vallejo':72,'Stockton':70,
     'San Leandro':66,'San Mateo':64,'San Jose':62,'Manteca':58,'Fremont':55
   };
-  // Monthly multiplier — team efficiency improves over time
-  // Aug ≈ base*1.38 (~91d), Jan ≈ 53d, Feb ≈ 51d
-  var MONTH_INSTALL_MULT = [1.38, 1.20, 1.06, 0.94, 0.86, 0.80, 0.75, 0.54];
+  // Monthly multiplier — team efficiency improves over time (Feb uptick = permitting backlog)
+  // Aug ≈ 91d, Jan ≈ 46d, Feb ≈ 51d (Feb > Jan intentional)
+  var MONTH_INSTALL_MULT = [1.38, 1.20, 1.06, 0.94, 0.86, 0.70, 0.75, 0.54];
   // Probability a non-cancelled deal is already installed (by month age)
   var INSTALLED_BY_MONTH = [1.0, 1.0, 0.95, 0.90, 0.80, 0.65, 0.40, 0.00];
 
@@ -498,7 +500,12 @@
       else if(r<0.90) value=9500+rng()*3000;
       else value=12500+rng()*2500;
       value=Math.round(value*100)/100;
-      var competitor=rng()>0.3?pick(COMPETITORS):null;
+      var competitor=null;
+      if(rng()>0.3){
+        var cr=rng(),ccum=0;
+        for(var ci=0;ci<COMPETITORS.length;ci++){ccum+=COMP_WEIGHTS[ci];if(cr<ccum){competitor=COMPETITORS[ci];break;}}
+        if(!competitor)competitor=COMPETITORS[COMPETITORS.length-1];
+      }
 
       deals.push({
         rep:pickRep(), city:city, value:value,
