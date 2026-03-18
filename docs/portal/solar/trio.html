@@ -184,6 +184,9 @@
     .data-table .highlight-row td:first-child {
       border-left: 3px solid var(--accent);
     }
+    #rep-table tbody tr:hover { background: var(--bg-surface-hover); }
+    #rep-table tbody tr td:first-child { transition: color 0.15s; }
+    #rep-table tbody tr:hover td:first-child { color: var(--accent); }
 
     /* Inline bar */
     .inline-bar {
@@ -455,8 +458,8 @@
     'San Leandro':66,'San Mateo':64,'San Jose':62,'Manteca':58,'Fremont':55
   };
   // Monthly multiplier — team efficiency improves over time
-  // Aug ≈ base*1.38 (~96d for avg city), Feb ≈ base*0.74 (~51d)
-  var MONTH_INSTALL_MULT = [1.38, 1.20, 1.05, 0.92, 0.82, 0.78, 0.74, 0.54];
+  // Aug ≈ base*1.38 (~91d), Jan ≈ 53d, Feb ≈ 51d
+  var MONTH_INSTALL_MULT = [1.38, 1.20, 1.06, 0.94, 0.86, 0.80, 0.75, 0.54];
   // Probability a non-cancelled deal is already installed (by month age)
   var INSTALLED_BY_MONTH = [1.0, 1.0, 0.95, 0.90, 0.80, 0.65, 0.40, 0.00];
 
@@ -542,6 +545,20 @@
           d.status='INSTALLED';d.stage=null;
           d.installDays=Math.round(CITY_BASE_DAYS[c]*MONTH_INSTALL_MULT[MONTHS.indexOf(d.month)]);
           break;
+        }
+      }
+    }
+  });
+
+  // Ensure every rep has at least 1 cancellation (realistic)
+  REPS.forEach(function(rep){
+    var repDeals=deals.filter(function(d){return d.rep===rep;});
+    var hasCancels=repDeals.some(function(d){return d.status==='CANCELLED';});
+    if(!hasCancels&&repDeals.length>2){
+      // Flip oldest installed deal to cancelled
+      for(var i=0;i<repDeals.length;i++){
+        if(repDeals[i].status==='INSTALLED'){
+          repDeals[i].status='CANCELLED';repDeals[i].installDays=null;break;
         }
       }
     }
@@ -765,7 +782,7 @@
       var pct=(d.revenue/maxRev*100).toFixed(0);
       var isTop=r==='Tristan';
       html+='<tr class="'+(isTop?'highlight-row':'')+'" style="cursor:pointer" onclick="showRepDetail(\''+r+'\')">';
-      html+='<td style="font-weight:600">'+(isTop?'<span style="color:var(--accent)">&#9733;</span> ':'')+r+' <span style="font-size:10px;color:var(--text-dim)">&#9654;</span></td>';
+      html+='<td style="font-weight:600">'+(isTop?'<span style="color:var(--accent)">&#9733;</span> ':'')+r+'</td>';
       html+='<td>'+d.signed+'</td><td>'+d.paid+'</td>';
       html+='<td>'+cancelPct+'%</td>';
       html+='<td style="font-family:JetBrains Mono,monospace;font-weight:600">'+fmt$(d.revenue)+'</td>';
@@ -777,9 +794,14 @@
     document.getElementById('rep-table').innerHTML=html;
   })();
 
-  // ── REP DETAIL (click handler) ──
+  // ── REP DETAIL (click handler — toggle on re-click) ──
+  var _activeRep=null;
   function showRepDetail(rep){
     var detail=document.getElementById('rep-detail');
+    if(_activeRep===rep&&detail.style.display==='block'){
+      detail.style.display='none';_activeRep=null;return;
+    }
+    _activeRep=rep;
     var repDeals=deals.filter(function(d){return d.rep===rep;});
     // Sort: installed first, then pipeline, then cancelled; within group by value desc
     var order={'INSTALLED':0,'PIPELINE':1,'CANCELLED':2};
@@ -787,7 +809,7 @@
 
     var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
     html+='<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted)">'+rep+' · Deal Breakdown ('+repDeals.length+' deals)</span>';
-    html+='<span onclick="document.getElementById(\'rep-detail\').style.display=\'none\'" style="cursor:pointer;color:var(--text-dim);font-size:16px">&times;</span></div>';
+    html+='<span onclick="document.getElementById(\'rep-detail\').style.display=\'none\';_activeRep=null" style="cursor:pointer;color:var(--text-dim);font-size:16px">&times;</span></div>';
     html+='<table class="data-table"><thead><tr><th>Month</th><th>City</th><th>Value</th><th>Status</th><th>Install Time</th></tr></thead><tbody>';
     repDeals.forEach(function(d){
       var statusColor=d.status==='INSTALLED'?'var(--green)':d.status==='CANCELLED'?'var(--red)':'var(--blue)';
