@@ -724,7 +724,7 @@
       if(cls==='Lower-Mid') return 'var(--orange)';
       return 'var(--red)';
     }
-    var html='<thead><tr><th>City</th><th>Income</th><th>Bracket</th><th>Deals</th><th>Install Rate</th><th>MPU Rate</th><th>ROOF Rate</th><th>Avg Deal</th></tr></thead><tbody>';
+    var html='<thead><tr><th>City</th><th>HH Income</th><th>Bracket</th><th>Deals</th><th>Install Rate</th><th>MPU Rate</th><th>ROOF Rate</th><th>Avg Deal</th></tr></thead><tbody>';
     CITIES.forEach(function(c){
       var g=geoData[c];
       var instRate=g.deals>0?((g.installed/g.deals*100).toFixed(0)):'0';
