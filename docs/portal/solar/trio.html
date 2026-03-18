@@ -436,7 +436,7 @@
   var UTILITY = {
     'San Jose':'PG&E','Hayward':'PG&E','Richmond':'PG&E','San Leandro':'PG&E',
     'Vallejo':'PG&E','Fremont':'PG&E','Oakland':'PG&E','San Mateo':'PG&E',
-    'Stockton':'PG&E','Manteca':'MID'
+    'Stockton':'PG&E','Manteca':'PG&E'
   };
 
   // City deal weights — lower income = more D2D receptivity = more deals
@@ -449,13 +449,14 @@
     'Hayward':0.33,'Richmond':0.30,'Oakland':0.26,'Vallejo':0.24,'Stockton':0.22,
     'San Leandro':0.18,'San Mateo':0.17,'San Jose':0.16,'Manteca':0.14,'Fremont':0.12
   };
-  // Install time offset per city (days vs monthly baseline)
-  var CITY_INSTALL_OFFSET = {
-    'Hayward':10,'Richmond':8,'Oakland':5,'Vallejo':3,'Stockton':2,
-    'San Leandro':-1,'San Mateo':-3,'San Jose':-4,'Manteca':-6,'Fremont':-10
+  // Base install days per city — higher risk = longer installs
+  var CITY_BASE_DAYS = {
+    'Hayward':82,'Richmond':78,'Oakland':74,'Vallejo':72,'Stockton':70,
+    'San Leandro':66,'San Mateo':64,'San Jose':62,'Manteca':58,'Fremont':55
   };
-  // Monthly baseline install days — team improves from ~97 to ~40
-  var MONTH_BASE_INSTALL = [95, 80, 70, 61, 53, 47, 42, 38];
+  // Monthly multiplier — team efficiency improves over time
+  // Aug ≈ base*1.38 (~97d for avg city), Feb ≈ base*0.63 (~43d)
+  var MONTH_INSTALL_MULT = [1.38, 1.22, 1.08, 0.95, 0.83, 0.73, 0.63, 0.54];
   // Probability a non-cancelled deal is already installed (by month age)
   var INSTALLED_BY_MONTH = [1.0, 1.0, 0.95, 0.90, 0.80, 0.65, 0.40, 0.00];
 
@@ -472,7 +473,7 @@
     return CITIES[CITIES.length-1];
   }
 
-  // Generate 66 deals with realistic month distribution
+  // Generate 66 deals — two-pass for deterministic cancel rates
   // Dec-Jan are low activity (winter). Mar is current month (14 signed so far)
   var MONTH_COUNTS = [5, 8, 9, 10, 5, 5, 10, 14]; // = 66
   var deals = [];
@@ -483,6 +484,7 @@
     return REPS[3];
   }
 
+  // Pass 1: Generate deal basics (city, rep, value, month, competitor)
   for(var mi=0;mi<MONTHS.length;mi++){
     for(var j=0;j<MONTH_COUNTS[mi];j++){
       var city = pickCity();
@@ -493,32 +495,57 @@
       else if(r<0.90) value=9500+rng()*3000;
       else value=12500+rng()*2500;
       value=Math.round(value*100)/100;
-
-      var status, installDays=null;
-      var rr=rng();
-      if(rr < CITY_CANCEL[city]){
-        status='CANCELLED';
-      } else {
-        var ri=rng();
-        if(ri < INSTALLED_BY_MONTH[mi]){
-          status='INSTALLED';
-          var baseDays = MONTH_BASE_INSTALL[mi] + CITY_INSTALL_OFFSET[city];
-          installDays = Math.round(baseDays * (0.85 + rng()*0.30));
-          if(installDays < 25) installDays = 25;
-        } else {
-          status='PIPELINE';
-        }
-      }
-      var stage=status==='PIPELINE'?pick(STAGES):null;
       var competitor=rng()>0.3?pick(COMPETITORS):null;
 
       deals.push({
         rep:pickRep(), city:city, value:value,
-        status:status, stage:stage, month:MONTHS[mi],
-        competitor:competitor, installDays:installDays
+        status:null, stage:null, month:MONTHS[mi],
+        competitor:competitor, installDays:null
       });
     }
   }
+
+  // Pass 2: Assign statuses per city — deterministic cancel count
+  CITIES.forEach(function(c){
+    var cityDeals=[];
+    for(var i=0;i<deals.length;i++){if(deals[i].city===c)cityDeals.push(deals[i]);}
+    var numCancel=Math.round(cityDeals.length*CITY_CANCEL[c]);
+    // Shuffle to randomize which deals cancel
+    for(var i=cityDeals.length-1;i>0;i--){
+      var j=Math.floor(rng()*(i+1));
+      var tmp=cityDeals[i];cityDeals[i]=cityDeals[j];cityDeals[j]=tmp;
+    }
+    for(var i=0;i<cityDeals.length;i++){
+      var d=cityDeals[i];
+      var mi=MONTHS.indexOf(d.month);
+      if(i<numCancel){
+        d.status='CANCELLED';
+      } else if(rng()<INSTALLED_BY_MONTH[mi]){
+        d.status='INSTALLED';
+        d.installDays=Math.round(CITY_BASE_DAYS[c]*MONTH_INSTALL_MULT[mi]);
+        if(d.installDays<25)d.installDays=25;
+      } else {
+        d.status='PIPELINE';
+        d.stage=pick(STAGES);
+      }
+    }
+  });
+
+  // Ensure every city has at least one install (safeguard for small samples)
+  CITIES.forEach(function(c){
+    var hasInstall=false;
+    for(var i=0;i<deals.length;i++){if(deals[i].city===c&&deals[i].status==='INSTALLED'){hasInstall=true;break;}}
+    if(!hasInstall){
+      for(var i=0;i<deals.length;i++){
+        var d=deals[i];
+        if(d.city===c&&d.status==='PIPELINE'&&MONTHS.indexOf(d.month)<7){
+          d.status='INSTALLED';d.stage=null;
+          d.installDays=Math.round(CITY_BASE_DAYS[c]*MONTH_INSTALL_MULT[MONTHS.indexOf(d.month)]);
+          break;
+        }
+      }
+    }
+  });
 
   // ── COMPUTED ──
   var installed = deals.filter(function(d){return d.status==='INSTALLED';});
@@ -800,7 +827,7 @@
     sortedCities.forEach(function(c){
       var g=geoData[c];
       var cancelPct=g.deals>0?((g.cancelled/g.deals*100).toFixed(0)):'0';
-      var avgInstall=g.installed>0?Math.round(g.installDaysTotal/g.installed):'-';
+      var avgInstall=CITY_BASE_DAYS[c];
       var avg=g.installed>0?g.revenue/g.installed:0;
       var mpu=(MPU_RATES[c]*100).toFixed(0);
       var roof=(ROOF_RATES[c]*100).toFixed(0);
