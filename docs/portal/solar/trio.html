@@ -413,6 +413,16 @@
     'Vallejo':0.20,'Fremont':0.12,'Oakland':0.22,'San Mateo':0.15,
     'Stockton':0.18,'Manteca':0.11
   };
+  var INCOME = {
+    'San Jose':146427,'Hayward':113318,'Richmond':90038,'San Leandro':98063,
+    'Vallejo':89496,'Fremont':181506,'Oakland':101600,'San Mateo':153504,
+    'Stockton':79907,'Manteca':94718
+  };
+  var INCOME_CLASS = {
+    'San Jose':'Media-Alta','Hayward':'Media','Richmond':'Media-Baja','San Leandro':'Media-Baja',
+    'Vallejo':'Media-Baja','Fremont':'Alta','Oakland':'Media','San Mateo':'Media-Alta',
+    'Stockton':'Baja','Manteca':'Media-Baja'
+  };
 
   // Seeded random for reproducibility
   var seed = 42;
@@ -708,16 +718,26 @@
       geoData[d.city].deals++;
       if(d.status==='INSTALLED'){geoData[d.city].installed++;geoData[d.city].revenue+=d.value;}
     });
-    var html='<thead><tr><th>City</th><th>Deals</th><th>Install Rate</th><th>MPU Rate</th><th>ROOF Rate</th><th>Avg Deal</th></tr></thead><tbody>';
+    function classColor(cls){
+      if(cls==='Alta'||cls==='Media-Alta') return 'var(--blue)';
+      if(cls==='Media') return 'var(--text)';
+      if(cls==='Media-Baja') return 'var(--orange)';
+      return 'var(--red)';
+    }
+    var html='<thead><tr><th>City</th><th>Income</th><th>Clase</th><th>Deals</th><th>Install Rate</th><th>MPU Rate</th><th>ROOF Rate</th><th>Avg Deal</th></tr></thead><tbody>';
     CITIES.forEach(function(c){
       var g=geoData[c];
       var instRate=g.deals>0?((g.installed/g.deals*100).toFixed(0)):'0';
       var avg=g.installed>0?g.revenue/g.installed:0;
       var mpu=(MPU_RATES[c]*100).toFixed(0);
       var roof=(ROOF_RATES[c]*100).toFixed(0);
+      var inc=INCOME[c];
+      var cls=INCOME_CLASS[c];
       function rateColor(v){return v>30?'var(--red)':v>20?'var(--orange)':'var(--green)';}
       html+='<tr>';
       html+='<td style="font-weight:600">'+c+'</td>';
+      html+='<td style="font-family:JetBrains Mono,monospace">$'+Math.round(inc/1000)+'k</td>';
+      html+='<td><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:0.3px;background:color-mix(in srgb,'+classColor(cls)+' 15%,transparent);color:'+classColor(cls)+'">'+cls+'</span></td>';
       html+='<td>'+g.deals+'</td>';
       html+='<td>'+instRate+'%</td>';
       html+='<td style="color:'+rateColor(parseInt(mpu))+'">'+mpu+'%</td>';
