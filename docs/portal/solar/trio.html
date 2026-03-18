@@ -300,6 +300,15 @@
       </div>
     </div>
 
+    <!-- INSTALL TIME TREND -->
+    <div class="section">
+      <div class="section-title">Avg Install Time Trend</div>
+      <div class="chart-card">
+        <div class="chart-wrap"><canvas id="chart-install-time"></canvas></div>
+        <div id="install-time-detail" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)"></div>
+      </div>
+    </div>
+
     <!-- PIPELINE BY STAGE + REP PERFORMANCE -->
     <div class="two-col">
       <div class="section">
@@ -321,6 +330,7 @@
       <div class="section-title">Rep Performance</div>
       <div class="chart-card" style="padding:0;overflow:hidden;">
         <table class="data-table" id="rep-table"></table>
+        <div id="rep-detail" style="display:none;padding:16px;border-top:1px solid var(--border)"></div>
       </div>
     </div>
 
@@ -423,6 +433,31 @@
     'Vallejo':'Lower-Mid','Fremont':'Upper','Oakland':'Lower-Mid','San Mateo':'Upper-Mid',
     'Stockton':'Lower','Manteca':'Lower-Mid'
   };
+  var UTILITY = {
+    'San Jose':'PG&E','Hayward':'PG&E','Richmond':'PG&E','San Leandro':'PG&E',
+    'Vallejo':'PG&E','Fremont':'PG&E','Oakland':'PG&E','San Mateo':'PG&E',
+    'Stockton':'PG&E','Manteca':'MID'
+  };
+
+  // City deal weights — lower income = more D2D receptivity = more deals
+  var CITY_WEIGHTS = {
+    'Stockton':0.14,'Richmond':0.13,'Oakland':0.13,'Vallejo':0.11,'Hayward':0.11,
+    'San Leandro':0.10,'Manteca':0.09,'San Jose':0.08,'San Mateo':0.06,'Fremont':0.05
+  };
+  // City cancel rates — higher MPU/ROOF = more cancellations
+  var CITY_CANCEL = {
+    'Hayward':0.33,'Richmond':0.30,'Oakland':0.26,'Vallejo':0.24,'Stockton':0.22,
+    'San Leandro':0.18,'San Mateo':0.17,'San Jose':0.16,'Manteca':0.14,'Fremont':0.12
+  };
+  // Install time offset per city (days vs monthly baseline)
+  var CITY_INSTALL_OFFSET = {
+    'Hayward':10,'Richmond':8,'Oakland':5,'Vallejo':3,'Stockton':2,
+    'San Leandro':-1,'San Mateo':-3,'San Jose':-4,'Manteca':-6,'Fremont':-10
+  };
+  // Monthly baseline install days — team improves from ~97 to ~40
+  var MONTH_BASE_INSTALL = [95, 80, 70, 61, 53, 47, 42, 38];
+  // Probability a non-cancelled deal is already installed (by month age)
+  var INSTALLED_BY_MONTH = [1.0, 1.0, 0.95, 0.90, 0.80, 0.65, 0.40, 0.00];
 
   // Seeded random for reproducibility
   var seed = 42;
@@ -430,9 +465,15 @@
   function randInt(a,b){ return Math.floor(a+rng()*(b-a+1)); }
   function pick(arr){ return arr[randInt(0,arr.length-1)]; }
 
+  var cityWeightArr = CITIES.map(function(c){return CITY_WEIGHTS[c];});
+  function pickCity(){
+    var r=rng(),cum=0;
+    for(var i=0;i<CITIES.length;i++){cum+=cityWeightArr[i];if(r<cum)return CITIES[i];}
+    return CITIES[CITIES.length-1];
+  }
+
   // Generate 66 deals with realistic month distribution
-  // Mar has 12 (current month). Rest ramps up then plateaus.
-  // Dec-Jan are low activity (winter). Mar is current month (12 signed so far)
+  // Dec-Jan are low activity (winter). Mar is current month (14 signed so far)
   var MONTH_COUNTS = [5, 8, 9, 10, 5, 5, 10, 14]; // = 66
   var deals = [];
   var repWeights = [0.33,0.25,0.22,0.20];
@@ -442,42 +483,39 @@
     return REPS[3];
   }
 
-  // Avg install time = 68 days (~2.3 months).
-  // Status depends on how old the deal is:
-  // Aug-Nov (4+ months ago): mostly installed or cancelled
-  // Dec-Jan (~2-3 months ago): mix of installed, pipeline, cancelled
-  // Feb (1 month ago): mostly pipeline, some installed
-  // Mar (current): all pipeline or cancelled (too recent for install)
-  // Target totals: 38 installed, 18 cancelled, 10 pipeline
-  // Install prob by month index: [0.85, 0.80, 0.75, 0.70, 0.60, 0.50, 0.30, 0.00]
-  // Cancel prob: [0.15, 0.20, 0.20, 0.22, 0.20, 0.18, 0.15, 0.10]
-  // Pipeline: remainder
-  var INSTALL_PROB = [0.85, 0.80, 0.78, 0.72, 0.62, 0.52, 0.30, 0.00];
-  var CANCEL_PROB =  [0.15, 0.17, 0.18, 0.20, 0.18, 0.18, 0.15, 0.10];
-
   for(var mi=0;mi<MONTHS.length;mi++){
     for(var j=0;j<MONTH_COUNTS[mi];j++){
+      var city = pickCity();
       var value;
-      // Realistic D2D solar commission: avg $7,000-$8,000
       var r=rng();
-      if(r<0.10) value=2800+rng()*1700; // small deal ~$3k-$4.5k
-      else if(r<0.70) value=5500+rng()*4000; // bulk ~$5.5k-$9.5k
-      else if(r<0.90) value=9500+rng()*3000; // good ~$9.5k-$12.5k
-      else value=12500+rng()*2500; // premium ~$12.5k-$15k
+      if(r<0.10) value=2800+rng()*1700;
+      else if(r<0.70) value=5500+rng()*4000;
+      else if(r<0.90) value=9500+rng()*3000;
+      else value=12500+rng()*2500;
       value=Math.round(value*100)/100;
 
+      var status, installDays=null;
       var rr=rng();
-      var status;
-      if(rr<INSTALL_PROB[mi]) status='INSTALLED';
-      else if(rr<INSTALL_PROB[mi]+CANCEL_PROB[mi]) status='CANCELLED';
-      else status='PIPELINE';
+      if(rr < CITY_CANCEL[city]){
+        status='CANCELLED';
+      } else {
+        var ri=rng();
+        if(ri < INSTALLED_BY_MONTH[mi]){
+          status='INSTALLED';
+          var baseDays = MONTH_BASE_INSTALL[mi] + CITY_INSTALL_OFFSET[city];
+          installDays = Math.round(baseDays * (0.85 + rng()*0.30));
+          if(installDays < 25) installDays = 25;
+        } else {
+          status='PIPELINE';
+        }
+      }
       var stage=status==='PIPELINE'?pick(STAGES):null;
       var competitor=rng()>0.3?pick(COMPETITORS):null;
 
       deals.push({
-        rep:pickRep(), city:pick(CITIES), value:value,
+        rep:pickRep(), city:city, value:value,
         status:status, stage:stage, month:MONTHS[mi],
-        competitor:competitor
+        competitor:competitor, installDays:installDays
       });
     }
   }
@@ -488,6 +526,8 @@
   var pipeline = deals.filter(function(d){return d.status==='PIPELINE';});
   var totalRevenue = installed.reduce(function(s,d){return s+d.value;},0);
   var avgDeal = totalRevenue/installed.length;
+  var totalInstallDays = installed.reduce(function(s,d){return s+(d.installDays||0);},0);
+  var avgInstallDays = Math.round(totalInstallDays/installed.length);
 
   // ── KPI CARDS ──
   function fmt$(v){return '$'+v.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
@@ -500,7 +540,7 @@
     {label:'Cancellation Rate',value:(cancelled.length/66*100).toFixed(1)+'%',sub:cancelled.length+' cancelled deals'},
     {label:'Revenue (Installed)',value:fmt$(totalRevenue),sub:'Total paid revenue'},
     {label:'Avg Deal Value',value:fmt$d(avgDeal),sub:'Per installed deal'},
-    {label:'Avg Install Time',value:'68 <span style="font-size:14px;font-weight:500">days</span>',sub:'Sign to install complete'},
+    {label:'Avg Install Time',value:avgInstallDays+' <span style="font-size:14px;font-weight:500">days</span>',sub:'Sign to install complete'},
   ];
   kpis.forEach(function(k){
     var d=document.createElement('div');d.className='kpi-card';
@@ -697,8 +737,8 @@
       var avg=d.paid>0?d.revenue/d.paid:0;
       var pct=(d.revenue/maxRev*100).toFixed(0);
       var isTop=r==='Tristan';
-      html+='<tr class="'+(isTop?'highlight-row':'')+'">';
-      html+='<td style="font-weight:600">'+(isTop?'<span style="color:var(--accent)">&#9733;</span> ':'')+r+'</td>';
+      html+='<tr class="'+(isTop?'highlight-row':'')+'" style="cursor:pointer" onclick="showRepDetail(\''+r+'\')">';
+      html+='<td style="font-weight:600">'+(isTop?'<span style="color:var(--accent)">&#9733;</span> ':'')+r+' <span style="font-size:10px;color:var(--text-dim)">&#9654;</span></td>';
       html+='<td>'+d.signed+'</td><td>'+d.paid+'</td>';
       html+='<td>'+cancelPct+'%</td>';
       html+='<td style="font-family:JetBrains Mono,monospace;font-weight:600">'+fmt$(d.revenue)+'</td>';
@@ -710,36 +750,71 @@
     document.getElementById('rep-table').innerHTML=html;
   })();
 
+  // ── REP DETAIL (click handler) ──
+  function showRepDetail(rep){
+    var detail=document.getElementById('rep-detail');
+    var repDeals=deals.filter(function(d){return d.rep===rep;});
+    // Sort: installed first, then pipeline, then cancelled; within group by value desc
+    var order={'INSTALLED':0,'PIPELINE':1,'CANCELLED':2};
+    repDeals.sort(function(a,b){return (order[a.status]-order[b.status])||(b.value-a.value);});
+
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+    html+='<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted)">'+rep+' · Deal Breakdown ('+repDeals.length+' deals)</span>';
+    html+='<span onclick="document.getElementById(\'rep-detail\').style.display=\'none\'" style="cursor:pointer;color:var(--text-dim);font-size:16px">&times;</span></div>';
+    html+='<table class="data-table"><thead><tr><th>Month</th><th>City</th><th>Value</th><th>Status</th><th>Install Time</th></tr></thead><tbody>';
+    repDeals.forEach(function(d){
+      var statusColor=d.status==='INSTALLED'?'var(--green)':d.status==='CANCELLED'?'var(--red)':'var(--blue)';
+      var statusLabel=d.status==='INSTALLED'?'Installed':d.status==='CANCELLED'?'Cancelled':d.stage;
+      html+='<tr>';
+      html+='<td style="font-size:11px">'+d.month.replace(' 20','\'')+'</td>';
+      html+='<td style="font-weight:600">'+d.city+'</td>';
+      html+='<td style="font-family:JetBrains Mono,monospace">'+fmt$d(d.value)+'</td>';
+      html+='<td><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:color-mix(in srgb,'+statusColor+' 15%,transparent);color:'+statusColor+'">'+statusLabel+'</span></td>';
+      html+='<td style="font-family:JetBrains Mono,monospace">'+(d.installDays?d.installDays+'d':'-')+'</td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    detail.style.display='block';
+    detail.innerHTML=html;
+  }
+
   // ── GEO BREAKDOWN TABLE ──
   (function(){
     var geoData={};
-    CITIES.forEach(function(c){geoData[c]={deals:0,installed:0,revenue:0};});
+    CITIES.forEach(function(c){geoData[c]={deals:0,installed:0,cancelled:0,revenue:0,installDaysTotal:0};});
     deals.forEach(function(d){
       geoData[d.city].deals++;
-      if(d.status==='INSTALLED'){geoData[d.city].installed++;geoData[d.city].revenue+=d.value;}
+      if(d.status==='INSTALLED'){geoData[d.city].installed++;geoData[d.city].revenue+=d.value;geoData[d.city].installDaysTotal+=d.installDays;}
+      if(d.status==='CANCELLED')geoData[d.city].cancelled++;
     });
+    // Sort cities by deals descending
+    var sortedCities=CITIES.slice().sort(function(a,b){return geoData[b].deals-geoData[a].deals;});
     function classColor(cls){
       if(cls==='Upper'||cls==='Upper-Mid') return 'var(--blue)';
       if(cls==='Middle') return 'var(--text)';
       if(cls==='Lower-Mid') return 'var(--orange)';
       return 'var(--red)';
     }
-    var html='<thead><tr><th>City</th><th>HH Income</th><th>Bracket</th><th>Deals</th><th>Install Rate</th><th>MPU Rate</th><th>ROOF Rate</th><th>Avg Deal</th></tr></thead><tbody>';
-    CITIES.forEach(function(c){
+    function rateColor(v){return v>30?'var(--red)':v>20?'var(--orange)':'var(--green)';}
+    var html='<thead><tr><th>City</th><th>Utility</th><th>HH Income</th><th>Bracket</th><th>Deals</th><th>Cancel %</th><th>Avg Install</th><th>MPU</th><th>ROOF</th><th>Avg Deal</th></tr></thead><tbody>';
+    sortedCities.forEach(function(c){
       var g=geoData[c];
-      var instRate=g.deals>0?((g.installed/g.deals*100).toFixed(0)):'0';
+      var cancelPct=g.deals>0?((g.cancelled/g.deals*100).toFixed(0)):'0';
+      var avgInstall=g.installed>0?Math.round(g.installDaysTotal/g.installed):'-';
       var avg=g.installed>0?g.revenue/g.installed:0;
       var mpu=(MPU_RATES[c]*100).toFixed(0);
       var roof=(ROOF_RATES[c]*100).toFixed(0);
       var inc=INCOME[c];
       var cls=INCOME_CLASS[c];
-      function rateColor(v){return v>30?'var(--red)':v>20?'var(--orange)':'var(--green)';}
+      var util=UTILITY[c];
       html+='<tr>';
       html+='<td style="font-weight:600">'+c+'</td>';
+      html+='<td style="font-size:11px;font-weight:500;color:'+(util==='PG&E'?'var(--accent)':'var(--text-muted)')+'">'+util+'</td>';
       html+='<td style="font-family:JetBrains Mono,monospace">$'+Math.round(inc/1000)+'k</td>';
       html+='<td><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:0.3px;background:color-mix(in srgb,'+classColor(cls)+' 15%,transparent);color:'+classColor(cls)+'">'+cls+'</span></td>';
-      html+='<td>'+g.deals+'</td>';
-      html+='<td>'+instRate+'%</td>';
+      html+='<td style="font-weight:600">'+g.deals+'</td>';
+      html+='<td style="color:'+rateColor(parseInt(cancelPct))+'">'+cancelPct+'%</td>';
+      html+='<td style="font-family:JetBrains Mono,monospace">'+(avgInstall!=='-'?avgInstall+'d':'-')+'</td>';
       html+='<td style="color:'+rateColor(parseInt(mpu))+'">'+mpu+'%</td>';
       html+='<td style="color:'+rateColor(parseInt(roof))+'">'+roof+'%</td>';
       html+='<td style="font-family:JetBrains Mono,monospace">'+(avg>0?fmt$d(avg):'-')+'</td>';
@@ -841,6 +916,116 @@
       '<strong>'+maxCity+'</strong> has the highest combined risk — '+
       (MPU_RATES[maxCity]*100).toFixed(0)+'% MPU + '+(ROOF_RATES[maxCity]*100).toFixed(0)+'% ROOF. '+
       'Consider additional site qualification steps for this market before committing reps.';
+  })();
+
+  // ── INSTALL TIME TREND CHART ──
+  (function(){
+    var cc=chartColors();
+    var monthInstallData={};
+    MONTHS.forEach(function(m){monthInstallData[m]={total:0,count:0,cities:{}};});
+    installed.forEach(function(d){
+      monthInstallData[d.month].total+=d.installDays;
+      monthInstallData[d.month].count++;
+      if(!monthInstallData[d.month].cities[d.city])
+        monthInstallData[d.month].cities[d.city]={total:0,count:0};
+      monthInstallData[d.month].cities[d.city].total+=d.installDays;
+      monthInstallData[d.month].cities[d.city].count++;
+    });
+    var monthAvgInstall=MONTHS.map(function(m){
+      var d=monthInstallData[m];
+      return d.count>0?Math.round(d.total/d.count):null;
+    });
+
+    function showInstallDetail(month){
+      var detail=document.getElementById('install-time-detail');
+      var d=monthInstallData[month];
+      if(!d||d.count===0){
+        detail.style.display='block';
+        detail.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:12px">No installed deals in '+month+'</div>';
+        return;
+      }
+      var entries=[];
+      Object.keys(d.cities).forEach(function(city){
+        var cd=d.cities[city];
+        entries.push({city:city,avg:Math.round(cd.total/cd.count),count:cd.count});
+      });
+      entries.sort(function(a,b){return b.avg-a.avg;});
+      var html='<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px">'+month+' · City Breakdown</div>';
+      html+='<table class="data-table"><thead><tr><th>City</th><th>Utility</th><th>Deals Installed</th><th>Avg Install Time</th></tr></thead><tbody>';
+      entries.forEach(function(e){
+        var util=UTILITY[e.city];
+        html+='<tr><td style="font-weight:600">'+e.city+'</td>';
+        html+='<td style="font-size:11px;color:'+(util==='PG&E'?'var(--accent)':'var(--text-muted)')+'">'+util+'</td>';
+        html+='<td>'+e.count+'</td>';
+        html+='<td style="font-family:JetBrains Mono,monospace">'+e.avg+' days</td></tr>';
+      });
+      html+='</tbody></table>';
+      detail.style.display='block';
+      detail.innerHTML=html;
+    }
+
+    var ch=new Chart(document.getElementById('chart-install-time'),{
+      type:'line',
+      data:{
+        labels:MONTHS.map(function(m){return m.replace(' 20','\'');}),
+        datasets:[{
+          label:'Avg Install Time',
+          data:monthAvgInstall,
+          borderColor:'#22c55e',
+          backgroundColor:'rgba(34,197,94,0.08)',
+          fill:true,
+          tension:0.3,
+          pointRadius:6,
+          pointBackgroundColor:'#22c55e',
+          pointBorderColor:'#22c55e',
+          pointHoverRadius:9,
+          spanGaps:false
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        onClick:function(e,elements){
+          if(elements.length>0){
+            var idx=elements[0].index;
+            showInstallDetail(MONTHS[idx]);
+          }
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(ctx){return ctx.raw+' days';},
+              afterLabel:function(){return 'Click for city breakdown';}
+            }
+          }
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{color:cc.tickColor}},
+          y:{grid:{color:cc.gridColor},ticks:{color:cc.tickColor},
+            title:{display:true,text:'Days',color:cc.tickColor}}
+        }
+      },
+      plugins:[{
+        afterDatasetsDraw:function(chart){
+          var ctx=chart.ctx;
+          chart.data.datasets.forEach(function(ds,i){
+            var meta=chart.getDatasetMeta(i);
+            meta.data.forEach(function(point,idx){
+              var val=ds.data[idx];
+              if(val!==null){
+                ctx.save();
+                ctx.fillStyle=getThemeColors().muted;
+                ctx.font='600 11px Inter';
+                ctx.textAlign='center';
+                ctx.fillText(val+'d',point.x,point.y-14);
+                ctx.restore();
+              }
+            });
+          });
+        }
+      }]
+    });
+    allCharts.push(ch);
   })();
 
   // ── ROI ANALYSIS ──
