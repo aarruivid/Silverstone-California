@@ -184,9 +184,9 @@
     .data-table .highlight-row td:first-child {
       border-left: 3px solid var(--accent);
     }
-    #rep-table tbody tr:hover { background: var(--bg-surface-hover); }
-    #rep-table tbody tr td:first-child { transition: color 0.15s; }
-    #rep-table tbody tr:hover td:first-child { color: var(--accent); }
+    #rep-table tbody tr:hover, #geo-table tbody tr:hover { background: var(--bg-surface-hover); }
+    #rep-table tbody tr td:first-child, #geo-table tbody tr td:first-child { transition: color 0.15s; }
+    #rep-table tbody tr:hover td:first-child, #geo-table tbody tr:hover td:first-child { color: var(--accent); }
 
     /* Inline bar */
     .inline-bar {
@@ -342,6 +342,7 @@
       <div class="section-title">Geographic Breakdown</div>
       <div class="chart-card" style="padding:0;overflow-x:auto;">
         <table class="data-table" id="geo-table"></table>
+        <div id="geo-detail" style="display:none;padding:16px;border-top:1px solid var(--border)"></div>
       </div>
     </div>
 
@@ -863,7 +864,7 @@
       var inc=INCOME[c];
       var cls=INCOME_CLASS[c];
       var util=UTILITY[c];
-      html+='<tr>';
+      html+='<tr style="cursor:pointer" onclick="showCityDetail(\''+c+'\')">';
       html+='<td style="font-weight:600">'+c+'</td>';
       html+='<td style="font-size:11px;font-weight:500;color:'+(util==='PG&E'?'var(--accent)':'var(--text-muted)')+'">'+util+'</td>';
       html+='<td style="font-family:JetBrains Mono,monospace">$'+Math.round(inc/1000)+'k</td>';
@@ -879,6 +880,50 @@
     html+='</tbody>';
     document.getElementById('geo-table').innerHTML=html;
   })();
+
+  // ── CITY DETAIL (click handler — toggle on re-click) ──
+  var _activeCity=null;
+  function showCityDetail(city){
+    var detail=document.getElementById('geo-detail');
+    if(_activeCity===city&&detail.style.display==='block'){
+      detail.style.display='none';_activeCity=null;return;
+    }
+    _activeCity=city;
+    var cityDeals=deals.filter(function(d){return d.city===city;});
+    // Group by rep
+    var repMap={};
+    REPS.forEach(function(r){repMap[r]={signed:0,installed:0,cancelled:0,revenue:0,installDays:[]};});
+    cityDeals.forEach(function(d){
+      repMap[d.rep].signed++;
+      if(d.status==='INSTALLED'){repMap[d.rep].installed++;repMap[d.rep].revenue+=d.value;if(d.installDays)repMap[d.rep].installDays.push(d.installDays);}
+      if(d.status==='CANCELLED')repMap[d.rep].cancelled++;
+    });
+    // Sort reps by signed desc
+    var sortedReps=REPS.slice().sort(function(a,b){return repMap[b].signed-repMap[a].signed;});
+    sortedReps=sortedReps.filter(function(r){return repMap[r].signed>0;});
+
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+    html+='<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted)">'+city+' · Rep Breakdown ('+cityDeals.length+' deals)</span>';
+    html+='<span onclick="document.getElementById(\'geo-detail\').style.display=\'none\';_activeCity=null" style="cursor:pointer;color:var(--text-dim);font-size:16px">&times;</span></div>';
+    html+='<table class="data-table"><thead><tr><th>Rep</th><th>Signed</th><th>Installed</th><th>Cancelled</th><th>Cancel %</th><th>Revenue</th><th>Avg Install</th></tr></thead><tbody>';
+    sortedReps.forEach(function(r){
+      var d=repMap[r];
+      var cancelPct=d.signed>0?((d.cancelled/d.signed*100).toFixed(0)):'0';
+      var avgInstall=d.installDays.length>0?Math.round(d.installDays.reduce(function(s,v){return s+v;},0)/d.installDays.length):null;
+      html+='<tr>';
+      html+='<td style="font-weight:600">'+r+'</td>';
+      html+='<td>'+d.signed+'</td>';
+      html+='<td>'+d.installed+'</td>';
+      html+='<td>'+d.cancelled+'</td>';
+      html+='<td>'+cancelPct+'%</td>';
+      html+='<td style="font-family:JetBrains Mono,monospace">'+fmt$(d.revenue)+'</td>';
+      html+='<td style="font-family:JetBrains Mono,monospace">'+(avgInstall?avgInstall+'d':'-')+'</td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    detail.style.display='block';
+    detail.innerHTML=html;
+  }
 
   // ── COMPETITOR CHART ──
   (function(){
