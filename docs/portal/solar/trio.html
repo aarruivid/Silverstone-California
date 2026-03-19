@@ -214,25 +214,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* ROI box */
-    .roi-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 10px; padding: 24px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .roi-box .step {
-      display: flex; align-items: baseline; gap: 8px;
-      margin-bottom: 10px; font-size: 13px;
-    }
-    .roi-box .step-label {
-      color: var(--text-muted); min-width: 180px;
-      font-family: 'Inter', sans-serif; font-size: 12px;
-    }
-    .roi-box .step-value { font-weight: 600; }
-    .roi-box .step-highlight {
-      font-size: 18px; font-weight: 700; color: var(--accent);
-    }
     .roi-divider {
       border: none; border-top: 1px dashed var(--border);
       margin: 14px 0;
@@ -371,11 +352,6 @@
       </div>
     </div>
 
-    <!-- ROI ANALYSIS -->
-    <div class="section">
-      <div class="section-title">ROI Analysis</div>
-      <div class="roi-box" id="roi-box"></div>
-    </div>
   </div>
 
   <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
@@ -1129,31 +1105,6 @@
     allCharts.push(ch);
   })();
 
-  // ── ROI ANALYSIS ──
-  (function(){
-    // First half vs second half closing rate improvement
-    var firstHalf=deals.filter(function(d){return MONTHS.indexOf(d.month)<4;});
-    var secondHalf=deals.filter(function(d){return MONTHS.indexOf(d.month)>=4;});
-    var cr1=firstHalf.filter(function(d){return d.status==='INSTALLED';}).length/firstHalf.length;
-    var cr2=secondHalf.filter(function(d){return d.status==='INSTALLED';}).length/secondHalf.length;
-    var additionalDeals=Math.round((cr2-cr1)*secondHalf.length);
-    var incrementalRev=additionalDeals*avgDeal;
-
-    var box=document.getElementById('roi-box');
-    box.innerHTML=
-      '<div class="step"><span class="step-label">Closing rate (Aug–Nov):</span><span class="step-value">'+(cr1*100).toFixed(1)+'%</span></div>'+
-      '<div class="step"><span class="step-label">Closing rate (Dec–Mar):</span><span class="step-value">'+(cr2*100).toFixed(1)+'%</span></div>'+
-      '<div class="step"><span class="step-label">Improvement:</span><span class="step-value" style="color:var(--green)">+'+ ((cr2-cr1)*100).toFixed(1)+' pp</span></div>'+
-      '<hr class="roi-divider">'+
-      '<div class="step"><span class="step-label">Deals in Dec–Mar:</span><span class="step-value">'+secondHalf.length+'</span></div>'+
-      '<div class="step"><span class="step-label">Additional deals from improvement:</span><span class="step-value">'+additionalDeals+'</span></div>'+
-      '<div class="step"><span class="step-label">Avg deal value (installed):</span><span class="step-value">'+fmt$d(avgDeal)+'</span></div>'+
-      '<hr class="roi-divider">'+
-      '<div class="step"><span class="step-label">Incremental revenue:</span><span class="step-highlight">'+fmt$(incrementalRev)+'</span></div>'+
-      '<div style="margin-top:12px;font-size:12px;color:var(--text-muted);font-family:Inter,sans-serif">'+
-      'By improving close rate '+((cr2-cr1)*100).toFixed(1)+' percentage points in the second half, '+
-      'the team generated an estimated '+fmt$(incrementalRev)+' in additional revenue over 4 months.</div>';
-  })();
   </script>
 </body>
 </html>
