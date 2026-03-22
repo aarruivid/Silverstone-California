@@ -52,14 +52,13 @@
         .nav-item:hover { background: var(--bg-hover); color: var(--text); }
         .nav-item.active { background: var(--orange-dim); color: var(--orange); }
         .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
-        .nav-footer { padding: 0.75rem; border-top: 1px solid var(--border); }
-        .portal-link {
-            display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.8rem;
-            color: var(--text-dim); text-decoration: none; font-size: 0.8rem;
-            border-radius: 8px; transition: all 0.2s;
+        .back-link {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; color: var(--text-dim); text-decoration: none;
+            margin-bottom: 10px; transition: color 0.2s;
         }
-        .portal-link:hover { color: var(--text); background: var(--bg-hover); }
-        .portal-link svg { width: 16px; height: 16px; }
+        .back-link:hover { color: var(--orange); }
+        .back-link svg { width: 14px; height: 14px; }
 
         /* Main content */
         .main { margin-left: var(--sidebar-w); min-height: 100vh; }
@@ -220,6 +219,10 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-header">
+            <a href="../" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Portal
+            </a>
             <div class="sidebar-brand">SOLAR<span>A</span></div>
             <div class="sidebar-sub">Pipeline Dashboard</div>
         </div>
@@ -232,12 +235,6 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                 Metrics
             </button>
-        </div>
-        <div class="nav-footer">
-            <a href="../" class="portal-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                Portal Home
-            </a>
         </div>
     </nav>
 
